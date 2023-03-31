@@ -1,4 +1,4 @@
-# Requirements Document 
+# Requirements Document - current EZWallet
 
 Date: 
 
