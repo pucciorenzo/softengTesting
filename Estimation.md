@@ -5,7 +5,7 @@ Version:
 
 
 # Estimation approach
-Consider the EZWallet  project as described in YOUR requirement document, assume that you are going to develop the project INDEPENDENT of the deadlines of the course
+Consider the EZWallet  project in current version (as received by the teachers), assume that you are going to develop the project INDEPENDENT of the deadlines of the course
 # Estimate by size
 ### 
 |             | Estimate                        |             
