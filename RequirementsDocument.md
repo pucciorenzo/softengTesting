@@ -1,4 +1,3 @@
-
 # Requirements Document 
 
 Date: 
@@ -32,10 +31,7 @@ Version:
 - [Deployment diagram](#deployment-diagram)
 
 # Informal description
-EZWallet is a web application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
-
-
-EZWallet (EaSy Wallet) is a software application to support the management of the users' expenses.
+EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
 
 
 
@@ -146,9 +142,9 @@ EZWallet (EaSy Wallet) is a software application to support the management of th
 
 # Glossary
 
-\<use UML class diagram to define important terms, or concepts in the domain of the system, and their relationships> 
+\<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships> 
 
-\<concepts are used consistently all over the document, ex in use cases, requirements etc>
+\<concepts must be used consistently all over the document, ex in use cases, requirements etc>
 
 # System Design
 \<describe here system design>
