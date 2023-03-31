@@ -1,4 +1,4 @@
-# Graphical User Interface Prototype  
+# Graphical User Interface Prototype  - CURRENT
 
 Authors:
 
