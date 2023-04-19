@@ -8,13 +8,13 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | Version number | Change |
 | ----------------- |:-----------|
 | 0.1.11 | added stakeholders| 
-| 0.2.2 | added context diagram|
-| 0.3.1 | added interfaces| 
-| 0.4.5 | added Functional requirements |
-| 0.5.1 | added non functional requirements |
-| 0.6.1 | added use case diagram |
-| 0.7.1 | added Glossary |
-
+| 0.2.2  | added context diagram|
+| 0.3.1  | added interfaces| 
+| 0.4.5  | added Functional requirements |
+| 0.5.1  | added non functional requirements |
+| 0.6.1  | added use case diagram |
+| 0.7.1  | added Glossary |
+| 1.0.0	 | added use cases, system diagram, deployment diagram, stories and personas |
 
 
 
@@ -45,7 +45,9 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 
 # Stakeholders
 
-
+<!--
+NEEDS CHANGES
+-->
 | Stakeholder name  			| Description | 
 | ----------------- 			|:-----------:|
 | User (Individual) 		| tracks their personal expenses | 
@@ -59,9 +61,14 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 
 # Context Diagram and interfaces
 
+<!--
+NEEDS CHANGES
+-->
+
 ## Context Diagram
 <!--Define here Context diagram using UML use case diagram-->
-![Context Diagram](./ContextDiagramV1.svg)
+![Context Diagram](diagrams/ContextDiagramV1.svg)
+
 
 <!--actors are a subset of stakeholders-->
 
@@ -78,11 +85,15 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 | Database Service(MongoDB)				| mongoose api (https://mongoosejs.com/docs/index.html)| Internet link |
 
 # Stories and personas
-\<A Persona is a realistic impersonation of an actor. Define here a few personas and describe in plain text how a persona interacts with the system>
+Persona 1: student, male, 20, low income.
+* Story: Rented a house, needs to keep track of his expenses so he can pays his rent each month.
 
-\<Persona is-an-instance-of actor>
+Persona 2: employee, female, 42, medium income, married with children, providing for the whole family.
+* Story: Since she’s the only one working in the family, she needs to know how family spends money.
 
-\<stories will be formalized later as scenarios in use cases>
+Persona 3: unemployed, male, 35, no income with little savings.
+* Story: Needs to keep track of his expenses and which are the categories where he spends too much.
+
 
 
 # Functional and non functional requirements
@@ -123,7 +134,7 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 | NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,1.6,2,3,4 |
 | NFR2 | Efficiency | < 0.2ms function response time | All FR |
 | NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,1.6,2,3,4 |
-| NFR4 | Portability | Android version >=7, IOS version >= 10, Windows version >= 10, latest stable firefox, chrome, edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.6,2,3,4 |
+| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.6,2,3,4 |
 | NFR5 | Security | GDPR, CCPA, ISO/IEC 27000-series compliance | All FR |
 | NFR6 | Maintainability | < 24 hr app migration to different service, < 6 hr recovery after failure | All FR |
 
@@ -138,46 +149,99 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 \<next describe here each use case in the UCD>
 -->
 
-![Use Case Diagram](./UseCaseDiagramV1.svg)
+![Use Case Diagram](diagrams/UseCaseDiagramV1.svg)
 
+## Use case: Create account
+Precondition: User has no account
 
-### Use case 1, UC1
-| Actors Involved        |  |
-| ------------- |:-------------:| 
-|  Precondition     | \<Boolean expression, must evaluate to true before the UC can start> |
-|  Post condition     | \<Boolean expression, must evaluate to true after UC is finished> |
-|  Nominal Scenario     | \<Textual description of actions executed by the UC> |
-|  Variants     | \<other normal executions> |
-|  Exceptions     | \<exceptions, errors > |
+Scenario 1 (nominal):
 
-##### Scenario 1.1 
+*	User ask to sign up
+*	System asks username
+*	System asks email
+*	System asks password
+*	System stores account
 
-\<describe here scenarios instances of UC1>
+Post condition: User is registered
 
-\<a scenario is a sequence of steps that corresponds to a particular execution of one use case>
+Scenario (exceptions):
 
-\<a scenario is a more formal description of a story>
+•	Email already used
 
-\<only relevant scenarios should be described>
+Post condition: User is not registered
 
-| Scenario 1.1 | |
-| ------------- |:-------------:| 
-|  Precondition     | \<Boolean expression, must evaluate to true before the scenario can start> |
-|  Post condition     | \<Boolean expression, must evaluate to true after scenario is finished> |
-| Step#        | Description  |
-|  1     |  |  
-|  2     |  |
-|  ...     |  |
+## Use case: Login
+Precondition: User has account
 
-##### Scenario 1.2
+Scenario 1 (nominal):
+*	1 User asks to login
+*	2 System asks email and password
+*	3 User enters email and password
+*	4 System checks, email and password correct, user is authorized
 
-##### Scenario 1.x
+Post condition: user is authorized
 
-### Use case 2, UC2
-..
+Scenario (exceptions):
+*	User does not exist 
+*	User is already logged in
+*	Email or password wrong
 
-### Use case x, UCx
-..
+Post condition  (for all exceptional scenarios): user is not authorized
+
+## Use case: Log out
+Precondition: User is logged in
+
+Scenario 1 (nominal):
+*	User ask to log out
+*	System logs user out
+
+Post condition: User is not authorized anymore
+<!--
+Scenario (exceptions):
+*	User already logged out
+*	User not found
+
+Post condition (for all): User is not authorized anymore
+-->
+
+## Use case: Create a category
+Precondition: User logged in
+*	User asks to create a category
+*	System asks the type
+*	System asks the color
+*	System creates the category
+
+Post condition: Category is created
+
+## Use case: View categories
+Precondition: User logged in
+*	User asks to view all categories
+*	System provides all existing categories
+
+## Use case: Create a transaction
+Precondition: User logged in
+*	User asks to create a transaction
+*	System asks the name, amount and type
+
+Post condition: Transaction is created
+
+## Use case: View transactions
+Precondition: User logged in
+*	User asks to view all transactions
+*	System provides all existing transactions
+
+## UC: Delete transaction
+Precondition: User logged in
+*	User asks to delete a transaction
+*	System asks user to indentify the transaction
+*	System deletes the transaction
+
+Post condition: Transaction is deleted
+
+## Use case: View transaction along with category
+Precondition: User logged in
+*	User asks to view transactions grouped by categories
+*	System shows the transactions grouped by categories
 
 
 
@@ -186,16 +250,13 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 \<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships> 
 \<concepts must be used consistently all over the document, ex in use cases, requirements etc>
 -->
-![GlossaryV1](./GlossaryV1.svg)
+![GlossaryV1](diagrams/GlossaryV1.svg)
 
 # System Design
-\<describe here system design>
-
-\<must be consistent with Context diagram>
+![SystemDesignV1](diagrams/SystemDiagramV1.svg)
 
 # Deployment Diagram 
-
-\<describe here deployment diagram >
+![DeploymentDiagram](diagrams/DeploymentDiagramV1.svg)
 
 
 
