@@ -43,7 +43,7 @@ In this estimation document we are performing a type of reverse engineering cons
 ###
  Note: We consider Management as a parallel work to anything else. So in our opinion it should not require a full working day by the team (we are considering approximately 1h per day by each member for management and 7h for the rest of the tasks) but it needs to be present everyday, so that is why it looks continuous in the Gantt chart.
 
-![Gantt chart](Diagrams/ganttchartV1.png)
+![Gantt chart](diagrams/ganttchartV1.png)
 # Summary
 
 Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
