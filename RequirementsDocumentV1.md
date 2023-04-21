@@ -97,7 +97,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 -->
 
 | ID 		| Description  	|
-| ----- 	|:-------------:| 
+| ----- 	|-------------| 
 | <b>FR1</b>		| <b>Manage account</b> |
 | + FR1.1	| Create account|
 | + FR1.2	| Log in  		|
@@ -119,7 +119,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 \<Describe constraints on functional requirements>
 -->
 | ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
-| ------------- |:-------------:| :-----:| -----:|
+| ------------- |-------------| -----| -----|
 | NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,2,3,4 |
 | NFR2 | Efficiency | < 0.2ms function response time | All FR |
 | NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,2,3,4 |
@@ -161,7 +161,7 @@ Post condition: User is not registered
  -->
 ### Use case 1: Create account
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User does not have an account 	|
 |  Post condition     	| User has account 		|
 |  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
@@ -169,7 +169,7 @@ Post condition: User is not registered
 
 <!--##### Scenario 1.1 : Nominal -->
 | Scenario 1.1 		| 	Nominal			|
-| ------------- 	|:-------------:| 
+| ------------- 	|-------------| 
 |  Precondition     | User does not have an account |
 |  Post condition   | User has an account |
 | Step#	| Description  			|
@@ -181,7 +181,7 @@ Post condition: User is not registered
 
 <!--##### Scenario 1.2 : Exception -->
 | Scenario 1.2 		| 	Exception			|
-| ------------- 	|:-------------:| 
+| ------------- 	|-------------| 
 |  Precondition     | Email already used to create an account |
 |  Post condition   | New account not created |
 | Step#	| Description  			|
@@ -213,7 +213,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 -->
 ### Use case 2: Log in
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User has account		|
 |  Post condition     	| User is authorized 	|
 |  Nominal Scenario     | User enter  email and password to login. System verifies credentials and authorizes user. |
@@ -222,7 +222,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 
 <!--##### Scenario 2.1 : Nominal -->
 | Scenario 2.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User has account and user is logged out |
 |  Post condition   | User is logged in and authorized |
 | Step#	| Description  			|
@@ -238,7 +238,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 
 <!--##### Scenario 2.2 : Nominal -->
 | Scenario 2.2 		| 	Variant			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User has account and user is logged in |
 |  Post condition   | User is still logged in and authorized |
 | Step#	| Description  			|
@@ -255,7 +255,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User does not have an account or provides wrong unregistered email |
 |  Post condition   | User is neither logged in nor authorized |
 | Step#	| Description  			|
@@ -268,7 +268,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User has account, is not logged in and provides either wrong existing email or wrong password |
 |  Post condition   | User is neither logged in nor authorized |
 | Step#	| Description  			|
@@ -299,7 +299,7 @@ Post condition (for all): User is not authorized anymore
 -->
 
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| User is logged out and not authorized any more	|
 |  Nominal Scenario     | User asks to log out, and system removes authorization and logs user out |
@@ -307,7 +307,7 @@ Post condition (for all): User is not authorized anymore
 |  Exceptions     		| User does not have account. Wrong email/password combination. |
 
 | Scenario 3.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | User is logged out and not authorized any more |
 | Step#	| Description  			|
@@ -320,7 +320,7 @@ Post condition (for all): User is not authorized anymore
 
 
 | Scenario 3.2 		| 	Variant			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User has account and is logged out |
 |  Post condition   | User is still logged out and not authorized |
 | Step#	| Description  			|
@@ -329,7 +329,7 @@ Post condition (for all): User is not authorized anymore
 | 3		| System finds empty token so user is already logged out and system returns  "logged out"|
 
 | Scenario 3.3 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User has wrong refresh token |
 |  Post condition   | User not authorized |
 | Step#	| Description  			|
@@ -350,14 +350,14 @@ Post condition (for all): User is not authorized anymore
 Post condition: Category is created
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A category is created	|
 |  Nominal Scenario     | User asks to create a  category, system creates it |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 4.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Category is created |
 | Step#	| Description  			|
@@ -370,7 +370,7 @@ Post condition: Category is created
 
 
 | Scenario 4.2		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Category not created |
 | Step#	| Description  			|
@@ -388,14 +388,14 @@ Post condition: Category is created
 *	System provides all existing categories
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All categories are displayed	|
 |  Nominal Scenario     | User asks to view all categories, system displays them |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 5.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All categories are displayed |
 | Step#	| Description  			|
@@ -404,7 +404,7 @@ Post condition: Category is created
 | 3		| System returns all categories as type and color	|
 
 | Scenario 5.2 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No category is displayed |
 | Step#	| Description  			|
@@ -423,14 +423,14 @@ Post condition: Category is created
 Post condition: Transaction is created
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is created	|
 |  Nominal Scenario     | User asks to create a  transaction, system creates it |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 6.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is created |
 | Step#	| Description  			|
@@ -443,7 +443,7 @@ Post condition: Transaction is created
 
 
 | Scenario 6.2		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Transaction is not created |
 | Step#	| Description  			|
@@ -454,20 +454,20 @@ Post condition: Transaction is created
 | 5		| System finds empty token and returns error "unauthorized" |
 
 
-## Use case: View transactions
+## Use case 7: View transactions
 <!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All transactions are displayed	|
 |  Nominal Scenario     | User asks to view all transactions, system displays them |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 7.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All transactions are displayed |
 | Step#	| Description  			|
@@ -476,7 +476,7 @@ Post condition: Transaction is created
 | 3		| System returns all transactions |
 
 | Scenario 7.2 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No transaction is displayed |
 | Step#	| Description  			|
@@ -485,7 +485,7 @@ Post condition: Transaction is created
 | 3     |  System finds invalid access token |
 | 4		| System returns error "unauthorized"|
 
-## UC: Delete transaction
+## Use case  8: Delete transaction
 <!--Precondition: User logged in
 *	User asks to delete a transaction
 *	System asks user to indentify the transaction
@@ -494,14 +494,14 @@ Post condition: Transaction is created
 Post condition: Transaction is deleted
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is deleted	|
 |  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 8.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is deleted |
 | Step#	| Description  			|
@@ -512,7 +512,7 @@ Post condition: Transaction is deleted
 
 
 | Scenario 8.2		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Transaction is not deleted |
 | Step#	| Description  			|
@@ -528,14 +528,14 @@ Post condition: Transaction is deleted
 *	System shows the transactions grouped by category
 -->
 | Actors Involved      	| User 			|
-| ------------- 		|:-------------:| 
+| ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All transactions grouped by categories are displayed	|
 |  Nominal Scenario     | User asks to view all transactions grouped by categories, system displays them |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 9.1 		| 	Nominal			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All transactions are displayed grouped by categories|
 | Step#	| Description  			|
@@ -544,7 +544,7 @@ Post condition: Transaction is deleted
 | 3		| System returns all transactions grouped by categories |
 
 | Scenario 9.2 		| 	Exception			|
-| ------------- 	|:-----------------:| 
+| ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No transaction is displayed |
 | Step#	| Description  			|
@@ -569,6 +569,6 @@ Post condition: Transaction is deleted
 
 # Software Bugs
 | ID | Type			| Description  	| Refers to FR 	|
-|:--:|:------------:|:-------------:|:-------------:|	
+|--|------------|-------------|-------------|	
 | 1  |Security		| No accessToken validation, anyone can access if non-empty access token in cookie 			| All FR |
 | 2  |Functional	| No user specific category/transaction separation. Any user can access/modify other user's data | FR 2, 3 |
