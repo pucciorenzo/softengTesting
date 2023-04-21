@@ -15,11 +15,9 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | 0.6.1  | added use case diagram |
 | 0.7.1  | added Glossary |
 | 1.0.0	 | added use cases, system diagram, deployment diagram, stories and personas |
-| 1.1.0  | removed admin features, replaced users with a generic user |
+| 1.1.0  | removed admin and users, replaced with a generic user |
 | 1.1.1  | removed database and hosting services |
 | 1.1.2  | added temporary section : software bugs |
-
-
 
 
 # Contents
