@@ -50,7 +50,7 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 # Stakeholders
 
 | Stakeholder name  			| Description | 
-| ----------------- 			|:-----------:|
+| ----------------- 			|-----------|
 | User						| tracks their expenses |
 | Project Team 				| develops, tests and maintains app |
 | Company(Owner)			| owns the app, employs and oversees developers, manages finances, takes executive decisions during app development |
@@ -72,7 +72,7 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 \<GUIs will be described graphically in a separate document>
 -->
 | Actor 		| Logical Interface 	| Physical Interface  |
-| ------------- |:-----------------:	| :------------------:|
+| ------------- |-----------------| ------------------|
 | User 		  	|GUI			 		| PC, Smartphone, Tablet |
 
 # Stories and personas
