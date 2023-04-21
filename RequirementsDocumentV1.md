@@ -139,7 +139,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 
 ![Use Case Diagram](diagrams/UseCaseDiagramV1.svg)
 
-## Use case: Create account
+<!-- ## Use case: Create account
 Precondition: User has no account
 
 Scenario 1 (nominal):
@@ -157,8 +157,19 @@ Scenario (exceptions):
 •	Email already used
 
 Post condition: User is not registered
+ -->
+### Use case 1, Create account
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User has no account 	|
+|  Post condition     	| User is registered 	|
+|  Nominal Scenario     | User ask to sign up -> System asks username, email, password -> system stores account |
+|  Variants     		| \<other normal executions> |
+|  Exceptions     		| Email already used|
 
-## Use case: Login
+##### Scenario 1.1 
+
+<!--## Use case: Login
 Precondition: User has account
 
 Scenario 1 (nominal):
@@ -175,9 +186,19 @@ Scenario (exceptions):
 *	Email or password wrong
 
 Post condition  (for all exceptional scenarios): user is not authorized
+-->
+### Use case 2, Log in
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User has account 		|
+|  Post condition     	| user is authorized 	|
+|  Nominal Scenario     | 1. User asks to login -> 2. System asks email and password -> 3. User enters email and password -> 4. System checks, email and password correct -> 5. User is authorized |
+|  Variants     		| \<other normal executions> |
+|  Exceptions     		| User does not exist, User is already logged in, Email or password is wrong|
+
 
 ## Use case: Log out
-Precondition: User is logged in
+<!--Precondition: User is logged in
 
 Scenario 1 (nominal):
 *	User ask to log out
@@ -191,6 +212,8 @@ Scenario (exceptions):
 
 Post condition (for all): User is not authorized anymore
 -->
+
+
 
 ## Use case: Create a category
 Precondition: User logged in
