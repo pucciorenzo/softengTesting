@@ -18,6 +18,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | 1.1.0  | removed admin and users, replaced with a generic user |
 | 1.1.1  | removed database and hosting services |
 | 1.1.2  | added temporary section : software bugs |
+| 1.2.1 | added use cases and scenarios |
 
 
 # Contents
@@ -158,7 +159,7 @@ Scenario (exceptions):
 
 Post condition: User is not registered
  -->
-### Use case 1, Create account
+### Use case 1: Create account
 | Actors Involved      	| User 			|
 | ------------- 		|:-------------:| 
 |  Precondition     	| User does not have an account 	|
@@ -166,15 +167,31 @@ Post condition: User is not registered
 |  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
 |  Exceptions     		| User already has an account |
 
-##### Scenario 1.1 : Nominal
-| Scenario 1.1 		| 				|
+<!--##### Scenario 1.1 : Nominal -->
+| Scenario 1.1 		| 	Nominal			|
 | ------------- 	|:-------------:| 
 |  Precondition     | User does not have an account |
 |  Post condition   | User has an account |
 | Step#	| Description  			|
-|  1    | User asks to register |  
-|  2    | System asks username, email, password |
-|  3    |  |
+| 1    	| User asks to register |  
+| 2    	| System asks username, email, password |
+| 3    	| User enters username, email, password  |
+| 4		| System checks that a user with provided email does not already exist |
+| 5		| System generates hash value from password and stores the username, email and hashed password.
+
+<!--##### Scenario 1.2 : Exception -->
+| Scenario 1.2 		| 	Exception			|
+| ------------- 	|:-------------:| 
+|  Precondition     | Email already used to create an account |
+|  Post condition   | New account not created |
+| Step#	| Description  			|
+| 1    	| User asks to register |  
+| 2    	| System asks username, email, password |
+| 3    	| User enters username, email, password  |
+| 4		| System checks that a user with provided email does not already exist |
+| 5		| System finds an account with the same email.
+| 6		| System returns error message "already registered" |
+
 
 <!--## Use case: Login
 Precondition: User has account
@@ -194,17 +211,78 @@ Scenario (exceptions):
 
 Post condition  (for all exceptional scenarios): user is not authorized
 -->
-### Use case 2, Log in
+### Use case 2: Log in
 | Actors Involved      	| User 			|
 | ------------- 		|:-------------:| 
-|  Precondition     	| User has account 		|
-|  Post condition     	| user is authorized 	|
-|  Nominal Scenario     | 1. User asks to login -> 2. System asks email and password -> 3. User enters email and password -> 4. System checks, email and password correct -> 5. User is authorized |
-|  Variants     		| \<other normal executions> |
-|  Exceptions     		| User does not exist, User is already logged in, Email or password is wrong|
+|  Precondition     	| User has account		|
+|  Post condition     	| User is authorized 	|
+|  Nominal Scenario     | User enter  email and password to login. System verifies credentials and authorizes user. |
+|  Variants     | User is already logged in and has access token. System notifies user already logged in. |
+|  Exceptions     		| User does not have account. Wrong email or password. |
+
+<!--##### Scenario 2.1 : Nominal -->
+| Scenario 2.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User has account and user is logged out |
+|  Post condition   | User is logged in and authorized |
+| Step#	| Description  			|
+| 1    	| User asks to log in |  
+| 2    	| System asks email and password |
+| 3    	| User enters email and password  |
+| 4		| System searches corresponding account using provided email |
+| 5		| System verifies user does not already have accessToken |
+| 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
+  7		| System generates an access token and a refresh token.|
+  8		| System stores the refresh token and returns both refresh token and access token to the user.|
+| 9     | User uses the tokens for later queries to the system. |
+
+<!--##### Scenario 2.2 : Nominal -->
+| Scenario 2.2 		| 	Variant			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User has account and user is logged in |
+|  Post condition   | User is still logged in and authorized |
+| Step#	| Description  			|
+| 1    	| User asks to log in |  
+| 2    	| System asks email and password |
+| 3    	| User enters email and password  |
+| 4		| System searches corresponding account using provided email |
+| 5		| System verifies user does not already have accessToken |
+| 6		| User already has accessToken. System
+  7		| System generates an access token and a refresh token.|
+  8		| System stores the refresh token. |
+| 9     | System returns both refresh token and access token to the user in cookie and returns access token also in the body.|
+| 10     | User uses the tokens for later queries to the system. |
+
+<!--##### Scenario 2.3 : Exception -->
+| Scenario 2.3 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User does not have an account or provides wrong unregistered email |
+|  Post condition   | User is neither logged in nor authorized |
+| Step#	| Description  			|
+| 1    	| User asks to log in |  
+| 2    	| System asks email and password |
+| 3    	| User enters email and password |
+| 4		| System searches corresponding account using provided email |
+| 5		| System does not find account |
+| 6		| System returns error "need to register." |
+
+<!--##### Scenario 2.3 : Exception -->
+| Scenario 2.3 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User has account, is not logged in and provides either wrong existing email or wrong password |
+|  Post condition   | User is neither logged in nor authorized |
+| Step#	| Description  			|
+| 1    	| User asks to log in |  
+| 2    	| System asks email and password |
+| 3    	| User enters email and password  |
+| 4		| System searches  corresponding account using provided email |
+| 5		| System verifies user does not already have accessToken |
+| 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
+  7		| Password hashes do not match and system returns error "wrong credentials" |
 
 
-## Use case: Log out
+
+## Use case 3: Log out
 <!--Precondition: User is logged in
 
 Scenario 1 (nominal):
@@ -220,47 +298,260 @@ Scenario (exceptions):
 Post condition (for all): User is not authorized anymore
 -->
 
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| User is logged out and not authorized any more	|
+|  Nominal Scenario     | User asks to log out, and system removes authorization and logs user out |
+|  Variants     | User is already logged out. System notifies user logged out. |
+|  Exceptions     		| User does not have account. Wrong email/password combination. |
+
+| Scenario 3.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | User is logged out and not authorized any more |
+| Step#	| Description  			|
+| 1     | User asks to log out |
+| 2     |  System verifies non empty access and refresh tokens. |
+| 3		| System uses refresh token to search for the user.	|
+| 4		| System sends empty access and refresh tokens. |
+| 5 	| System clears stored user's refresh token. |
+| 6		| System returns  "logged out"|
 
 
-## Use case: Create a category
-Precondition: User logged in
+| Scenario 3.2 		| 	Variant			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User has account and is logged out |
+|  Post condition   | User is still logged out and not authorized |
+| Step#	| Description  			|
+| 1     | User asks to log out |
+| 2     |  System verifies non empty access and refresh tokens. |
+| 3		| System finds empty token so user is already logged out and system returns  "logged out"|
+
+| Scenario 3.3 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User has wrong refresh token |
+|  Post condition   | User not authorized |
+| Step#	| Description  			|
+| 1     | User asks to log out |
+| 2     |  System verifies non empty access and refresh tokens. |
+| 3		| System uses refresh token to search for the user.	|
+| 4		| System does not find user using the refresh token and returns error "user not found"|
+
+
+
+## Use case 4: Create a category
+<!--Precondition: User logged in
 *	User asks to create a category
 *	System asks the type
 *	System asks the color
 *	System creates the category
 
 Post condition: Category is created
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| A category is created	|
+|  Nominal Scenario     | User asks to create a  category, system creates it |
+|  Exceptions     		| User is not authorized |
 
-## Use case: View categories
-Precondition: User logged in
+| Scenario 4.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | Category is created |
+| Step#	| Description  			|
+| 1     | User asks to create a category |
+| 2     |  System asks type and color of the category |
+| 3		| User provides type and color	|
+| 4		| System verifies access token |
+| 5		| System creates and stores the category|
+| 6 	| System returns created category|
+
+
+| Scenario 4.2		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | Category not created |
+| Step#	| Description  			|
+| 1     | User asks to create a category |
+| 2     |  System asks type and color of the category |
+| 3		| User provides type and color	|
+| 4		| System verifies access token |
+| 5		| System finds empty token and returns error "unauthorized" |
+
+
+
+## Use case 5: View categories
+<!--Precondition: User logged in
 *	User asks to view all categories
 *	System provides all existing categories
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| All categories are displayed	|
+|  Nominal Scenario     | User asks to view all categories, system displays them |
+|  Exceptions     		| User is not authorized |
 
-## Use case: Create a transaction
-Precondition: User logged in
+| Scenario 5.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | All categories are displayed |
+| Step#	| Description  			|
+| 1     | User asks to view all categories|
+| 2     |  System verifies access token |
+| 3		| System returns all categories as type and color	|
+
+| Scenario 5.2 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | No category is displayed |
+| Step#	| Description  			|
+| 1     | User asks to view all categories|
+| 2     |  System verifies access token |
+| 3     |  System finds invalid access token |
+| 4		| System returns error "unauthorized"|
+
+
+
+## Use case 6: Create a transaction
+<!--Precondition: User logged in
 *	User asks to create a transaction
 *	System asks the name, amount and type
 
 Post condition: Transaction is created
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| A transaction is created	|
+|  Nominal Scenario     | User asks to create a  transaction, system creates it |
+|  Exceptions     		| User is not authorized |
+
+| Scenario 6.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | Transaction is created |
+| Step#	| Description  			|
+| 1     | User asks to create a transaction |
+| 2     |  System asks name, amount and type of the transaction |
+| 3		| User provides the name, amount and type 	|
+| 4		| System verifies access token |
+| 5		| System creates and stores the transaction|
+| 6 	| System returns created transaction|
+
+
+| Scenario 6.2		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | Transaction is not created |
+| Step#	| Description  			|
+| 1     | User asks to create a transaction |
+| 2     |  System asks name, amount and type of the transaction |
+| 3		| User provides the name, amount and type 	|
+| 4		| System verifies access token |
+| 5		| System finds empty token and returns error "unauthorized" |
+
 
 ## Use case: View transactions
-Precondition: User logged in
+<!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| All transactions are displayed	|
+|  Nominal Scenario     | User asks to view all transactions, system displays them |
+|  Exceptions     		| User is not authorized |
+
+| Scenario 7.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | All transactions are displayed |
+| Step#	| Description  			|
+| 1     | User asks to view all transactions|
+| 2     |  System verifies access token |
+| 3		| System returns all transactions |
+
+| Scenario 7.2 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | No transaction is displayed |
+| Step#	| Description  			|
+| 1     | User asks to view all transactions|
+| 2     |  System verifies access token |
+| 3     |  System finds invalid access token |
+| 4		| System returns error "unauthorized"|
 
 ## UC: Delete transaction
-Precondition: User logged in
+<!--Precondition: User logged in
 *	User asks to delete a transaction
 *	System asks user to indentify the transaction
 *	System deletes the transaction
 
 Post condition: Transaction is deleted
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| A transaction is deleted	|
+|  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
+|  Exceptions     		| User is not authorized |
 
-## Use case: View transactions grouped by category
-Precondition: User logged in
+| Scenario 8.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | Transaction is deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a transaction providing the transaction id |
+| 2		| System verifies access token |
+| 3		| System searches the transaction using id and deletes it|
+| 4 	| System returns deleted transaction|
+
+
+| Scenario 8.2		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | Transaction is not deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a transaction providing the transaction id |
+| 2		| System verifies access token |
+| 3     |  System finds invalid access token |
+| 4		| System returns error "unauthorized"|
+
+
+## Use case 9: View transactions grouped by category
+<!--Precondition: User logged in
 *	User asks to view transactions grouped by category
 *	System shows the transactions grouped by category
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|:-------------:| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| All transactions grouped by categories are displayed	|
+|  Nominal Scenario     | User asks to view all transactions grouped by categories, system displays them |
+|  Exceptions     		| User is not authorized |
 
+| Scenario 9.1 		| 	Nominal			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is logged in |
+|  Post condition   | All transactions are displayed grouped by categories|
+| Step#	| Description  			|
+| 1     | User asks to view all transactions grouped by categories|
+| 2     |  System verifies access token |
+| 3		| System returns all transactions grouped by categories |
+
+| Scenario 9.2 		| 	Exception			|
+| ------------- 	|:-----------------:| 
+|  Precondition     | User is not authorized |
+|  Post condition   | No transaction is displayed |
+| Step#	| Description  			|
+| 1     | User asks to view all transactions grouped by categories|
+| 2     |  System verifies access token |
+| 3     |  System finds invalid access token |
+| 4		| System returns error "unauthorized"|
 
 
 # Glossary
