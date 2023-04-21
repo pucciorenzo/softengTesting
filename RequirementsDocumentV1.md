@@ -16,6 +16,9 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | 0.7.1  | added Glossary |
 | 1.0.0	 | added use cases, system diagram, deployment diagram, stories and personas |
 | 1.1.0  | removed admin features, replaced users with a generic user |
+| 1.1.1  | removed database and hosting services |
+| 1.1.2  | added temporary section : software bugs |
+
 
 
 
@@ -245,3 +248,8 @@ Precondition: User logged in
 # Deployment Diagram 
 ![DeploymentDiagram](diagrams/DeploymentDiagramV1.svg)
 
+# Software Bugs
+| ID | Type			| Description  	| Refers to FR 	|
+|:--:|:------------:|:-------------:|:-------------:|	
+| 1  |Security		| No accessToken validation, anyone can access if non-empty access token in cookie 			| All FR |
+| 2  |Functional	| No user specific category/transaction separation. Any user can access/modify other user's data | FR 2, 3 |
