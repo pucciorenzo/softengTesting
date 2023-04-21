@@ -15,6 +15,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | 0.6.1  | added use case diagram |
 | 0.7.1  | added Glossary |
 | 1.0.0	 | added use cases, system diagram, deployment diagram, stories and personas |
+| 1.1.0  | removed admin features, replaced users with a generic user |
 
 
 
@@ -37,6 +38,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
+- [Software Bugs](#software-bugs)
 
 # Informal description
 EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
@@ -45,30 +47,19 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 
 # Stakeholders
 
-<!--
-NEEDS CHANGES
--->
 | Stakeholder name  			| Description | 
 | ----------------- 			|:-----------:|
-| User (Individual) 		| tracks their personal expenses | 
-| User (Family) 			| tracks their family expenses |
-| User (Admin)				| manages registered users |
+| User						| tracks their expenses |
 | Project Team 				| develops, tests and maintains app |
 | Company(Owner)			| owns the app, employs and oversees developers, manages finances, takes executive decisions during app development |
-| Hosting service 			| host the app, provide api, make app accessible on the internet, provide data security, guarantee uptime |
-| Database service 			| deploy, store, manage and secure database for the user data online storage and retrieval through app|
 
 
 # Context Diagram and interfaces
 
-<!--
-NEEDS CHANGES
--->
 
 ## Context Diagram
-<!--Define here Context diagram using UML use case diagram-->
+<!--Define here Context diagram using UML use case diagram -->
 ![Context Diagram](diagrams/ContextDiagramV1.svg)
-
 
 <!--actors are a subset of stakeholders-->
 
@@ -80,9 +71,7 @@ NEEDS CHANGES
 -->
 | Actor 		| Logical Interface 	| Physical Interface  |
 | ------------- |:-----------------:	| :------------------:|
-| User(Individual, Family, Admin)	  	|GUI			 		| PC, Smartphone, Tablet |
-| Hosting Service						| VM, Filesystem, Cloud	| Server|
-| Database Service(MongoDB)				| mongoose api (https://mongoosejs.com/docs/index.html)| Internet link |
+| User 		  	|GUI			 		| PC, Smartphone, Tablet |
 
 # Stories and personas
 Persona 1: student, male, 20, low income.
@@ -112,8 +101,6 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | + FR1.2	| Log in  		|
 | + FR1.3 	| Log out 		|
 | + FR1.4 	| Authenticate and authorize	|
-| + FR1.5 	| Manage access rights			|
-| + FR1.6 	| View users 	|
 | <b>FR2</b>		| <b>Manage categories</b> | 
 | + FR2.1	| Define category	|
 | + FR2.2	| View categories	|
@@ -121,7 +108,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | + FR3.1	| add transaction		|
 | + FR3.2	| View transactions		|
 | + FR3.3	| remove transaction	|
-| <b>FR4</b>		| <b>View transactions along with their categories</b>|
+| <b>FR4</b>		| <b>View transactions grouped by category</b>|
 
 
 
@@ -131,10 +118,10 @@ Persona 3: unemployed, male, 35, no income with little savings.
 -->
 | ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
 | ------------- |:-------------:| :-----:| -----:|
-| NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,1.6,2,3,4 |
+| NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,2,3,4 |
 | NFR2 | Efficiency | < 0.2ms function response time | All FR |
-| NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,1.6,2,3,4 |
-| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.6,2,3,4 |
+| NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,2,3,4 |
+| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,2,3,4 |
 | NFR5 | Security | GDPR, CCPA, ISO/IEC 27000-series compliance | All FR |
 | NFR6 | Maintainability | < 24 hr app migration to different service, < 6 hr recovery after failure | All FR |
 
@@ -238,10 +225,10 @@ Precondition: User logged in
 
 Post condition: Transaction is deleted
 
-## Use case: View transaction along with category
+## Use case: View transactions grouped by category
 Precondition: User logged in
-*	User asks to view transactions grouped by categories
-*	System shows the transactions grouped by categories
+*	User asks to view transactions grouped by category
+*	System shows the transactions grouped by category
 
 
 
@@ -257,7 +244,4 @@ Precondition: User logged in
 
 # Deployment Diagram 
 ![DeploymentDiagram](diagrams/DeploymentDiagramV1.svg)
-
-
-
 
