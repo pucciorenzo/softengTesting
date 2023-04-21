@@ -161,13 +161,20 @@ Post condition: User is not registered
 ### Use case 1, Create account
 | Actors Involved      	| User 			|
 | ------------- 		|:-------------:| 
-|  Precondition     	| User has no account 	|
-|  Post condition     	| User is registered 	|
-|  Nominal Scenario     | User ask to sign up -> System asks username, email, password -> system stores account |
-|  Variants     		| \<other normal executions> |
-|  Exceptions     		| Email already used|
+|  Precondition     	| User does not have an account 	|
+|  Post condition     	| User has account 		|
+|  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
+|  Exceptions     		| User already has an account |
 
-##### Scenario 1.1 
+##### Scenario 1.1 : Nominal
+| Scenario 1.1 		| 				|
+| ------------- 	|:-------------:| 
+|  Precondition     | User does not have an account |
+|  Post condition   | User has an account |
+| Step#	| Description  			|
+|  1    | User asks to register |  
+|  2    | System asks username, email, password |
+|  3    |  |
 
 <!--## Use case: Login
 Precondition: User has account
