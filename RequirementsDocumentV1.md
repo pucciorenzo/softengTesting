@@ -29,7 +29,6 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 - [Context Diagram and interfaces](#context-diagram-and-interfaces)
 	+ [Context Diagram](#context-diagram)
 	+ [Interfaces](#interfaces) 
-	
 - [Stories and personas](#stories-and-personas)
 - [Functional and non functional requirements](#functional-and-non-functional-requirements)
 	+ [Functional Requirements](#functional-requirements)
@@ -37,7 +36,20 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-    	+ [Relevant scenarios](#relevant-scenarios)
+		+ [Use case 1: Create account](#use-case-1-create-account)
+		+ [Use case 2: Log in](#use-case-2-log-in)
+		+ [Use case 3: View account](#use-case-3-view-account)
+		+ [Use case 4: Log out](#use-case-4-log-out)
+		+ [Use case 5: Create category](#use-case-5-create-a-category)
+		+ [Use case 6: View categories](#use-case-6-view-categories)
+		+ [Use case 7: Create transaction](#use-case-7-create-a-transaction)
+		+ [Use case 8: View transactions](#use-case-8-view-transactions)
+		+ [Use case 9: Delete transaction](#use-case-9-delete-transaction)
+		+ [Use case 10: View transactions grouped by categories](#use-case-10-view-transactions-grouped-by-category)
+
+
+
+
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
@@ -142,6 +154,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 
 ![Use Case Diagram](diagrams/UseCaseDiagramV1.svg)
 
+## Use cases
 <!-- ## Use case: Create account
 Precondition: User has no account
 
