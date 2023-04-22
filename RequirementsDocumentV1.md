@@ -19,6 +19,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 | 1.1.1  | removed database and hosting services |
 | 1.1.2  | added temporary section : software bugs |
 | 1.2.1 | added use cases and scenarios |
+| 1.3.1 | add view account use case |
 
 
 # Contents
@@ -101,8 +102,9 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | <b>FR1</b>		| <b>Manage account</b> |
 | + FR1.1	| Create account|
 | + FR1.2	| Log in  		|
-| + FR1.3 	| Log out 		|
-| + FR1.4 	| Authenticate and authorize	|
+| + FR1.3	| View account	|
+| + FR1.4 	| Log out 		|
+| + FR1.5 	| Authenticate and authorize	|
 | <b>FR2</b>		| <b>Manage categories</b> | 
 | + FR2.1	| Define category	|
 | + FR2.2	| View categories	|
@@ -120,10 +122,10 @@ Persona 3: unemployed, male, 35, no income with little savings.
 -->
 | ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
 | ------------- |-------------| -----| -----|
-| NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,2,3,4 |
+| NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,1.4,2,3,4 |
 | NFR2 | Efficiency | < 0.2ms function response time | All FR |
-| NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,2,3,4 |
-| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,2,3,4 |
+| NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,1.4,2,3,4 |
+| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.4,2,3,4 |
 | NFR5 | Security | GDPR, CCPA, ISO/IEC 27000-series compliance | All FR |
 | NFR6 | Maintainability | < 24 hr app migration to different service, < 6 hr recovery after failure | All FR |
 
@@ -280,9 +282,56 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
   7		| Password hashes do not match and system returns error "wrong credentials" |
 
+### Use case 3: View account
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in 	|
+|  Post condition     	| User's account information is displayed 		|
+|  Nominal Scenario     | User asks to view his account information and system shows it |
+|  Exceptions     		| User is not logged in. User does not provide his own username. |
+
+<!--##### Scenario 3.1 : Nominal -->
+| Scenario 3.1 		| 	Nominal			|
+| ------------- 	|-------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | User's account is displayed |
+| Step#	| Description  			|
+| 1    	| User asks to view his account |
+| 2    	| System asks username |  
+| 3    	| User provides his username |
+| 4    	| System verifies user has both access and refresh token. |
+| 5    	| System finds user account using the refresh token. |
+| 6		| System verifies the provided username matches found account's username |
+| 7		| System returns the account information.
+
+<!--##### Scenario 3.2 : Exception -->
+| Scenario 3.2 		| 	Exception			|
+| ------------- 	|-------------| 
+|  Precondition     | User is not logged in |
+|  Post condition   | User's account is not displayed |
+| Step#	| Description  			|
+| 1    	| User asks to view his account |
+| 2    	| System asks username |  
+| 3    	| User provides his username |
+| 4    	| System verifies user has both access and refresh token. |
+| 5    	| System finds empty access token or refresh token.|
+| 6   	| System returns error "unauthorized". |
+
+| Scenario 3.3 		| 	Exception			|
+| ------------- 	|-------------| 
+|  Precondition     | User  |
+|  Post condition   | User's account is displayed |
+| Step#	| Description  			|
+| 1    	| User asks to view his account |
+| 2    	| System asks username |  
+| 3    	| User provides his username |
+| 4    	| System verifies user has both access and refresh token. |
+| 5    	| System finds user account using the refresh token. |
+| 6		| System verifies the provided username matches found account's username |
+| 7		| Usernames do not match. System returns error "unauthorized".
 
 
-## Use case 3: Log out
+### Use case 4: Log out
 <!--Precondition: User is logged in
 
 Scenario 1 (nominal):
@@ -306,7 +355,7 @@ Post condition (for all): User is not authorized anymore
 |  Variants     | User is already logged out. System notifies user logged out. |
 |  Exceptions     		| User does not have account. Wrong email/password combination. |
 
-| Scenario 3.1 		| 	Nominal			|
+| Scenario 4.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | User is logged out and not authorized any more |
@@ -319,7 +368,7 @@ Post condition (for all): User is not authorized anymore
 | 6		| System returns  "logged out"|
 
 
-| Scenario 3.2 		| 	Variant			|
+| Scenario 4.2 		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User has account and is logged out |
 |  Post condition   | User is still logged out and not authorized |
@@ -328,7 +377,7 @@ Post condition (for all): User is not authorized anymore
 | 2     |  System verifies non empty access and refresh tokens. |
 | 3		| System finds empty token so user is already logged out and system returns  "logged out"|
 
-| Scenario 3.3 		| 	Exception			|
+| Scenario 4.3 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User has wrong refresh token |
 |  Post condition   | User not authorized |
@@ -340,7 +389,7 @@ Post condition (for all): User is not authorized anymore
 
 
 
-## Use case 4: Create a category
+### Use case 5: Create a category
 <!--Precondition: User logged in
 *	User asks to create a category
 *	System asks the type
@@ -356,7 +405,7 @@ Post condition: Category is created
 |  Nominal Scenario     | User asks to create a  category, system creates it |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 4.1 		| 	Nominal			|
+| Scenario 5.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Category is created |
@@ -369,7 +418,7 @@ Post condition: Category is created
 | 6 	| System returns created category|
 
 
-| Scenario 4.2		| 	Exception			|
+| Scenario 5.2		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Category not created |
@@ -382,7 +431,7 @@ Post condition: Category is created
 
 
 
-## Use case 5: View categories
+### Use case 6: View categories
 <!--Precondition: User logged in
 *	User asks to view all categories
 *	System provides all existing categories
@@ -394,7 +443,7 @@ Post condition: Category is created
 |  Nominal Scenario     | User asks to view all categories, system displays them |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 5.1 		| 	Nominal			|
+| Scenario 6.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All categories are displayed |
@@ -403,7 +452,7 @@ Post condition: Category is created
 | 2     |  System verifies access token |
 | 3		| System returns all categories as type and color	|
 
-| Scenario 5.2 		| 	Exception			|
+| Scenario 6.2 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No category is displayed |
@@ -415,7 +464,7 @@ Post condition: Category is created
 
 
 
-## Use case 6: Create a transaction
+### Use case 7: Create a transaction
 <!--Precondition: User logged in
 *	User asks to create a transaction
 *	System asks the name, amount and type
@@ -429,7 +478,7 @@ Post condition: Transaction is created
 |  Nominal Scenario     | User asks to create a  transaction, system creates it |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 6.1 		| 	Nominal			|
+| Scenario 7.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is created |
@@ -442,7 +491,7 @@ Post condition: Transaction is created
 | 6 	| System returns created transaction|
 
 
-| Scenario 6.2		| 	Exception			|
+| Scenario 7.2		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Transaction is not created |
@@ -454,7 +503,7 @@ Post condition: Transaction is created
 | 5		| System finds empty token and returns error "unauthorized" |
 
 
-## Use case 7: View transactions
+### Use case 8: View transactions
 <!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
@@ -466,7 +515,7 @@ Post condition: Transaction is created
 |  Nominal Scenario     | User asks to view all transactions, system displays them |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 7.1 		| 	Nominal			|
+| Scenario 8.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All transactions are displayed |
@@ -475,7 +524,7 @@ Post condition: Transaction is created
 | 2     |  System verifies access token |
 | 3		| System returns all transactions |
 
-| Scenario 7.2 		| 	Exception			|
+| Scenario 8.2 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No transaction is displayed |
@@ -485,7 +534,7 @@ Post condition: Transaction is created
 | 3     |  System finds invalid access token |
 | 4		| System returns error "unauthorized"|
 
-## Use case  8: Delete transaction
+### Use case  9: Delete transaction
 <!--Precondition: User logged in
 *	User asks to delete a transaction
 *	System asks user to indentify the transaction
@@ -500,7 +549,7 @@ Post condition: Transaction is deleted
 |  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 8.1 		| 	Nominal			|
+| Scenario 9.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is deleted |
@@ -511,7 +560,7 @@ Post condition: Transaction is deleted
 | 4 	| System returns deleted transaction|
 
 
-| Scenario 8.2		| 	Exception			|
+| Scenario 9.2		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | Transaction is not deleted |
@@ -522,7 +571,7 @@ Post condition: Transaction is deleted
 | 4		| System returns error "unauthorized"|
 
 
-## Use case 9: View transactions grouped by category
+### Use case 10: View transactions grouped by category
 <!--Precondition: User logged in
 *	User asks to view transactions grouped by category
 *	System shows the transactions grouped by category
@@ -534,7 +583,7 @@ Post condition: Transaction is deleted
 |  Nominal Scenario     | User asks to view all transactions grouped by categories, system displays them |
 |  Exceptions     		| User is not authorized |
 
-| Scenario 9.1 		| 	Nominal			|
+| Scenario 10.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All transactions are displayed grouped by categories|
@@ -543,7 +592,7 @@ Post condition: Transaction is deleted
 | 2     |  System verifies access token |
 | 3		| System returns all transactions grouped by categories |
 
-| Scenario 9.2 		| 	Exception			|
+| Scenario 10.2 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No transaction is displayed |
@@ -570,5 +619,6 @@ Post condition: Transaction is deleted
 # Software Bugs
 | ID | Type			| Description  	| Refers to FR 	|
 |--|------------|-------------|-------------|	
-| 1  |Security		| No accessToken validation, anyone can access if non-empty access token in cookie 			| All FR |
-| 2  |Functional	| No user specific category/transaction separation. Any user can access/modify other user's data | FR 2, 3 |
+| 1  |Security		| No tokens validation, anyone can access if non-empty tokens in cookie 			| All FR |
+| 2  |Security	| No user specific category/transaction separation. Any user can access/modify other user's data | FR 2, 3 |
+| 3  |Functional/Security	| No admin implementation. Any one can view all users | FR 1.3, 1.5 |
