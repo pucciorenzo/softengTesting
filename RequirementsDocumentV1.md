@@ -6,7 +6,7 @@ Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 
  
 | Version number | Change |
-| ----------------- |:-----------|
+| ----------------- |-----------|
 | 0.1.11 | added stakeholders| 
 | 0.2.2  | added context diagram|
 | 0.3.1  | added interfaces| 
@@ -262,11 +262,8 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password  |
 | 4		| System searches corresponding account using provided email |
 | 5		| System verifies user does not already have accessToken |
-| 6		| User already has accessToken. System
-  7		| System generates an access token and a refresh token.|
-  8		| System stores the refresh token. |
-| 9     | System returns both refresh token and access token to the user in cookie and returns access token also in the body.|
-| 10     | User uses the tokens for later queries to the system. |
+| 6		| User already has accessToken. 
+| 7     | System returns "you are already logged in"|
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
