@@ -7,7 +7,8 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
  
 | Version number | Change |
 | ----------------- |-----------|
-| 1 				| same as V1 |
+| 1.0.0 				| same as V1 |
+| 1.1.0             | changed upto use case 1 |
 
 
 # Contents
