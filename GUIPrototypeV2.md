@@ -4,7 +4,7 @@ Authors:
 
 Date:
 
-Version:
+Version: 2.1.0
 
 
 
@@ -16,6 +16,9 @@ Version:
 ![pass conf](guiV2/V2%20forgot%20password%20confirm.png)
 ![pass res](guiV2/V2%20reset%20password.png)
 ![main](guiV2/V2%20main%20page.png)
+![main settings](guiV2/V2%20main%20page%20settings.png)
+![change username](guiV2/V2%20change%20username.png)
+![change pass](guiV2/V2%20change%20password.png)
 ![new budget](guiV2/V2%20main%20page%20new%20budget.png)
 ![categories](guiV2/V2%20categories%20.png)
 ![categories ch](guiV2/V2%20categories%20%20change.png)
