@@ -1,33 +1,33 @@
 # Project Estimation - FUTURE
-Date:
+Date: 26.04.2023
 
-Version:
+Version: 2
 
 
 # Estimation approach
-Consider the EZWallet  project in FUTURE version (as proposed by the team), assume that you are going to develop the project INDEPENDENT of the deadlines of the course
+In this document we are trying to do a approximate estimation on the duration and effort it would take for our team to complete this project.
 # Estimate by size
 ### 
 |             | Estimate                        |             
 | ----------- | ------------------------------- |  
-| NC =  Estimated number of classes to be developed   |                             |             
-|  A = Estimated average size per class, in LOC       |                            | 
-| S = Estimated size of project, in LOC (= NC * A) | |
-| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |                                      |   
-| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | | 
-| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |                    |               
+| NC =  Estimated number of modules to be developed   | 50                            |             
+|  A = Estimated average size per module, in LOC       |        150                    | 
+| S = Estimated size of project, in LOC (= NC * A) | 7500|
+| E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |                   750                   |   
+| C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) |22500 | 
+| Estimated calendar time, in calendar weeks (Assume team of 4 people, 8 hours per day, 5 days per week ) |         ~4.7           |               
 
 # Estimate by product decomposition
 ### 
 |         component name    | Estimated effort (person hours)   |             
 | ----------- | ------------------------------- | 
-|requirement document    | |
-| GUI prototype ||
-|design document ||
-|code ||
-| unit tests ||
-| api tests ||
-| management documents  ||
+|requirement document    |20 |
+| GUI prototype |150|
+|design document |20|
+|code |300|
+| unit tests |150|
+| api tests |150|
+| management documents  |10|
 
 
 
@@ -35,19 +35,23 @@ Consider the EZWallet  project in FUTURE version (as proposed by the team), assu
 ### 
 |         Activity name    | Estimated effort (person hours)   |             
 | ----------- | ------------------------------- | 
-| | |
+|1 Requirement engineering (Requrirement document)|65 |
+|2 Design (Design document)| 65|
+|3 Implementation (Coding + Testing)| 520|
+|4 Integration (Coding + Testing)| 225|
+|3 Management |25 |
 ###
-Insert here Gantt chart with above activities
+![Gantt chart](diagrams/ganttchartV2.png)
 
 # Summary
 
-Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
+Here are the results of the three estimation approaches.
 
 |             | Estimated effort                        |   Estimated duration |          
 | ----------- | ------------------------------- | ---------------|
-| estimate by size ||
-| estimate by product decomposition ||
-| estimate by activity decomposition ||
+| estimate by size |750|~4.7
+| estimate by product decomposition |800|5
+| estimate by activity decomposition |900|~5.6
 
 
 
