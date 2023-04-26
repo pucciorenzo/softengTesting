@@ -4,7 +4,7 @@ Authors:
 
 Date:
 
-Version: 2.1.0
+Version: 2.1.1
 
 
 
@@ -19,6 +19,7 @@ Version: 2.1.0
 ![main settings](guiV2/V2%20main%20page%20settings.png)
 ![change username](guiV2/V2%20change%20username.png)
 ![change pass](guiV2/V2%20change%20password.png)
+![remove ads](guiV2/V2%20main%20page%20remove%20ads.png)
 ![new budget](guiV2/V2%20main%20page%20new%20budget.png)
 ![categories](guiV2/V2%20categories%20.png)
 ![categories ch](guiV2/V2%20categories%20%20change.png)
