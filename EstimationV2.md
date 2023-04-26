@@ -5,7 +5,7 @@ Version: 2
 
 
 # Estimation approach
-In this document we are trying to do a approximate estimation on the duration and effort it would take for our team to complete this project.
+In this document we are trying to do a approximate estimation on the duration and effort it would take for our team to complete this project. 
 # Estimate by size
 ### 
 |             | Estimate                        |             
