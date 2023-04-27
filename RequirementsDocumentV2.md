@@ -456,9 +456,9 @@ Post condition (for all): User is not authorized anymore
 | 3		| User provides current password and new password	|
 | 4		| System verifies provided current password hash matches with stored password hash|
 | 5 	| System hashes the new password and stores it in the account |
-| 6 	| System returns message password change successful |
+| 6 	| System returns "password changed successfully" |
 
-| Scenario 5.2 		| 	Exception		|
+| Scenario 6.2 		| 	Exception		|
 | ------------- 	|-----------------	| 
 |  Precondition     | User does not provide correct current password |
 |  Post condition   | password is not changed |
@@ -470,7 +470,41 @@ Post condition (for all): User is not authorized anymore
 | 5 	| Password hashes do not match |
 | 7 	| System returns "wrong current password" |
 
-### Use case 5: Create a category
+### Use case 7: Change username
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| username is changed |
+|  Nominal Scenario     | User asks to change their username, system starts username change process, user sets new username |
+<!--|  Exceptions     		| User provides wrong password |-->
+
+
+| Scenario 6.1 		| 	Nominal			|
+| ------------- 	|-----------------	| 
+|  Precondition     | User is logged in |
+|  Post condition   | username is changed |
+| Step#	| Description  			|
+| 1     | User asks to change their username |
+| 2     |  System asks new username |
+| 3		| User provides new username |
+| 4		| System  stores new username |
+| 6 	| System returns "username changed successfully" |
+
+<!--
+| Scenario 6.2 		| 	Exception		|
+| ------------- 	|-----------------	| 
+|  Precondition     | User does not provide correct current password |
+|  Post condition   | password is not changed |
+| Step#	| Description  			|
+| 1     | User asks to change their password |
+| 2     |  System asks to provide current password and new password |
+| 3		| User provides current password and new password	|
+| 4		| System verifies provided current password hash matches with stored password hash|
+| 5 	| Password hashes do not match |
+| 7 	| System returns "wrong current password" | 
+-->
+
+### Use case 6: Create a category
 <!--Precondition: User logged in
 *	User asks to create a category
 *	System asks the type
