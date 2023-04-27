@@ -799,7 +799,59 @@ Post condition: Transaction is deleted
 | 10	| System notifies the user of the unsuccessful purchase |
 
 ### Use case 17: Set a budget
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in, no budget is set	|
+|  Post condition     	| A budget is set	|
+|  Nominal Scenario     | User asks to set a budget, system sets it |
 
+| Scenario 17.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | No budget is already set |
+|  Post condition   | a budget is set |
+| Step#	| Description  			|
+| 1     | User asks to set a budget |
+| 2     |  System asks budget amount |
+| 3		| User provides the amount |
+| 4		| System sets the amount as budget |
+| 5 	| System returns "budget added successfully" |
+
+### Use case 18: Edit a budget
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| A budget is already set	|
+|  Post condition     	| New budget is set |
+|  Nominal Scenario     | User asks to edits a budget, system sets new budget |
+
+| Scenario 18.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | A budget is already set |
+|  Post condition   | New budget is set |
+| Step#	| Description  			|
+| 1     | User asks to edit the set budget |
+| 2     |  System asks new budget amount |
+| 3		| User provides the new amount |
+| 4		| System sets the new amount as budget |
+| 5 	| System returns "budget edited successfully" |
+
+### Use case 19: Delete budget
+
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| A budget is already set	|
+|  Post condition     	| Budget is deleted |
+|  Nominal Scenario     | User asks to delete set budget, system deletes it |
+
+| Scenario 18.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | A budget is already set |
+|  Post condition   | budget is deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a set budget |
+| 2     |  System asks to confirm deletion |
+| 3		| User confirms |
+| 4		| System deletes the budget |
+| 5 	| System returns "budget deleted successfully" |
 
 
 # Glossary
