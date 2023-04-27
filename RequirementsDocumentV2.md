@@ -545,7 +545,7 @@ Post condition: Category is created
 | 6 	| System returns "category already exists"|
 
 
-### Use case 6: View categories
+### Use case 9: View categories
 <!--Precondition: User logged in
 *	User asks to view all categories
 *	System provides all existing categories
@@ -555,18 +555,18 @@ Post condition: Category is created
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All categories are displayed	|
 |  Nominal Scenario     | User asks to view all categories, system displays them |
-|  Exceptions     		| User is not authorized |
+<!--|  Exceptions     		| User is not authorized |-->
 
-| Scenario 6.1 		| 	Nominal			|
+| Scenario 9.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All categories are displayed |
 | Step#	| Description  			|
 | 1     | User asks to view all categories|
-| 2     |  System verifies access token |
-| 3		| System returns all categories as type and color	|
+| 2		| System returns all categories as type and color	|
 
-| Scenario 6.2 		| 	Exception			|
+<!--
+| Scenario 9.2 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is not authorized |
 |  Post condition   | No category is displayed |
@@ -575,7 +575,7 @@ Post condition: Category is created
 | 2     |  System verifies access token |
 | 3     |  System finds invalid access token |
 | 4		| System returns error "unauthorized"|
-
+-->
 
 
 ### Use case 7: Create a transaction
