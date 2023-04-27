@@ -183,7 +183,7 @@ Post condition: User is not registered
 | ------------- 		|-------------| 
 |  Precondition     	| User does not have an account 	|
 |  Post condition     	| User has account 		|
-|  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
+|  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. System creates an account using the details provided |
 |  Exceptions     		| User already has an account, user does not verify email |
 
 <!--##### Scenario 1.1 : Nominal -->
@@ -842,7 +842,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| Budget is deleted |
 |  Nominal Scenario     | User asks to delete set budget, system deletes it |
 
-| Scenario 18.1 		| 	Nominal			|
+| Scenario 19.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | A budget is already set |
 |  Post condition   | budget is deleted |
@@ -852,6 +852,54 @@ Post condition: Transaction is deleted
 | 3		| User confirms |
 | 4		| System deletes the budget |
 | 5 	| System returns "budget deleted successfully" |
+
+
+### Use case 20: View statistics
+
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is registered |
+|  Post condition     	| System displays current month's transaction, remaining budget if set, pie-chart of transactions per categories	|
+|  Nominal Scenario     | User logs in or goes to homepage |
+
+| Scenario 20.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | Category does not exist |
+|  Post condition   | Category is created |
+| Step#	| Description  			|
+| 1     | User logs in or user asks to go to homepage |
+| 2     |  System shows homepage with current month's transaction list, remaining budget if set, a pie-chart of transaction amount per categories |
+
+
+| Scenario 20.3		| 	Variant			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in and in their homepage |
+|  Post condition   | user sees statistics in user-defined date range |
+| Step#	| Description  			|
+| 1     | User asks to set range of date to show the statistics for |
+| 2     |  System asks the start data and end date |
+| 3		| User provides the start date and end date |
+| 4		| System displays the transactions and pie-chart of transaction amount per categories in the given data range |
+
+
+### Use case 21: Analyse userbase
+???
+| Actors Involved      	| Admin, Company(Owner)	|
+| ------------- 		|-------------| 
+|  Precondition     	| Company(owner) requests report |
+|  Post condition     	| Company(owner) receives a report and makes managerial decisions |
+|  Nominal Scenario     | Company(owner) asks admin to generate app usage report, admin asks system to retreive user base data, generates reports, submits to company (owner), owner makes managerial decisions  based on report |
+
+| Scenario 21.1		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | Admin is logged in |
+|  Post condition   | Admin generates report |
+| Step#	| Description  			|
+| 1     | Admin queries system to generate statistics related to userbase (rate of growth in new sign up, current freemium conversion rate, average app usage time per customer  ) |
+| 2     |  System retreives queried information |
+| 3		| Admin compiles all the informaton, generates report and submits to company(owner)|
+| 4		|  Company(Owner) analyses the report to make future managerial decisions.|
+
 
 
 # Glossary
