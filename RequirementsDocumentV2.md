@@ -341,8 +341,6 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 2		| System verifies use is logged in |
 | 3		| User is not logged in.
 | 4		| System returns error "unauthorized" |
-| 5		| System displays log in page |
-
 
 ### Use case 4: Log out
 <!--Precondition: User is logged in
@@ -363,42 +361,31 @@ Post condition (for all): User is not authorized anymore
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
-|  Post condition     	| User is logged out and not authorized any more	|
+|  Post condition     	| User is logged out |
 |  Nominal Scenario     | User asks to log out, and system removes authorization and logs user out |
 |  Variants     | User is already logged out. System notifies user logged out. |
-|  Exceptions     		| User does not have account. Wrong email/password combination. |
+<!--|  Exceptions     		| User is not logged in | -->
 
 | Scenario 4.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | User is logged out and not authorized any more |
+|  Post condition   | User is logged out |
 | Step#	| Description  			|
 | 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System uses refresh token to search for the user.	|
-| 4		| System sends empty access and refresh tokens. |
-| 5 	| System clears stored user's refresh token. |
-| 6		| System returns  "logged out"|
+| 2     |  System verifies user is not already logged out |
+| 3		| System removes authorization |
+| 4		| System returns  "logged out successfully"|
 
 
 | Scenario 4.2 		| 	Variant			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account and is logged out |
-|  Post condition   | User is still logged out and not authorized |
+|  Precondition     |User is logged out |
+|  Post condition   | User is still logged out |
 | Step#	| Description  			|
 | 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System finds empty token so user is already logged out and system returns  "logged out"|
-
-| Scenario 4.3 		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User has wrong refresh token |
-|  Post condition   | User not authorized |
-| Step#	| Description  			|
-| 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System uses refresh token to search for the user.	|
-| 4		| System does not find user using the refresh token and returns error "user not found"|
+| 2     |  System verifies user is not already logged out |
+| 3		| User is already logged out|
+| 4		|system returns  "already logged out"|
 
 
 ### Use case 5: Reset Password
