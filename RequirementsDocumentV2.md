@@ -108,7 +108,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 |  &nbsp;&nbsp;&nbsp;&nbsp; FR1.7 	| Change password	|
 |  &nbsp;&nbsp;&nbsp;&nbsp; FR1.8	| Change username	|
 | <b>FR2</b>		| <b>Manage categories</b> | 
-| &nbsp;&nbsp;&nbsp;&nbsp; FR2.1	| Define category	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR2.1	| Create category	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.2	| View categories	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.4	| Edit category	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.3	| Delete category	|
@@ -479,7 +479,7 @@ Post condition (for all): User is not authorized anymore
 <!--|  Exceptions     		| User provides wrong password |-->
 
 
-| Scenario 6.1 		| 	Nominal			|
+| Scenario 7.1 		| 	Nominal			|
 | ------------- 	|-----------------	| 
 |  Precondition     | User is logged in |
 |  Post condition   | username is changed |
@@ -504,7 +504,7 @@ Post condition (for all): User is not authorized anymore
 | 7 	| System returns "wrong current password" | 
 -->
 
-### Use case 6: Create a category
+### Use case 8: Create a category
 <!--Precondition: User logged in
 *	User asks to create a category
 *	System asks the type
@@ -515,38 +515,37 @@ Post condition: Category is created
 -->
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
-|  Precondition     	| User is logged in	|
+|  Precondition     	| User is logged in |
 |  Post condition     	| A category is created	|
 |  Nominal Scenario     | User asks to create a  category, system creates it |
-|  Exceptions     		| User is not authorized |
+|  Exceptions     		| Category already exists |
 
-| Scenario 5.1 		| 	Nominal			|
+| Scenario 8.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is logged in |
+|  Precondition     | Category does not exist |
 |  Post condition   | Category is created |
 | Step#	| Description  			|
 | 1     | User asks to create a category |
-| 2     |  System asks type and color of the category |
-| 3		| User provides type and color	|
-| 4		| System verifies access token |
-| 5		| System creates and stores the category|
-| 6 	| System returns created category|
+| 2     |  System asks name and color of the category |
+| 3		| User provides name and color	|
+| 4		| System verifies a category of same name does not exist |
+| 5		| System stores the category|
+| 6 	| System returns "category created successfully"|
 
-
-| Scenario 5.2		| 	Exception			|
+| Scenario 8.2		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
+|  Precondition     | Category already exists |
 |  Post condition   | Category not created |
 | Step#	| Description  			|
 | 1     | User asks to create a category |
-| 2     |  System asks type and color of the category |
-| 3		| User provides type and color	|
-| 4		| System verifies access token |
-| 5		| System finds empty token and returns error "unauthorized" |
+| 2     |  System asks name and color of the category |
+| 3		| User provides name and color	|
+| 4		| System verifies a category of same name does not exist |
+| 5		| A category of same name exists |
+| 6 	| System returns "category already exists"|
 
 
-
-### Use case 6: View categories
+### Use case 9: View categories
 <!--Precondition: User logged in
 *	User asks to view all categories
 *	System provides all existing categories
@@ -556,30 +555,52 @@ Post condition: Category is created
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All categories are displayed	|
 |  Nominal Scenario     | User asks to view all categories, system displays them |
-|  Exceptions     		| User is not authorized |
+<!--|  Exceptions     		| User is not authorized |-->
 
-| Scenario 6.1 		| 	Nominal			|
+| Scenario 9.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All categories are displayed |
 | Step#	| Description  			|
 | 1     | User asks to view all categories|
-| 2     |  System verifies access token |
-| 3		| System returns all categories as type and color	|
+| 2		| System displays all stored categories	|
 
-| Scenario 6.2 		| 	Exception			|
+### Use case 10: Edit category
+<!--Precondition: User logged in
+*	User asks to view all categories
+*	System provides all existing categories
+-->
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| Category is edited	|
+|  Nominal Scenario     | User asks to edit a category, provides new values, system modifies stored category replacing old values with new values |
+|  Exceptions     		| Category with provided name already exists |
+
+| Scenario 10.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | No category is displayed |
+|  Precondition     | User is logged in |
+|  Post condition   | Category is edited |
 | Step#	| Description  			|
-| 1     | User asks to view all categories|
-| 2     |  System verifies access token |
-| 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 1     | User asks to edit a category|
+| 2		| System asks new values for the category |
+| 3     | System verifies a category with the provided name does not already exist |
+| 4     | System replaces old values in the stored category with the new values |
+| 5     | System returns "Category edited successfully"|
 
-
+| Scenario 10.2		| 	Exception			|
+| ------------- 	|-----------------| 
+|  Precondition     | Category with new name already exist |
+|  Post condition   | Category is not edited |
+| Step#	| Description  			|
+| 1     | User asks to edit a category|
+| 2		| System asks new values for the category |
+| 3     | System verifies a category with the provided name does not already exist |
+| 4     | A category with the provided name already exists |
+| 5     | System returns "category already exists"|
 
 ### Use case 7: Create a transaction
+
 <!--Precondition: User logged in
 *	User asks to create a transaction
 *	System asks the name, amount and type
