@@ -518,32 +518,31 @@ Post condition: Category is created
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A category is created	|
 |  Nominal Scenario     | User asks to create a  category, system creates it |
-|  Exceptions     		| User is not authorized |
+|  Exceptions     		| Category already exists |
 
-| Scenario 5.1 		| 	Nominal			|
+| Scenario 8.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Category is created |
 | Step#	| Description  			|
 | 1     | User asks to create a category |
-| 2     |  System asks type and color of the category |
-| 3		| User provides type and color	|
-| 4		| System verifies access token |
-| 5		| System creates and stores the category|
-| 6 	| System returns created category|
+| 2     |  System asks name and color of the category |
+| 3		| User provides name and color	|
+| 4		| System verifies a category of same name does not exist |
+| 5		| System stores the category|
+| 6 	| System returns "category created successfully"|
 
-
-| Scenario 5.2		| 	Exception			|
+| Scenario 8.2		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
+|  Precondition     | Category already exists |
 |  Post condition   | Category not created |
 | Step#	| Description  			|
 | 1     | User asks to create a category |
-| 2     |  System asks type and color of the category |
-| 3		| User provides type and color	|
-| 4		| System verifies access token |
-| 5		| System finds empty token and returns error "unauthorized" |
-
+| 2     |  System asks name and color of the category |
+| 3		| User provides name and color	|
+| 4		| System verifies a category of same name does not exist |
+| 5		| A category of same name exists |
+| 6 	| System returns "category already exists"|
 
 
 ### Use case 6: View categories
