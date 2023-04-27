@@ -8,8 +8,6 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 | Version number | Change |
 | ----------------- |-----------|
 | 1.0.0 				| same as V1 |
-| 1.1.0             | changed upto use case 1 |
-
 
 # Contents
 
@@ -48,18 +46,16 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
 
 # Stakeholders
-
 | Stakeholder name  			| Description | 
 | ----------------- 			|-----------|
 | User						| tracks their expenses |
 | Project Team 				| develops, tests and maintains app |
 | Company(Owner)			| owns the app, employs and oversees developers, manages finances, takes executive decisions during app development |
-| Admin 					| track app users? |
+| Admin 					| track app usage |
 | Google AdSense			| generates revenue from the app by displaying ads on the website |
+| PayPal Checkout	| payment service provider |
 
 # Context Diagram and interfaces
-
-
 ## Context Diagram
 <!--Define here Context diagram using UML use case diagram -->
 ![Context Diagram](diagrams/ContextDiagramV2.svg)
@@ -75,8 +71,8 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 | Actor 		| Logical Interface 	| Physical Interface  |
 | ------------- |-----------------| ------------------|
 | User, Admin  	|GUI			 		| PC, Smartphone, Tablet |
-| Google AdSense| Internet Link, api		| https://adsense.google.com/start/
-|
+| Google AdSense| Internet link, api		| https://adsense.google.com/start/
+| Paypal Checkout 	| Internet link, api | https://developer.paypal.com/docs/checkout/ |
 
 # Stories and personas
 Persona 1: student, male, 20, low income.
