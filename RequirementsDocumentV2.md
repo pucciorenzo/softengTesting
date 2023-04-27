@@ -183,7 +183,7 @@ Post condition: User is not registered
 |  Precondition     	| User does not have an account 	|
 |  Post condition     	| User has account 		|
 |  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
-|  Exceptions     		| User already has an account |
+|  Exceptions     		| User already has an account, user does not verify email |
 
 <!--##### Scenario 1.1 : Nominal -->
 | Scenario 1.1 		| 	Nominal			|
@@ -419,6 +419,54 @@ Post condition (for all): User is not authorized anymore
 | 4		| System does not find user using the refresh token and returns error "user not found"|
 
 
+### Use case 5: Reset Password
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User does not remember their password	|
+|  Post condition     	| A new password is created	|
+|  Nominal Scenario     | User asks to reset their password, system starts password reset process, user sets new password |
+|  Exceptions     		| User does not have an account, user does not verify email |
+
+| Scenario 5.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Category is created |
+| Step#	| Description  			|
+| 1     | User asks to reset their password |
+| 2     |  System asks to provide email |
+| 3		| User provides email	|
+| 4		| System verifies an account with the provided email exists |
+| 5		| System sends password reset link to the email provided |
+| 6		| User clicks on the reset link |
+| 7 	| System asks new password |
+| 8 	| User provides new password |
+| 9 	| System hashes the password and stores the hashed password in the account |
+| 10 	| System returns message password reset successful |
+
+| Scenario 5.2 		| 	Exception		|
+| ------------- 	|-----------------	| 
+|  Precondition     | User does not provide correct email, email has not been used to create account |
+|  Post condition   | No change, password reset fails |
+| Step#	| Description  			|
+| 1     | User asks to reset their password |
+| 2     |  System asks to provide email |
+| 3		| User provides email	|
+| 4		| System verifies an account with the provided email exists |
+| 5		| System does not find an account
+| 6 	| System returns error user not found |
+
+| Scenario 5.2 		| 	Exception		|
+| ------------- 	|-----------------	| 
+|  Precondition     | User does not provide correct email, account with provided email exists |
+|  Post condition   | No change, password reset fails |
+| Step#	| Description  			|
+| 1     | User asks to reset their password |
+| 2     |  System asks to provide email |
+| 3		| User provides email	|
+| 4		| System verifies an account with the provided email exists |
+| 5		| System sends password reset link to the email provided |
+| 6		| User does not click on the reset link |
+| 7		| The link expires |
 
 ### Use case 5: Create a category
 <!--Precondition: User logged in
