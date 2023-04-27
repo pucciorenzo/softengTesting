@@ -399,34 +399,34 @@ Post condition (for all): User is not authorized anymore
 | Scenario 5.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | Category is created |
+|  Post condition   | New password is created |
 | Step#	| Description  			|
 | 1     | User asks to reset their password |
-| 2     |  System asks to provide email |
+| 2     | System asks to provide email |
 | 3		| User provides email	|
 | 4		| System verifies an account with the provided email exists |
 | 5		| System sends password reset link to the email provided |
 | 6		| User clicks on the reset link |
 | 7 	| System asks new password |
 | 8 	| User provides new password |
-| 9 	| System hashes the password and stores the hashed password in the account |
-| 10 	| System returns message password reset successful |
+| 9 	| System hashes the password and stores the hashed password |
+| 10 	| System returns  "password reset successful" |
 
 | Scenario 5.2 		| 	Exception		|
 | ------------- 	|-----------------	| 
-|  Precondition     | User does not provide correct email, email has not been used to create account |
+|  Precondition     | User provides wrong unregistered email |
 |  Post condition   | No change, password reset fails |
 | Step#	| Description  			|
 | 1     | User asks to reset their password |
 | 2     |  System asks to provide email |
 | 3		| User provides email	|
 | 4		| System verifies an account with the provided email exists |
-| 5		| System does not find an account
-| 6 	| System returns error user not found |
+| 5		| System does not find an account |
+| 6 	| System returns error "user does not exist" |
 
 | Scenario 5.2 		| 	Exception		|
 | ------------- 	|-----------------	| 
-|  Precondition     | User does not provide correct email, account with provided email exists |
+|  Precondition     | User provides wrong but registered email |
 |  Post condition   | No change, password reset fails |
 | Step#	| Description  			|
 | 1     | User asks to reset their password |
@@ -436,7 +436,6 @@ Post condition (for all): User is not authorized anymore
 | 5		| System sends password reset link to the email provided |
 | 6		| User does not click on the reset link |
 | 7		| The link expires |
-
 
 ### Use case 6: Change Password
 | Actors Involved      	| User 			|
