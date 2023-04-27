@@ -33,6 +33,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 		+ [Use case 8: View transactions](#use-case-8-view-transactions)
 		+ [Use case 9: Delete transaction](#use-case-9-delete-transaction)
 		+ [Use case 10: View transactions grouped by categories](#use-case-10-view-transactions-grouped-by-category)
+		+ [Use case 11: Remove ads](#use-case-11-remove-ads)
 
 
 
@@ -682,6 +683,73 @@ Post condition: Transaction is deleted
 | 2     |  System verifies access token |
 | 3     |  System finds invalid access token |
 | 4		| System returns error "unauthorized"|
+
+
+### Use case 11: Remove ads
+<!--Precondition: User logged in
+*	User asks to buy the application
+*	System connects the user to the payment provider
+*	Payment provider approve the transaction
+*	System remove the ads from the user interface
+-->
+| Actors Involved      	| User, PayPal 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User logged in |
+|  Post condition     	| Application purchased, ads removed |
+|  Nominal Scenario     | User asks to buy the application, system connects the user to the payment provider, payment provider approve the transaction, system remove the ads from the user interface |
+| Variant 				| Application already purchased |
+|  Exceptions     		| User is not authorized, payment is not successful |
+
+| Scenario 11.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Application purchased, ads removed |
+| Step#	| Description  			|
+| 1     | User asks to buy the application |
+| 2     | System verifies access token |
+| 3		| System open the pop up to buy the app |
+| 4 	| User selects the payment method |
+| 5 	| System connects the user with the payment provider |
+| 6 	| Payment provider manages the payment process( outside our control ) |
+| 7 	| Payment provider approves the transaction |
+| 8 	| Payment provider returns the control to the application |
+| 9 	| System notifies the user of the successful purchase of the app  |
+| 10 	| System removes the ads from the user interface |
+
+| Scenario 11.2 		| 	Variant			|
+| ------------- 	|-----------------| 
+|  Precondition     | Application already purchased |
+|  Post condition   | No changes |
+| Step#	| Description  			|
+| 1     | User asks to buy the application |
+| 2     | System verifies access token |
+| 3     | System notifies the user that has already bought the app |
+
+| Scenario 11.3 		| 	Exception			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is not authorized |
+|  Post condition   | Application not purchased, ads not removed |
+| Step#	| Description  			|
+| 1     | User asks to buy the application |
+| 2     | System verifies access token |
+| 3     | System finds invalid access token |
+| 4		| System returns error "unauthorized"|
+
+| Scenario 11.4 		| 	Exception			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Application not purchased, ads not removed |
+| Step#	| Description  			|
+| 1     | User asks to buy the application |
+| 2     | System verifies access token |
+| 3		| System open the pop up to buy the app |
+| 4 	| User selects the payment method |
+| 5 	| System connects the user with the payment provider |
+| 6 	| Payment provider manages the payment process( outside our control ) |
+| 7 	| Payment provider don't approves the transaction |
+| 8 	| Payment provider returns the control to the application |
+| 9 	| System notifies the user of the unsuccessful purchase of the app  |
+
 
 
 # Glossary
