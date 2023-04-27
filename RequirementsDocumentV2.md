@@ -118,18 +118,18 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| list all transactions	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.3	| remove transaction	|
 | <b>FR4</b>		| <b>Manage ads</b>|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR5.1	| receive ads 	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR5.2	| show ads 		|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR5.3	| remove ads 	|
-| <b>FR6</b>		| <b>Manage budget</b>|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR6.1	| set budget 	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR6.2	| edit budget	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR6.3	| remove budget	|
-| <b>FR7</b>		| <b>View statistics</b>|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR7.1	| Show current month's remaining budget	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR7.2	| Show current month's transactions 	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR7.3	| Show, for the current month, a pie-chart of total amount of transactions per categories.|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR7.4	| Show, for user provided data range, all transactions and a pie-chart of total amount of transactions per categories in that data range.|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR4.1	| receive ads 	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR4.2	| show ads 		|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR4.3	| remove ads 	|
+| <b>FR5</b>		| <b>Manage budget</b>|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR5.1	| set budget 	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR5.2	| edit budget	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR5.3	| remove budget	|
+| <b>FR6</b>		| <b>View statistics</b>|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR6.1	| Show current month's remaining budget	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR6.2	| Show current month's transactions 	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR6.3	| Show, for the current month, a pie-chart of total amount of transactions per categories.|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR6.4	| Show, for user provided data range, all transactions and a pie-chart of total amount of transactions per categories in that data range.|
 | <b>FR7</b>		| <b>Analyze userbase</b>|
 
 ## Non Functional Requirements
