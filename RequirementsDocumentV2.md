@@ -108,7 +108,7 @@ Persona 3: unemployed, male, 35, no income with little savings.
 |  &nbsp;&nbsp;&nbsp;&nbsp; FR1.7 	| Change password	|
 |  &nbsp;&nbsp;&nbsp;&nbsp; FR1.8	| Change username	|
 | <b>FR2</b>		| <b>Manage categories</b> | 
-| &nbsp;&nbsp;&nbsp;&nbsp; FR2.1	| Define category	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR2.1	| Create category	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.2	| View categories	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.4	| Edit category	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.3	| Delete category	|
