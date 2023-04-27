@@ -300,9 +300,9 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 6		| System returns error "need to register." |
 
 <!--##### Scenario 2.3 : Exception -->
-| Scenario 2.3 		| 	Exception			|
+| Scenario 2.4 		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account, is not logged in and provides either wrong existing email or wrong password |
+|  Precondition     | User has account, is not logged in and provides either wrong but existing email or wrong password |
 |  Post condition   | User is neither logged in nor authorized |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
@@ -467,6 +467,8 @@ Post condition (for all): User is not authorized anymore
 | 5		| System sends password reset link to the email provided |
 | 6		| User does not click on the reset link |
 | 7		| The link expires |
+
+
 
 ### Use case 5: Create a category
 <!--Precondition: User logged in
