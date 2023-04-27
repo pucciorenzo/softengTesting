@@ -515,14 +515,14 @@ Post condition: Category is created
 -->
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
-|  Precondition     	| User is logged in	|
+|  Precondition     	| User is logged in |
 |  Post condition     	| A category is created	|
 |  Nominal Scenario     | User asks to create a  category, system creates it |
 |  Exceptions     		| Category already exists |
 
 | Scenario 8.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is logged in |
+|  Precondition     | Category does not exist |
 |  Post condition   | Category is created |
 | Step#	| Description  			|
 | 1     | User asks to create a category |
