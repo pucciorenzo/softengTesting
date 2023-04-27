@@ -252,46 +252,44 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User has account		|
-|  Post condition     	| User is authorized 	|
+|  Post condition     	| User is logged in 	|
 |  Nominal Scenario     | User enter  email and password to login. System verifies credentials and authorizes user. |
-|  Variants     | User is already logged in and has access token. System notifies user already logged in. |
+|  Variants     | User is already logged in. System notifies user already logged in. |
 |  Exceptions     		| User does not have account. Wrong email or password. |
 
 <!--##### Scenario 2.1 : Nominal -->
 | Scenario 2.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User has account and user is logged out |
-|  Post condition   | User is logged in and authorized |
+|  Post condition   | User is logged in. |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
 | 2    	| System asks email and password |
 | 3    	| User enters email and password  |
 | 4		| System searches corresponding account using provided email |
-| 5		| System verifies user does not already have accessToken |
+| 5		| System verifies user is not already logged in |
 | 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
-  7		| System generates an access token and a refresh token.|
-  8		| System stores the refresh token and returns both refresh token and access token to the user.|
-| 9     | User uses the tokens for later queries to the system. |
+  7		| System authorizes user. |
 
 <!--##### Scenario 2.2 : Nominal -->
 | Scenario 2.2 		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User has account and user is logged in |
-|  Post condition   | User is still logged in and authorized |
+|  Post condition   | User is still logged in|
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
 | 2    	| System asks email and password |
 | 3    	| User enters email and password  |
 | 4		| System searches corresponding account using provided email |
-| 5		| System verifies user does not already have accessToken |
-| 6		| User already has accessToken. |
+| 5		| System verifies user is not already logged in. |
+| 6		| User is already logged in. |
 | 7     | System returns "you are already logged in"|
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User does not have an account or provides wrong unregistered email |
-|  Post condition   | User is neither logged in nor authorized |
+|  Precondition     | User provides unregistered email |
+|  Post condition   | User is not logged in|
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
 | 2    	| System asks email and password |
@@ -300,19 +298,20 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 5		| System does not find account |
 | 6		| System returns error "need to register." |
 
-<!--##### Scenario 2.3 : Exception -->
+<!--##### Scenario 2.4 : Exception -->
 | Scenario 2.4 		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account, is not logged in and provides either wrong but existing email or wrong password |
-|  Post condition   | User is neither logged in nor authorized |
+|  Precondition     | User provides wrong but existing email or wrong password |
+|  Post condition   | User is neither logged in |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
 | 2    	| System asks email and password |
 | 3    	| User enters email and password  |
-| 4		| System searches  corresponding account using provided email |
-| 5		| System verifies user does not already have accessToken |
+| 4		| System searches corresponding account using provided email |
+| 5		| System verifies user is not already logged in |
 | 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
-  7		| Password hashes do not match and system returns error "wrong credentials" |
+  7		| Password hashes do not match
+  | 8	| System returns error "wrong credentials" |
 
 ### Use case 3: View account
 | Actors Involved      	| User 			|
@@ -320,7 +319,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 |  Precondition     	| User is logged in 	|
 |  Post condition     	| User's account information is displayed 		|
 |  Nominal Scenario     | User asks to view his account information and system shows it |
-|  Exceptions     		| User is not logged in. User does not provide his own username. |
+|  Exceptions     		| User is not logged in. |
 
 <!--##### Scenario 3.1 : Nominal -->
 | Scenario 3.1 		| 	Nominal			|
@@ -329,12 +328,8 @@ Post condition  (for all exceptional scenarios): user is not authorized
 |  Post condition   | User's account is displayed |
 | Step#	| Description  			|
 | 1    	| User asks to view his account |
-| 2    	| System asks username |  
-| 3    	| User provides his username |
-| 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds user account using the refresh token. |
-| 6		| System verifies the provided username matches found account's username |
-| 7		| System returns the account information.
+| 2		| System verifies use is logged in |
+| 3		| System returns the account information. |
 
 <!--##### Scenario 3.2 : Exception -->
 | Scenario 3.2 		| 	Exception			|
@@ -343,24 +338,10 @@ Post condition  (for all exceptional scenarios): user is not authorized
 |  Post condition   | User's account is not displayed |
 | Step#	| Description  			|
 | 1    	| User asks to view his account |
-| 2    	| System asks username |  
-| 3    	| User provides his username |
-| 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds empty access token or refresh token.|
-| 6   	| System returns error "unauthorized". |
-
-| Scenario 3.3 		| 	Exception			|
-| ------------- 	|-------------| 
-|  Precondition     | User  |
-|  Post condition   | User's account is displayed |
-| Step#	| Description  			|
-| 1    	| User asks to view his account |
-| 2    	| System asks username |  
-| 3    	| User provides his username |
-| 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds user account using the refresh token. |
-| 6		| System verifies the provided username matches found account's username |
-| 7		| Usernames do not match. System returns error "unauthorized".
+| 2		| System verifies use is logged in |
+| 3		| User is not logged in.
+| 4		| System returns error "unauthorized" |
+| 5		| System displays log in page |
 
 
 ### Use case 4: Log out
