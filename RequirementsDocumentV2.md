@@ -479,7 +479,7 @@ Post condition (for all): User is not authorized anymore
 <!--|  Exceptions     		| User provides wrong password |-->
 
 
-| Scenario 6.1 		| 	Nominal			|
+| Scenario 7.1 		| 	Nominal			|
 | ------------- 	|-----------------	| 
 |  Precondition     | User is logged in |
 |  Post condition   | username is changed |
@@ -504,7 +504,7 @@ Post condition (for all): User is not authorized anymore
 | 7 	| System returns "wrong current password" | 
 -->
 
-### Use case 6: Create a category
+### Use case 8: Create a category
 <!--Precondition: User logged in
 *	User asks to create a category
 *	System asks the type
