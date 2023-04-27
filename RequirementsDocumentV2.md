@@ -654,9 +654,24 @@ Post condition: Transaction is created
 | 5		| System creates and stores the transaction |
 | 6 	| System returns "transaction created successfully" |
 
+### Use case 13: View a transaction
+
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| A transaction is created	|
+|  Nominal Scenario     | User asks to create a  transaction, system creates it |
+
+| Scenario 13.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Transaction is created |
+| Step#	| Description  			|
+| 1     | User asks to view a transaction |
+| 2     |  System displays complete transaction details |
 
 
-### Use case 8: View transactions
+### Use case 14: List all transactions
 <!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
@@ -666,9 +681,8 @@ Post condition: Transaction is created
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All transactions are displayed	|
 |  Nominal Scenario     | User asks to view all transactions, system displays them |
-|  Exceptions     		| User is not authorized |
 
-| Scenario 8.1 		| 	Nominal			|
+| Scenario 13.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | All transactions are displayed |
