@@ -563,22 +563,44 @@ Post condition: Category is created
 |  Post condition   | All categories are displayed |
 | Step#	| Description  			|
 | 1     | User asks to view all categories|
-| 2		| System returns all categories as type and color	|
+| 2		| System displays all stored categories	|
 
-<!--
-| Scenario 9.2 		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | No category is displayed |
-| Step#	| Description  			|
-| 1     | User asks to view all categories|
-| 2     |  System verifies access token |
-| 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+### Use case 10: Edit category
+<!--Precondition: User logged in
+*	User asks to view all categories
+*	System provides all existing categories
 -->
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| Category is edited	|
+|  Nominal Scenario     | User asks to edit a category, provides new values, system modifies stored category replacing old values with new values |
+|  Exceptions     		| Category with provided name already exists |
 
+| Scenario 10.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Category is edited |
+| Step#	| Description  			|
+| 1     | User asks to edit a category|
+| 2		| System asks new values for the category |
+| 3     | System verifies a category with the provided name does not already exist |
+| 4     | System replaces old values in the stored category with the new values |
+| 5     | System returns "Category edited successfully"|
+
+| Scenario 10.2		| 	Exception			|
+| ------------- 	|-----------------| 
+|  Precondition     | Category with new name already exist |
+|  Post condition   | Category is not edited |
+| Step#	| Description  			|
+| 1     | User asks to edit a category|
+| 2		| System asks new values for the category |
+| 3     | System verifies a category with the provided name does not already exist |
+| 4     | A category with the provided name already exists |
+| 5     | System returns "category already exists"|
 
 ### Use case 7: Create a transaction
+
 <!--Precondition: User logged in
 *	User asks to create a transaction
 *	System asks the name, amount and type
