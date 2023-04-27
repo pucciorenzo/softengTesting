@@ -470,6 +470,52 @@ Post condition (for all): User is not authorized anymore
 | 7		| The link expires |
 
 
+### Use case 6: Change Password
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| password is changed |
+|  Nominal Scenario     | User asks to change their password, system starts password change process, user sets new password |
+|  Exceptions     		| User provides wrong current password |
+
+
+| Scenario 6.1 		| 	Nominal			|
+| ------------- 	|-----------------	| 
+|  Precondition     | User is logged in |
+|  Post condition   | password is changed |
+| Step#	| Description  			|
+| 1     | User asks to change their password |
+| 2     |  System asks to provide current password and new password |
+| 3		| User provides current password and new password	|
+| 4		| System retreives the user account and verifies provided current password hash matches with stored password hash|
+| 5 	| System hashes the new password and stores it in the account |
+| 6 	| System returns message password change successful |
+
+| Scenario 5.2 		| 	Exception		|
+| ------------- 	|-----------------	| 
+|  Precondition     | User does not provide correct current email |
+|  Post condition   | No change, password reset fails |
+| Step#	| Description  			|
+| 1     | User asks to reset their password |
+| 2     |  System asks to provide email |
+| 3		| User provides email	|
+| 4		| System verifies an account with the provided email exists |
+| 5		| System does not find an account
+| 6 	| System returns error user not found |
+
+| Scenario 5.2 		| 	Exception		|
+| ------------- 	|-----------------	| 
+|  Precondition     | User does not provide correct email, account with provided email exists |
+|  Post condition   | No change, password reset fails |
+| Step#	| Description  			|
+| 1     | User asks to reset their password |
+| 2     |  System asks to provide email |
+| 3		| User provides email	|
+| 4		| System verifies an account with the provided email exists |
+| 5		| System sends password reset link to the email provided |
+| 6		| User does not click on the reset link |
+| 7		| The link expires |
+
 
 ### Use case 5: Create a category
 <!--Precondition: User logged in
@@ -764,10 +810,3 @@ Post condition: Transaction is deleted
 
 # Deployment Diagram 
 ![DeploymentDiagram](diagrams/DeploymentDiagramV1.svg)
-
-# Software Bugs
-| ID | Type			| Description  	| Refers to FR 	|
-|--|------------|-------------|-------------|	
-| 1  |Security		| No tokens validation, anyone can access if non-empty tokens in cookie 			| All FR |
-| 2  |Security	| No user specific category/transaction separation. Any user can access/modify other user's data | FR 2, 3 |
-| 3  |Functional/Security	| No admin implementation. Any one can view all users | FR 1.3, 1.5 |
