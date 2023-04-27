@@ -740,70 +740,65 @@ Post condition: Transaction is deleted
 | 4		| System does not delete the transaction |
 
 
-### Use case 11: Remove ads
+### Use case 16: Remove ads
 <!--Precondition: User logged in
 *	User asks to buy the application
 *	System connects the user to the payment provider
 *	Payment provider approve the transaction
 *	System remove the ads from the user interface
 -->
-| Actors Involved      	| User, PayPal 			|
+| Actors Involved      	| User, PayPal |
 | ------------- 		|-------------| 
 |  Precondition     	| User logged in |
-|  Post condition     	| Application purchased, ads removed |
-|  Nominal Scenario     | User asks to buy the application, system connects the user to the payment provider, payment provider approve the transaction, system remove the ads from the user interface |
-| Variant 				| Application already purchased |
-|  Exceptions     		| User is not authorized, payment is not successful |
+|  Post condition     	| ads removed |
+|  Nominal Scenario     | User asks to pay to remove ads, system connects the user to the payment provider, payment provider confirms payment, system remove the ads from the user interface |
+| Variant 				| User already made the payment |
+|  Exceptions     		| payment is not successful |
 
-| Scenario 11.1 		| 	Nominal			|
+| Scenario 16.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | Application purchased, ads removed |
+|  Post condition   | ads removed |
 | Step#	| Description  			|
-| 1     | User asks to buy the application |
-| 2     | System verifies access token |
-| 3		| System open the pop up to buy the app |
-| 4 	| User selects the payment method |
-| 5 	| System connects the user with the payment provider |
-| 6 	| Payment provider manages the payment process( outside our control ) |
-| 7 	| Payment provider approves the transaction |
-| 8 	| Payment provider returns the control to the application |
-| 9 	| System notifies the user of the successful purchase of the app  |
-| 10 	| System removes the ads from the user interface |
+| 1     | User asks to pay to remove ads |
+| 2		| System verifies user has not already made the purchase |
+| 3		| System displays the price and asks to confirm the purchase |
+| 4 	| User confirms |
+| 5 	| System directs user to payment service provider |
+| 6 	| Payment provider handles the transaction |
+| 7 	| When transaction is complete, payment provider redirects user back to system  |
+| 8 	| System verifies that the transaction completed successfully and payment was made.
+|9 		| System notifies the user of the successful payment |
+| 10 	| System removes the ads from the user interface for the user |
 
-| Scenario 11.2 		| 	Variant			|
+| Scenario 16.2 		| 	Variant			|
 | ------------- 	|-----------------| 
-|  Precondition     | Application already purchased |
+|  Precondition     | Payment to remove ad already made |
 |  Post condition   | No changes |
 | Step#	| Description  			|
-| 1     | User asks to buy the application |
-| 2     | System verifies access token |
-| 3     | System notifies the user that has already bought the app |
+| 1     | User asks to pay to remove ads |
+| 2		| System verifies user has not already made the payment |
+| 3		| User has already made the payment |
+| 4     | System notifies the user that they have already made the payment |
 
-| Scenario 11.3 		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | Application not purchased, ads not removed |
-| Step#	| Description  			|
-| 1     | User asks to buy the application |
-| 2     | System verifies access token |
-| 3     | System finds invalid access token |
-| 4		| System returns error "unauthorized"|
 
-| Scenario 11.4 		| 	Exception			|
+| Scenario 16.3 		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User is logged in |
-|  Post condition   | Application not purchased, ads not removed |
+|  Precondition     | User does not complete purchase |
+|  Post condition   | ads not removed |
 | Step#	| Description  			|
-| 1     | User asks to buy the application |
-| 2     | System verifies access token |
-| 3		| System open the pop up to buy the app |
-| 4 	| User selects the payment method |
-| 5 	| System connects the user with the payment provider |
-| 6 	| Payment provider manages the payment process( outside our control ) |
-| 7 	| Payment provider don't approves the transaction |
-| 8 	| Payment provider returns the control to the application |
-| 9 	| System notifies the user of the unsuccessful purchase of the app  |
+| 1     | User asks to pay to remove ads |
+| 2		| System verifies user has not already made the purchase |
+| 3		| System displays the price and asks to confirm the purchase |
+| 4 	| User confirms |
+| 5 	| System directs user to payment service provider |
+| 6 	| Payment provider handles the transaction |
+| 7 	| When transaction is complete, payment provider redirects user back to system  |
+| 8 	| System verifies that the transaction completed successfully and payment was made. |
+| 9		| User did not complete the purchase |
+| 10	| System notifies the user of the unsuccessful purchase |
+
+### Use case 17: Set a budget
 
 
 
