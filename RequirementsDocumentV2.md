@@ -566,10 +566,7 @@ Post condition: Category is created
 | 2		| System displays all stored categories	|
 
 ### Use case 10: Edit category
-<!--Precondition: User logged in
-*	User asks to view all categories
-*	System provides all existing categories
--->
+
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
@@ -598,8 +595,42 @@ Post condition: Category is created
 | 3     | System verifies a category with the provided name does not already exist |
 | 4     | A category with the provided name already exists |
 | 5     | System returns "category already exists"|
+ 
 
-### Use case 7: Create a transaction
+
+ ### Use case 11: Delete category
+
+| Actors Involved      	| User 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User is logged in	|
+|  Post condition     	| Category is deleted	|
+|  Nominal Scenario     | User asks to delete a category, system deletes it|
+|  Exceptions     		| At least one transaction belonging to the category exists |
+
+| Scenario 11.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Category is deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a category|
+| 2		| System verifies no transaction belonging to the category exists |
+| 3		| System deletes the category |
+| 4 	| System returns "category deleted" |
+
+
+| Scenario 11.2 		| 	Exception			|
+| ------------- 	|-----------------| 
+|  Precondition     | User is logged in |
+|  Post condition   | Category is not deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a category|
+| 2		| System verifies no transaction belonging to the category exists |
+| 3		| At least one transaction belonging to the category exists. |
+| 4 	| System returns "Cannot delete category" |
+
+
+
+### Use case 11: Create a transaction
 
 <!--Precondition: User logged in
 *	User asks to create a transaction
