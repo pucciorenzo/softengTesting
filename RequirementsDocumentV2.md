@@ -679,27 +679,16 @@ Post condition: Transaction is created
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
-|  Post condition     	| All transactions are displayed	|
+|  Post condition     	| List of all transactions are displayed	|
 |  Nominal Scenario     | User asks to view all transactions, system displays them |
 
 | Scenario 13.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | All transactions are displayed |
+|  Post condition   | List of all transactions are displayed |
 | Step#	| Description  			|
 | 1     | User asks to view all transactions|
-| 2     |  System verifies access token |
-| 3		| System returns all transactions |
-
-| Scenario 8.2 		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | No transaction is displayed |
-| Step#	| Description  			|
-| 1     | User asks to view all transactions|
-| 2     |  System verifies access token |
-| 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 2		| System displays a list of all transactions |
 
 ### Use case  9: Delete transaction
 <!--Precondition: User logged in
