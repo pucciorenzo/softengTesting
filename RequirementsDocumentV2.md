@@ -614,8 +614,10 @@ Post condition: Category is created
 | Step#	| Description  			|
 | 1     | User asks to delete a category|
 | 2		| System verifies no transaction belonging to the category exists |
-| 3		| System deletes the category |
-| 4 	| System returns "category deleted" |
+| 3		| System asks to confirm the deletion |
+| 4  	| User confirms. |
+| 5		| System deletes the category |
+| 6 	| System returns "category deleted" |
 
 
 | Scenario 11.2 		| 	Exception			|
@@ -682,7 +684,7 @@ Post condition: Transaction is created
 |  Post condition     	| List of all transactions are displayed	|
 |  Nominal Scenario     | User asks to view all transactions, system displays them |
 
-| Scenario 13.1 		| 	Nominal			|
+| Scenario 14.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | List of all transactions are displayed |
@@ -690,7 +692,7 @@ Post condition: Transaction is created
 | 1     | User asks to view all transactions|
 | 2		| System displays a list of all transactions |
 
-### Use case  9: Delete transaction
+### Use case  15: Delete transaction
 <!--Precondition: User logged in
 *	User asks to delete a transaction
 *	System asks user to indentify the transaction
@@ -703,60 +705,17 @@ Post condition: Transaction is deleted
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is deleted	|
 |  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
-|  Exceptions     		| User is not authorized |
 
-| Scenario 9.1 		| 	Nominal			|
+| Scenario 12.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is deleted |
 | Step#	| Description  			|
-| 1     | User asks to delete a transaction providing the transaction id |
-| 2		| System verifies access token |
-| 3		| System searches the transaction using id and deletes it|
-| 4 	| System returns deleted transaction|
-
-
-| Scenario 9.2		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | Transaction is not deleted |
-| Step#	| Description  			|
-| 1     | User asks to delete a transaction providing the transaction id |
-| 2		| System verifies access token |
-| 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
-
-
-### Use case 10: View transactions grouped by category
-<!--Precondition: User logged in
-*	User asks to view transactions grouped by category
-*	System shows the transactions grouped by category
--->
-| Actors Involved      	| User 			|
-| ------------- 		|-------------| 
-|  Precondition     	| User is logged in	|
-|  Post condition     	| All transactions grouped by categories are displayed	|
-|  Nominal Scenario     | User asks to view all transactions grouped by categories, system displays them |
-|  Exceptions     		| User is not authorized |
-
-| Scenario 10.1 		| 	Nominal			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is logged in |
-|  Post condition   | All transactions are displayed grouped by categories|
-| Step#	| Description  			|
-| 1     | User asks to view all transactions grouped by categories|
-| 2     |  System verifies access token |
-| 3		| System returns all transactions grouped by categories |
-
-| Scenario 10.2 		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | No transaction is displayed |
-| Step#	| Description  			|
-| 1     | User asks to view all transactions grouped by categories|
-| 2     |  System verifies access token |
-| 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 1     | User asks to delete a transaction |
+| 2     |  System asks to confirm the deletion |
+| 3		| User confirms. |
+| 5		| System deletes the transaction |
+| 6 	| System returns "transaction deleted successfully" |
 
 
 ### Use case 11: Remove ads
