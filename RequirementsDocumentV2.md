@@ -113,12 +113,13 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.3	| Delete category	|
 | <b>FR3</b>		| <b>Manage transactions</b>	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.1	| add transaction		|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| View transactions		|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| View transaction		|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| list all transactions	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.3	| remove transaction	|
-| <b>FR4</b>		| <b>View transactions grouped by category</b>|
-| <b>FR5</b>		| <b>Manage ads</b>|
+| <b>FR4</b>		| <b>Manage ads</b>|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR5.1	| receive ads 	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR5.2	| show ads 		|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR5.3	| remove ads 	|
 | <b>FR6</b>		| <b>Manage budget</b>|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR6.1	| set budget 	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR6.2	| edit budget	|
@@ -130,18 +131,13 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | &nbsp;&nbsp;&nbsp;&nbsp; FR7.4	| Show, for user provided data range, all transactions and a pie-chart of total amount of transactions per categories in that data range.|
 | <b>FR7</b>		| <b>Analyze userbase</b>|
 
-
-
-
-
-
 ## Non Functional Requirements
 <!--
 \<Describe constraints on functional requirements>
 -->
 | ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
 | ------------- |-------------| -----| -----|
-| NFR1 | Usability | no training required, user rating > 4,5/5 | FR:1.1,1.2,1.3,1.4,2,3,4 |
+| NFR1 | Usability | no training required, user rating > 4,5/5, freemium conversion rate 10% | FR:1.1,1.2,1.3,1.4,2,3,4 |
 | NFR2 | Efficiency | < 0.2ms function response time | All FR |
 | NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,1.4,2,3,4 |
 | NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.4,2,3,4 |
