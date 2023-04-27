@@ -113,10 +113,10 @@ Persona 3: unemployed, male, 35, no income with little savings.
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.4	| Edit category	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR2.3	| Delete category	|
 | <b>FR3</b>		| <b>Manage transactions</b>	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR3.1	| add transaction		|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR3.1	| create transaction		|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| View transaction		|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR3.2	| list all transactions	|
-| &nbsp;&nbsp;&nbsp;&nbsp; FR3.3	| remove transaction	|
+| &nbsp;&nbsp;&nbsp;&nbsp; FR3.3	| delete transaction	|
 | <b>FR4</b>		| <b>Manage ads</b>|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR4.1	| receive ads 	|
 | &nbsp;&nbsp;&nbsp;&nbsp; FR4.2	| show ads 		|
@@ -629,8 +629,7 @@ Post condition: Category is created
 | 4 	| System returns "Cannot delete category" |
 
 
-
-### Use case 11: Create a transaction
+### Use case 12: Create a transaction
 
 <!--Precondition: User logged in
 *	User asks to create a transaction
@@ -643,31 +642,18 @@ Post condition: Transaction is created
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is created	|
 |  Nominal Scenario     | User asks to create a  transaction, system creates it |
-|  Exceptions     		| User is not authorized |
 
-| Scenario 7.1 		| 	Nominal			|
+| Scenario 12.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is created |
 | Step#	| Description  			|
 | 1     | User asks to create a transaction |
-| 2     |  System asks name, amount and type of the transaction |
-| 3		| User provides the name, amount and type 	|
-| 4		| System verifies access token |
-| 5		| System creates and stores the transaction|
-| 6 	| System returns created transaction|
+| 2     |  System asks details of the transaction |
+| 3		| User provides the details |
+| 5		| System creates and stores the transaction |
+| 6 	| System returns "transaction created successfully" |
 
-
-| Scenario 7.2		| 	Exception			|
-| ------------- 	|-----------------| 
-|  Precondition     | User is not authorized |
-|  Post condition   | Transaction is not created |
-| Step#	| Description  			|
-| 1     | User asks to create a transaction |
-| 2     |  System asks name, amount and type of the transaction |
-| 3		| User provides the name, amount and type 	|
-| 4		| System verifies access token |
-| 5		| System finds empty token and returns error "unauthorized" |
 
 
 ### Use case 8: View transactions
