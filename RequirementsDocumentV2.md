@@ -913,4 +913,4 @@ Post condition: Transaction is deleted
 ![SystemDesignV1](diagrams/SystemDiagramV1.svg)
 
 # Deployment Diagram 
-![DeploymentDiagram](diagrams/DeploymentDiagramV1.svg)
+![DeploymentDiagram](diagrams/DeploymentDiagramV2.svg)
