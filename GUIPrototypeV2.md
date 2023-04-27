@@ -76,6 +76,7 @@ Version: 2.1.1
 ### New category menu
 ![categories new](guiV2/V2%20categories%20new.png){width=40%}
 ![categories already ex](guiV2/V2%20category%20esists.png){width=40%}
+
 If a category with that name already exists, the system shows an error.
 
 ## Transactions sections
