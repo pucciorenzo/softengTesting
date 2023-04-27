@@ -620,7 +620,19 @@ Post condition: Category is created
 | 6 	| System returns "category deleted" |
 
 
-| Scenario 11.2 		| 	Exception			|
+| Scenario 11.2 		| 	Variant			|
+| ------------- 	|-----------------| 
+|  Precondition     | User cancels deletion |
+|  Post condition   | Transaction is not deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a category |
+| 2		| System verifies no transaction belonging to the category exists |
+| 3     |  System asks to confirm the deletion |
+| 4		| User cancels. |
+| 5		| System does not delete the transaction |
+
+
+| Scenario 11.3 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Category is not deleted |
@@ -706,7 +718,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| A transaction is deleted	|
 |  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
 
-| Scenario 12.1 		| 	Nominal			|
+| Scenario 15.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is deleted |
@@ -714,8 +726,18 @@ Post condition: Transaction is deleted
 | 1     | User asks to delete a transaction |
 | 2     |  System asks to confirm the deletion |
 | 3		| User confirms. |
-| 5		| System deletes the transaction |
-| 6 	| System returns "transaction deleted successfully" |
+| 4		| System deletes the transaction |
+| 5 	| System returns "transaction deleted successfully" |
+
+| Scenario 15.2 		| 	Variant			|
+| ------------- 	|-----------------| 
+|  Precondition     | User cancels deletion |
+|  Post condition   | Transaction is not deleted |
+| Step#	| Description  			|
+| 1     | User asks to delete a transaction |
+| 2     |  System asks to confirm the deletion |
+| 3		| User cancels. |
+| 4		| System does not delete the transaction |
 
 
 ### Use case 11: Remove ads
