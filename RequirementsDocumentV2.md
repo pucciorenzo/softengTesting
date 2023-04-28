@@ -40,11 +40,13 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 		+ [use case 14: list all transactions](#use-case-14-list-all-transactions	)                    
 		+ [use case 15: delete transaction   ](#use-case-15-delete-transaction		)               
 		+ [use case 16: remove ads           ](#use-case-16-remove-ads				)     
-		+ [use case 17: set a budget         ](#use-case-17-set-a-budget			)          
-		+ [use case 18: edit a budget        ](#use-case-18-edit-a-budget			)          
-		+ [use case 19: delete budget        ](#use-case-19-delete-budget			)          
-		+ [use case 20: view statistics      ](#use-case-20-view-statistics			)               
-		+ [use case 21: analyse userbase     ](#use-case-21-analyse-userbase		)          
+		+ [use case 17: show ads           	 ]
+		(#use-case-17-show-ads				  )
+		+ [use case 18: set a budget         ](#use-case-18-set-a-budget			)          
+		+ [use case 19: edit a budget        ](#use-case-19-edit-a-budget			)          
+		+ [use case 20: delete budget        ](#use-case-20-delete-budget			)          
+		+ [use case 21: view statistics      ](#use-case-21-view-statistics			)               
+		+ [use case 22: analyse userbase     ](#use-case-22-analyse-userbase		)          
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
@@ -760,12 +762,12 @@ Post condition: Transaction is deleted
 |  Post condition     	| ads removed |
 |  Nominal Scenario     | User asks to pay to remove ads, system connects the user to the payment provider, payment provider confirms payment, system remove the ads from the user interface |
 | Variant 				| User already made the payment |
-|  Exceptions     		| payment is not successful |
+|  Exceptions     		| Payment is not successful |
 
 | Scenario 16.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | ads removed |
+|  Post condition   | Ads removed |
 | Step#	| Description  			|
 | 1     | User asks to pay to remove ads |
 | 2		| System verifies user has not already made the purchase |
@@ -805,14 +807,48 @@ Post condition: Transaction is deleted
 | 9		| User did not complete the purchase |
 | 10	| System notifies the user of the unsuccessful purchase |
 
-### Use case 17: Set a budget
+
+### Use case 17: Show ads
+<!--Precondition: User logged in
+*  	User view a page
+*	System show the ads on the user interface
+-->
+| Actors Involved      	| User, Google Adsense 			|
+| ------------- 		|-------------| 
+|  Precondition     	| User logged in |
+|  Post condition     	| Ads shown on the user interface |
+|  Nominal Scenario     | User view a page, system show the ads on the user interface |
+|  Variant 				| User already made the payment |
+
+| Scenario 17.1 		| 	Nominal			|
+| ------------- 	|-----------------| 
+|  Precondition     | User logged in |
+|  Post condition   | Ads shown on the user interface |
+| Step#	| Description  			|
+| 1     | User view a page |
+| 2		| System verifies user has not already made the purchas |
+| 3 	| System adds the ads container on the page |
+| 4 	| Google Adsense populate the ads container |
+
+| Scenario 17.2 		| 	Variant			|
+| ------------- 	|-----------------| 
+|  Precondition     | Application already purchased |
+|  Post condition   | No changes |
+| Step#	| Description  			|
+| 1     | User view a page |
+| 2 	| System verifies user has not already made the purchas |
+| 3     | System finds that the app is already purchased |
+| 4     | System doesn't add the ads container on the page |
+
+
+### Use case 18: Set a budget
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in, no budget is set	|
 |  Post condition     	| A budget is set	|
 |  Nominal Scenario     | User asks to set a budget, system sets it |
 
-| Scenario 17.1 		| 	Nominal			|
+| Scenario 18.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | No budget is already set |
 |  Post condition   | a budget is set |
@@ -823,14 +859,14 @@ Post condition: Transaction is deleted
 | 4		| System sets the amount as budget |
 | 5 	| System returns "budget added successfully" |
 
-### Use case 18: Edit a budget
+### Use case 19: Edit a budget
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| A budget is already set	|
 |  Post condition     	| New budget is set |
 |  Nominal Scenario     | User asks to edits a budget, system sets new budget |
 
-| Scenario 18.1 		| 	Nominal			|
+| Scenario 19.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | A budget is already set |
 |  Post condition   | New budget is set |
@@ -841,7 +877,7 @@ Post condition: Transaction is deleted
 | 4		| System sets the new amount as budget |
 | 5 	| System returns "budget edited successfully" |
 
-### Use case 19: Delete budget
+### Use case 20: Delete budget
 
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
@@ -849,7 +885,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| Budget is deleted |
 |  Nominal Scenario     | User asks to delete set budget, system deletes it |
 
-| Scenario 19.1 		| 	Nominal			|
+| Scenario 20.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | A budget is already set |
 |  Post condition   | budget is deleted |
@@ -861,7 +897,7 @@ Post condition: Transaction is deleted
 | 5 	| System returns "budget deleted successfully" |
 
 
-### Use case 20: View statistics
+### Use case 21: View statistics
 
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
@@ -869,7 +905,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| System displays current month's transaction, remaining budget if set, pie-chart of transactions per categories	|
 |  Nominal Scenario     | User logs in or goes to homepage |
 
-| Scenario 20.1 		| 	Nominal			|
+| Scenario 21.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | Category does not exist |
 |  Post condition   | Category is created |
@@ -878,7 +914,7 @@ Post condition: Transaction is deleted
 | 2     |  System shows homepage with current month's transaction list, remaining budget if set, a pie-chart of transaction amount per categories |
 
 
-| Scenario 20.3		| 	Variant			|
+| Scenario 21.2		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in and in their homepage |
 |  Post condition   | user sees statistics in user-defined date range |
@@ -889,7 +925,7 @@ Post condition: Transaction is deleted
 | 4		| System displays the transactions and pie-chart of transaction amount per categories in the given data range |
 
 
-### Use case 21: Analyse userbase
+### Use case 22: Analyse userbase
 ???
 | Actors Involved      	| Admin, Company(Owner)	|
 | ------------- 		|-------------| 
@@ -897,7 +933,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| Company(owner) receives a report and makes managerial decisions |
 |  Nominal Scenario     | Company(owner) asks admin to generate app usage report, admin asks system to retreive user base data, generates reports, submits to company (owner), owner makes managerial decisions  based on report |
 
-| Scenario 21.1		| 	Nominal			|
+| Scenario 22.1		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | Admin is logged in |
 |  Post condition   | Admin generates report |
