@@ -907,10 +907,10 @@ Post condition: Transaction is deleted
 \<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships> 
 \<concepts must be used consistently all over the document, ex in use cases, requirements etc>
 -->
-![GlossaryV1](diagrams/GlossaryV1.svg)
+![Glossary](diagrams/GlossaryV2.svg)
 
 # System Design
-![SystemDesignV1](diagrams/SystemDiagramV1.svg)
+![System Design](diagrams/SystemDiagramV1.svg)
 
 # Deployment Diagram 
-![DeploymentDiagram](diagrams/DeploymentDiagramV2.svg)
+![Deployment Diagram](diagrams/DeploymentDiagramV2.svg)
