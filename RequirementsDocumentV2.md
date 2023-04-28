@@ -8,7 +8,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 | Version number | Change |
 | ----------------- |-----------|
 | 1.0.0 				| same as V1 |
-| 2.0.0 				| same as V1 |
+| 2.0.0 				| V2 |
 
 # Contents
 
@@ -24,42 +24,27 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-		+ [Use case 1: Create account        ](#Use-case-1-Create-account        )          
-		+ [Use case 2: Log in                ](#Use-case-2-Log-in                )               
-		+ [Use case 3: View account          ](#Use-case-3-View-account          )               
-		+ [Use case 4: Log out               ](#Use-case-4-Log-out               )          
-		+ [Use case 5: Reset Password        ](#Use-case-5-Reset-Password        )               
-		+ [Use case 6: Change Password       ](#Use-case-6-Change-Password       )               
-		+ [Use case 7: Change username       ](#Use-case-7-Change-username       )                    
-		+ [Use case 8: Create a category     ](#Use-case-8-Create-a-category     )                    
-		+ [Use case 9: View categories       ](#Use-case-9-View-categories       )                    
-		+ [Use case 10: Edit category        ](#Use-case-10-Edit-category        )                    
-		+ [Use case 11: Delete category      ](#Use-case-11-Delete-category     )                    
-		+ [Use case 12: Create a transaction ](#Use-case-12-Create-a-transaction )               
-		+ [Use case 13: View a transaction   ](#Use-case-13-View-a-transaction   )               
-		+ [Use case 14: List all transactions](#Use-case-14-List-all-transactions)                    
-		+ [Use case 15: Delete transaction   ](#Use-case-15-Delete-transaction  )               
-		+ [Use case 16: Remove ads           ](#Use-case-16-Remove-ads           )     
-		+ [Use case 17: Set a budget         ](#Use-case-17-Set-a-budget         )          
-		+ [Use case 18: Edit a budget        ](#Use-case-18-Edit-a-budget        )          
-		+ [Use case 19: Delete budget        ](#Use-case-19-Delete-budget        )          
-		+ [Use case 20: View statistics      ](#Use-case-20-View-statistics      )               
-		+ [Use case 21: Analyse userbase     ](#Use-case-21-Analyse-userbase     )          
-			
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-
-
-
-
+		+ [use case 1: create account        ](#use-case-1-create-account			)          
+		+ [use case 2: log in                ](#use-case-2-log-in					)               
+		+ [use case 3: view account          ](#use-case-3-view-account				)               
+		+ [use case 4: log out               ](#use-case-4-log-out					)          
+		+ [use case 5: reset password        ](#use-case-5-reset-password			)               
+		+ [use case 6: change password       ](#use-case-6-change-password			)               
+		+ [use case 7: change username       ](#use-case-7-change-username			)                    
+		+ [use case 8: create a category     ](#use-case-8-create-a-category		)                    
+		+ [use case 9: view categories       ](#use-case-9-view-categories			)                    
+		+ [use case 10: edit category        ](#use-case-10-edit-category			)                    
+		+ [use case 11: delete category      ](#use-case-11-delete-category			)		                    
+		+ [use case 12: create a transaction ](#use-case-12-create-a-transaction	)               
+		+ [use case 13: view a transaction   ](#use-case-13-view-a-transaction		)               
+		+ [use case 14: list all transactions](#use-case-14-list-all-transactions	)                    
+		+ [use case 15: delete transaction   ](#use-case-15-delete-transaction		)               
+		+ [use case 16: remove ads           ](#use-case-16-remove-ads				)     
+		+ [use case 17: set a budget         ](#use-case-17-set-a-budget			)          
+		+ [use case 18: edit a budget        ](#use-case-18-edit-a-budget			)          
+		+ [use case 19: delete budget        ](#use-case-19-delete-budget			)          
+		+ [use case 20: view statistics      ](#use-case-20-view-statistics			)               
+		+ [use case 21: analyse userbase     ](#use-case-21-analyse-userbase		)          
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
