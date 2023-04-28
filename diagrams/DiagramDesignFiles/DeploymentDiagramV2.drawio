@@ -1,0 +1,76 @@
+<mxfile host="Electron" modified="2023-04-27T23:47:45.106Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="WVgn16F1VvoQ39MGF-Fe" version="21.2.1" type="device">
+  <diagram name="Page-1" id="c9db0220-8083-56f3-ca83-edcdcd058819">
+    <mxGraphModel dx="1793" dy="1045" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1.5" pageWidth="826" pageHeight="1169" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" style=";html=1;" />
+        <mxCell id="1" style=";html=1;" parent="0" />
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-1" value="PC or smartphone" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;direction=south;size=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="320" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-2" value="&amp;lt;&amp;lt;deploy&amp;gt;&amp;gt;" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="DpDxxJjmYzguWLow-8Xv-3" target="DpDxxJjmYzguWLow-8Xv-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="20" y="530" as="sourcePoint" />
+            <mxPoint x="30" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-3" value="Web EZWallet Client" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
+          <mxGeometry y="305" width="80" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-6" value="+internet link" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="DpDxxJjmYzguWLow-8Xv-1" target="DpDxxJjmYzguWLow-8Xv-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="310" y="360" as="sourcePoint" />
+            <mxPoint x="420" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-7" value="Server Machine" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;direction=south;size=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="320" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-8" value="&amp;lt;&amp;lt;deploy&amp;gt;&amp;gt;" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" source="DpDxxJjmYzguWLow-8Xv-9" parent="1" target="DpDxxJjmYzguWLow-8Xv-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="110" as="sourcePoint" />
+            <mxPoint x="626" y="-30" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-9" value="EZWallet Server" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
+          <mxGeometry x="540" y="140" width="80" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-10" value="Ads Server" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;direction=south;size=10;" vertex="1" parent="1">
+          <mxGeometry x="800" y="440" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-11" value="+internet link" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1" source="DpDxxJjmYzguWLow-8Xv-10" target="DpDxxJjmYzguWLow-8Xv-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="430" as="sourcePoint" />
+            <mxPoint x="480" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-13" value="Payment Server" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;direction=south;size=10;" vertex="1" parent="1">
+          <mxGeometry x="800" y="200" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-14" value="+internet link" style="endArrow=none;html=1;rounded=0;" edge="1" source="DpDxxJjmYzguWLow-8Xv-13" parent="1" target="DpDxxJjmYzguWLow-8Xv-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="554.29" y="320" as="sourcePoint" />
+            <mxPoint x="615.713611111111" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-15" value="Paypal Checkout" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="80" width="80" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-16" value="&amp;lt;&amp;lt;deploy&amp;gt;&amp;gt;" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" source="DpDxxJjmYzguWLow-8Xv-15" parent="1" target="DpDxxJjmYzguWLow-8Xv-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="910.16" y="240" as="sourcePoint" />
+            <mxPoint x="1039.9974193548387" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-17" value="Google AdSense" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="560" width="80" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DpDxxJjmYzguWLow-8Xv-18" value="&amp;lt;&amp;lt;deploy&amp;gt;&amp;gt;" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="DpDxxJjmYzguWLow-8Xv-17" target="DpDxxJjmYzguWLow-8Xv-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="767.16" y="470" as="sourcePoint" />
+            <mxPoint x="830" y="469.32929377350615" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
