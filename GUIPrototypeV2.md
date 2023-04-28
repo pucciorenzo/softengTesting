@@ -1,10 +1,15 @@
 # Graphical User Interface Prototype  - FUTURE
 
-Authors:
+Authors: Cosi Vincenzo, Masetta Dimitri, Muka Ines, Thapa Bipin
 
-Date:
+Date: 04/28/2023
 
-Version: 2.1.1
+Version: V2 - Graphical user interface of EZWallet in FUTURE form (as proposed by the team)
+
+| Version number | Change   |
+| ----- |----------|
+| 2.0.0 | Implemented new features from Requirements Document v2  |
+| 2.1.0 | Menu implemented  | 
 
 # Contents
 

@@ -1,12 +1,20 @@
 # Graphical User Interface Prototype  - CURRENT
 
-Authors:
+Authors: Cosi Vincenzo, Masetta Dimitri, Muka Ines, Thapa Bipin
 
-Date:
+Date: 04/17/2023
 
-Version:
+Version: V1 - Graphical user interface of EZWallet in CURRENT form (as received by teachers)
 
+| Version number | Change   |
+| ----- |----------|
+| 1.0.0 | GUI implemented   |
+| 1.1.0 | Menu implemented  | 
+
+<!--
 \<Report here the GUI that you propose for EZWallet in CURRENT form, as received by teachers. You are free to organize it as you prefer. A suggested presentation matches the Use cases and scenarios defined in the Requirement document. The GUI can be shown as a sequence of graphical files (jpg, png)  >
+-->
+
 
 # Contents
 
