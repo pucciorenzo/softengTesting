@@ -36,15 +36,15 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 		+ [use case 10: edit category       		](#use-case-10-edit-category				)                    
 		+ [use case 11: delete category     		](#use-case-11-delete-category				)		                    
 		+ [use case 12: create a transaction 		](#use-case-12-create-a-transaction			)               
-		+ [use case 13: history of all transactions	](#use-case-14-history-of-all-transactions	)                    
-		+ [use case 14: delete transaction   		](#use-case-15-delete-transaction			)                   
+		+ [use case 13: history of all transactions	](#use-case-13-history-of-all-transactions	)                    
+		+ [use case 14: delete transaction   		](#use-case-14-delete-transaction			)                   
 		+ [use case 15: show ads           	 		](#use-case-15-show-ads			  			)
 		+ [use case 16: remove ads           		](#use-case-16-remove-ads					) 
-		+ [use case 17: set a budget         		](#use-case-18-set-a-budget					)          
-		+ [use case 18: edit a budget        		](#use-case-19-edit-a-budget				)          
-		+ [use case 19: delete budget        		](#use-case-20-delete-budget				)          
-		+ [use case 20: view statistics      		](#use-case-21-view-statistics				)               
-		+ [use case 21: analyse userbase     		](#use-case-22-analyse-userbase				)          
+		+ [use case 17: set a budget         		](#use-case-17-set-a-budget					)          
+		+ [use case 18: edit a budget        		](#use-case-18-edit-a-budget				)          
+		+ [use case 19: delete budget        		](#use-case-29-delete-budget				)          
+		+ [use case 20: view statistics      		](#use-case-20-view-statistics				)               
+		+ [use case 21: analyse userbase     		](#use-case-21-analyse-userbase				)          
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
@@ -221,7 +221,7 @@ Post condition: User is not registered
 | 3    	| User enters username, email, password  |
 | 4		| System checks that a user with provided email does not already exist |
 | 5		| System finds an account with the same email
-| 6		| System returns error message "already registered" |
+| 6		| System returns error message "Already registered" |
 
 <!--##### Scenario 1.3 : Exception -->
 | Scenario 1.3 		| 	Exception			|
@@ -291,7 +291,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 4		| System searches corresponding account using provided email |
 | 5		| System verifies user is not already logged in |
 | 6		| User is already logged in |
-| 7     | System returns "you are already logged in"|
+| 7     | System returns "You are already logged in"|
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
@@ -304,7 +304,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password |
 | 4		| System searches corresponding account using provided email |
 | 5		| System does not find account |
-| 6		| System returns error "need to register." |
+| 6		| System returns error "Need to register." |
 
 <!--##### Scenario 2.4 : Exception -->
 | Scenario 2.4 		| 	Exception			|
@@ -319,7 +319,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 5		| System verifies user is not already logged in |
 | 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
   7		| Password hashes do not match
-  | 8	| System returns error "wrong credentials" |
+  | 8	| System returns error "Wrong credentials" |
 
 ### Use case 3: View account
 | Actors Involved      	| User 			|
@@ -348,7 +348,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 1    	| User asks to view his account |
 | 2		| System verifies user is logged in |
 | 3		| User is not logged in
-| 4		| System returns error "unauthorized" |
+| 4		| System returns error "Unauthorized" |
 
 ### Use case 4: Log out
 <!--Precondition: User is logged in
@@ -382,7 +382,7 @@ Post condition (for all): User is not authorized anymore
 | 1     | User asks to log out |
 | 2     |  System verifies user is not already logged out |
 | 3		| System removes authorization |
-| 4		| System returns  "logged out successfully"|
+| 4		| System returns  "Logged out successfully"|
 
 
 | Scenario 4.2 		| 	Variant			|
@@ -393,7 +393,7 @@ Post condition (for all): User is not authorized anymore
 | 1     | User asks to log out |
 | 2     |  System verifies user is not already logged out |
 | 3		| User is already logged out|
-| 4		|system returns  "already logged out"|
+| 4		|system returns  "Already logged out"|
 
 
 ### Use case 5: Reset Password
@@ -418,7 +418,7 @@ Post condition (for all): User is not authorized anymore
 | 7 	| System asks new password |
 | 8 	| User provides new password |
 | 9 	| System hashes the password and stores the hashed password |
-| 10 	| System returns  "password reset successful" |
+| 10 	| System returns  "Password reset successful" |
 
 | Scenario 5.2 		| 	Exception		|
 | ------------- 	|-----------------	| 
@@ -430,9 +430,9 @@ Post condition (for all): User is not authorized anymore
 | 3		| User provides email	|
 | 4		| System verifies an account with the provided email exists |
 | 5		| System does not find an account |
-| 6 	| System returns error "user does not exist" |
+| 6 	| System returns error "User does not exist" |
 
-| Scenario 5.2 		| 	Exception		|
+| Scenario 5.3 		| 	Exception		|
 | ------------- 	|-----------------	| 
 |  Precondition     | User provides wrong but registered email |
 |  Post condition   | No change, password reset fails |
@@ -464,7 +464,7 @@ Post condition (for all): User is not authorized anymore
 | 3		| User provides current password and new password	|
 | 4		| System verifies provided current password hash matches with stored password hash|
 | 5 	| System hashes the new password and stores it in the account |
-| 6 	| System returns "password changed successfully" |
+| 6 	| System returns "Password changed successfully" |
 
 | Scenario 6.2 		| 	Exception		|
 | ------------- 	|-----------------	| 
@@ -476,7 +476,7 @@ Post condition (for all): User is not authorized anymore
 | 3		| User provides current password and new password	|
 | 4		| System verifies provided current password hash matches with stored password hash|
 | 5 	| Password hashes do not match |
-| 7 	| System returns "wrong current password" |
+| 6 	| System returns "Wrong current password" |
 
 ### Use case 7: Change username
 | Actors Involved      	| User 			|
@@ -496,7 +496,7 @@ Post condition (for all): User is not authorized anymore
 | 2     |  System asks new username |
 | 3		| User provides new username |
 | 4		| System  stores new username |
-| 6 	| System returns "username changed successfully" |
+| 5 	| System returns "Username changed successfully" |
 
 <!--
 | Scenario 6.2 		| 	Exception		|
@@ -538,7 +538,7 @@ Post condition: Category is created
 | 3		| User provides name and color	|
 | 4		| System verifies a category of same name does not exist |
 | 5		| System stores the category|
-| 6 	| System returns "category created successfully"|
+| 6 	| System returns "Category created successfully"|
 
 | Scenario 8.2		| 	Exception			|
 | ------------- 	|-----------------| 
@@ -550,7 +550,7 @@ Post condition: Category is created
 | 3		| User provides name and color	|
 | 4		| System verifies a category of same name does not exist |
 | 5		| A category of same name exists |
-| 6 	| System returns "category already exists"|
+| 6 	| System returns "Category already exists"|
 
 
 ### Use case 9: View categories
@@ -685,7 +685,7 @@ Post condition: Transaction is created
 | 1     | User asks to create a transaction |
 | 2     |  System asks details (name, type, and amount) of the transaction |
 | 3		| User provides the details (name, type, and amount) |
-| 3		| System takes the date from the browser time |
+| 4		| System takes the date from the browser time |
 | 5		| System creates and stores the transaction |
 | 6 	| System returns "Transaction created successfully" |
 
@@ -707,7 +707,7 @@ Post condition: Transaction is created
 | 2     |  System displays complete transaction details |
 -->
 
-### Use case 14: History of all transactions
+### Use case 13: History of all transactions
 <!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
@@ -719,7 +719,7 @@ Post condition: Transaction is created
 |  Nominal Scenario     | User asks to view the history of all transactions. System displays them. |
 |  Variants     		| No transactions are yet created |
 
-| Scenario 14.1 		| 	Nominal			|
+| Scenario 13.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | List of all transactions made is displayed |
@@ -728,7 +728,7 @@ Post condition: Transaction is created
 | 2		| System displays a list of all transactions ever made |
 
 
-| Scenario 14.2		| 	Variant			|
+| Scenario 13.2		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | No transactions are displayed |
@@ -738,7 +738,7 @@ Post condition: Transaction is created
 | 3		| System displays "No transactions created yet"	|
 
 
-### Use case  15: Delete transaction
+### Use case  14: Delete transaction
 <!--Precondition: User logged in
 *	User asks to delete a transaction
 *	System asks user to indentify the transaction
@@ -752,7 +752,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| A transaction is deleted	|
 |  Nominal Scenario     | User asks to delete a  transaction. System deletes it. |
 
-| Scenario 15.1 		| 	Nominal			|
+| Scenario 14.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Transaction is deleted |
@@ -763,7 +763,7 @@ Post condition: Transaction is deleted
 | 4		| System deletes the transaction |
 | 5 	| System returns "Transaction deleted successfully" |
 
-| Scenario 15.2 		| 	Variant			|
+| Scenario 14.2 		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User cancels deletion |
 |  Post condition   | Transaction is not deleted |
@@ -773,7 +773,7 @@ Post condition: Transaction is deleted
 | 3		| User cancels |
 | 4		| System does not delete the transaction |
 
-### Use case 16: Show ads
+### Use case 15: Show ads
 <!--Precondition: User logged in
 *  	User view a page
 *	System show the ads on the user interface
@@ -785,7 +785,7 @@ Post condition: Transaction is deleted
 |  Nominal Scenario     | User view a page. System show the ads on the user interface. |
 |  Variant 				| User already made the payment |
 
-| Scenario 16.1 		| 	Nominal			|
+| Scenario 15.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User logged in |
 |  Post condition   | Ads shown on the user interface |
@@ -795,7 +795,8 @@ Post condition: Transaction is deleted
 | 3 	| System adds the ads container on the page |
 | 4 	| Google Adsense populate the ads container (receiving ads) |
 
-| Scenario 16.2 		| 	Variant			|
+
+| Scenario 15.2 		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | Application already purchased |
 |  Post condition   | No changes in the page|
@@ -805,7 +806,7 @@ Post condition: Transaction is deleted
 | 3     | System finds that the app is already purchased |
 | 4     | System doesn't add the ads container on the page |
 
-### Use case 17: Remove ads
+### Use case 16: Remove ads
 <!--Precondition: User logged in
 *	User asks to buy the application
 *	System connects the user to the payment provider
@@ -820,7 +821,7 @@ Post condition: Transaction is deleted
 | Variants 				| User cancles payment. User already made the payment |
 |  Exceptions     		| Payment is not successful |
 
-| Scenario 17.1 		| 	Nominal			|
+| Scenario 16.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Ads removed |
@@ -836,7 +837,7 @@ Post condition: Transaction is deleted
 |9 		| System notifies the user of the successful payment |
 | 10 	| System removes the ads from the user interface for the user |
 
-| Scenario 17.2		| 	Variant			|
+| Scenario 16.2		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
 |  Post condition   | Ads not removed |
@@ -849,7 +850,7 @@ Post condition: Transaction is deleted
 | 6 	| System does not remove the ads from the user interface for the user|
 
 
-| Scenario 17.2 		| 	Variant			|
+| Scenario 16.3 		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | Payment to remove ad already made |
 |  Post condition   | No changes |
@@ -860,7 +861,7 @@ Post condition: Transaction is deleted
 | 4     | System notifies the user that they have already made the payment |
 
 
-| Scenario 17.3 		| 	Exception			|
+| Scenario 16.4 		| 	Exception			|
 | ------------- 	|-----------------| 
 |  Precondition     | User does not complete purchase |
 |  Post condition   | Ads not removed |
@@ -878,14 +879,14 @@ Post condition: Transaction is deleted
 
 
 
-### Use case 18: Set a budget
+### Use case 17: Set a budget
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in. No budget is set.	|
 |  Post condition     	| A budget is set	|
 |  Nominal Scenario     | User asks to set a budget. System sets it. |
 
-| Scenario 18.1 		| 	Nominal			|
+| Scenario 17.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | No budget is already set |
 |  Post condition   | A budget is set |
@@ -896,14 +897,14 @@ Post condition: Transaction is deleted
 | 4		| System sets the amount as budget |
 | 5 	| System returns "Budget added successfully" |
 
-### Use case 19: Edit a budget
+### Use case 18: Edit a budget
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| A budget is already set	|
 |  Post condition     	| New budget is set |
 |  Nominal Scenario     | User asks to edits a budget. System sets new budget. |
 
-| Scenario 19.1 		| 	Nominal			|
+| Scenario 18.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | A budget is already set |
 |  Post condition   | New budget is set |
@@ -914,7 +915,7 @@ Post condition: Transaction is deleted
 | 4		| System sets the new amount as budget |
 | 5 	| System returns "Budget edited successfully" |
 
-### Use case 20: Delete budget
+### Use case 19: Delete budget
 
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
@@ -923,7 +924,7 @@ Post condition: Transaction is deleted
 |  Nominal Scenario     | User asks to delete set budget. System deletes it |
 |  Variants     | User cancles the deletion of a set budget |
 
-| Scenario 20.1 		| 	Nominal			|
+| Scenario 19.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | A budget is already set |
 |  Post condition   | Budget is not deleted |
@@ -934,7 +935,7 @@ Post condition: Transaction is deleted
 | 4		| System does not delete the budget |
 
 
-### Use case 21: View statistics
+### Use case 20: View statistics
 
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
@@ -942,7 +943,7 @@ Post condition: Transaction is deleted
 |  Post condition     	| System displays current month's transaction. Remaining budget if set. Pie-chart of transactions per categories.	|
 |  Nominal Scenario     | User logs in or goes to homepage |
 
-| Scenario 21.1 		| 	Nominal			|
+| Scenario 20.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User has an account |
 |  Post condition   | System displays current month's transaction. Remaining budget if set. Pie-chart of transactions per categories. |
@@ -951,7 +952,7 @@ Post condition: Transaction is deleted
 | 2     |  System shows homepage with current month's transaction list, remaining budget if set, a pie-chart of transaction amount per categories |
 
 
-| Scenario 21.2		| 	Variant			|
+| Scenario 20.2		| 	Variant			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in and in their homepage |
 |  Post condition   | user sees statistics in user-defined date range |
@@ -962,14 +963,14 @@ Post condition: Transaction is deleted
 | 4		| System displays the transactions and pie-chart of transaction amount per categories in the given data range |
 
 
-### Use case 22: Analyse userbase
+### Use case 21: Analyse userbase
 | Actors Involved      	| Admin, Company(Owner)	|
 | ------------- 		|-------------| 
 |  Precondition     	| Company(owner) requests report |
 |  Post condition     	| Company(owner) receives a report and makes managerial decisions |
 |  Nominal Scenario     | Company(owner) asks admin to generate app usage report. Admin asks system to retreive user base data. generates reports. Submits to company (owner). Owner makes managerial decisions based on report. |
 
-| Scenario 22.1		| 	Nominal			|
+| Scenario 12.1		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | Admin is logged in |
 |  Post condition   | Admin generates report |
