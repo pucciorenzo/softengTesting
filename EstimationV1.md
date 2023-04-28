@@ -10,8 +10,8 @@ In this estimation document we are performing a type of reverse engineering cons
 ### 
 |             | Estimate                        |             
 | ----------- | ------------------------------- |  
-| NC =  Estimated number of classes to be developed   |      9                       |             
-|  A = Estimated average size per class, in LOC       |      80                      | 
+| NC =  Estimated number of modules to be developed   |      9                       |             
+|  A = Estimated average size per module, in LOC       |      80                      | 
 | S = Estimated size of project, in LOC (= NC * A) |           720 |
 | E = Estimated effort, in person hours (here use productivity 10 LOC per person hour)  |            72                          |   
 | C = Estimated cost, in euro (here use 1 person hour cost = 30 euro) | 2160| 
@@ -46,7 +46,7 @@ In this estimation document we are performing a type of reverse engineering cons
 ![Gantt chart](diagrams/ganttchartV1.png)
 # Summary
 
-Report here the results of the three estimation approaches. The  estimates may differ. Discuss here the possible reasons for the difference
+As a result we are presenting a summary with the estimated effort and duration for each estimation approach, by size, by product decomposition, and by activity decompostion. As we can see in the table below, both estimated effort and duration increase respectively for different estimation approaches. This is to be considered a normal behavior with a very easy logical explanation. In the estimation by size we are only considering coding part, while for the two other approaches we are also considering documentation and extra processes, so as a result the estimation by size is the lowest. When we compare estimation by product decomposition and estimation by activity decomposition we have a much smaller gap, since the reference measuring units are much more related and comparable to each other, but estimation by activitiy decomposition yields a higher estimated effort and therefore duration. This is because, in activity decomposition when we calculate person hours for the activity and lay it out in Gantt chart we may add extra hours to complete full working days for the easiness of calculation and representation. Another explanation for these differences in the end estimated effort and duration values is also the tendency to overestimate a bit, since it is easier to overestimate slightly in the requirement engineering phase than to have to allocate extra time and resources at the middle or end of the project. 
 
 |             | Estimated effort                        |   Estimated duration |          
 | ----------- | ------------------------------- | ---------------|
