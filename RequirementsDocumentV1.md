@@ -87,6 +87,7 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 | Actor 		| Logical Interface 	| Physical Interface  |
 | ------------- |-----------------| ------------------|
 | User 		  	|GUI			 		| PC, Smartphone, Tablet |
+| Database Service(MongoDB)				| Internet link, mongoose api | https://mongoosejs.com/docs/index.html |
 
 # Stories and personas
 Persona 1: student, male, 20, low income.
