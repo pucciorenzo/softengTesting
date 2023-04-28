@@ -42,13 +42,12 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 		+ [use case 16: remove ads           		](#use-case-16-remove-ads					) 
 		+ [use case 17: set a budget         		](#use-case-17-set-a-budget					)          
 		+ [use case 18: edit a budget        		](#use-case-18-edit-a-budget				)          
-		+ [use case 19: delete budget        		](#use-case-29-delete-budget				)          
+		+ [use case 19: delete budget        		](#use-case-19-delete-budget				)          
 		+ [use case 20: view statistics      		](#use-case-20-view-statistics				)               
 		+ [use case 21: analyse userbase     		](#use-case-21-analyse-userbase				)          
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
-- [Software Bugs](#software-bugs)
 
 # Informal description
 EZWallet (read EaSy Wallet) is a software application designed to help individuals and families keep track of their expenses. Users can enter and categorize their expenses, allowing them to quickly see where their money is going. They can set a budget and also make use of the statistical analytics to manage their expenses. EZWallet is a powerful tool for those looking to take control of their finances and make informed decisions about their spending.
