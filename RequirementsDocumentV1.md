@@ -189,7 +189,7 @@ Post condition: User is not registered
 | 2    	| System asks username, email, password |
 | 3    	| User enters username, email, password  |
 | 4		| System checks that a user with provided email does not already exist |
-| 5		| System generates hash value from password and stores the username, email and hashed password.
+| 5		| System generates hash value from password and stores the username, email and hashed password|
 
 <!--##### Scenario 1.2 : Exception -->
 | Scenario 1.2 		| 	Exception			|
@@ -201,8 +201,8 @@ Post condition: User is not registered
 | 2    	| System asks username, email, password |
 | 3    	| User enters username, email, password  |
 | 4		| System checks that a user with provided email does not already exist |
-| 5		| System finds an account with the same email.
-| 6		| System returns error message "already registered" |
+| 5		| System finds an account with the same email
+| 6		| System returns error message "Already registered" |
 
 
 <!--## Use case: Login
@@ -243,10 +243,10 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password  |
 | 4		| System searches corresponding account using provided email |
 | 5		| System verifies user does not already have accessToken |
-| 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
-  7		| System generates an access token and a refresh token.|
-  8		| System stores the refresh token and returns both refresh token and access token to the user.|
-| 9     | User uses the tokens for later queries to the system. |
+| 6		| System generates hash from provided password and verifies that it matches with the stored password hash
+  7		| System generates an access token and a refresh token|
+  8		| System stores the refresh token and returns both refresh token and access token to the user|
+| 9     | User uses the tokens for later queries to the system |
 
 <!--##### Scenario 2.2 : Nominal -->
 | Scenario 2.2 		| 	Variant			|
@@ -259,8 +259,8 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password  |
 | 4		| System searches corresponding account using provided email |
 | 5		| System verifies user does not already have accessToken |
-| 6		| User already has accessToken. 
-| 7     | System returns "you are already logged in"|
+| 6		| User already has accessToken| 
+| 7     | System returns "You are already logged in"|
 
 <!--##### Scenario 2.3 : Exception -->
 | Scenario 2.3 		| 	Exception			|
@@ -273,7 +273,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password |
 | 4		| System searches corresponding account using provided email |
 | 5		| System does not find account |
-| 6		| System returns error "need to register." |
+| 6		| System returns error "Need to register" |
 
 <!--##### Scenario 2.4 : Exception -->
 | Scenario 2.4 		| 	Exception			|
@@ -286,15 +286,15 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 3    	| User enters email and password  |
 | 4		| System searches  corresponding account using provided email |
 | 5		| System verifies user does not already have accessToken |
-| 6		| System generates hash from provided password and verifies that it matches with the stored password hash.
-  7		| Password hashes do not match and system returns error "wrong credentials" |
+| 6		| System generates hash from provided password and verifies that it matches with the stored password hash|
+  7		| Password hashes do not match and system returns error "Wrong credentials" |
 
 ### Use case 3: View account
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in 	|
 |  Post condition     	| User's account information is displayed 		|
-|  Nominal Scenario     | User asks to view his account information and system shows it |
+|  Nominal Scenario     | User asks to view his account information. System shows it |
 |  Exceptions     		| User is not logged in. User does not provide his own username. |
 
 <!--##### Scenario 3.1 : Nominal -->
@@ -306,10 +306,10 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 1    	| User asks to view his account |
 | 2    	| System asks username |  
 | 3    	| User provides his username |
-| 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds user account using the refresh token. |
+| 4    	| System verifies user has both access and refresh token |
+| 5    	| System finds user account using the refresh token |
 | 6		| System verifies the provided username matches found account's username |
-| 7		| System returns the account information.
+| 7		| System returns the account information|
 
 <!--##### Scenario 3.2 : Exception -->
 | Scenario 3.2 		| 	Exception			|
@@ -321,8 +321,8 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 2    	| System asks username |  
 | 3    	| User provides his username |
 | 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds empty access token or refresh token.|
-| 6   	| System returns error "unauthorized". |
+| 5    	| System finds empty access token or refresh token|
+| 6   	| System returns error "Unauthorized" |
 
 | Scenario 3.3 		| 	Exception			|
 | ------------- 	|-------------| 
@@ -332,10 +332,10 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 1    	| User asks to view his account |
 | 2    	| System asks username |  
 | 3    	| User provides his username |
-| 4    	| System verifies user has both access and refresh token. |
-| 5    	| System finds user account using the refresh token. |
+| 4    	| System verifies user has both access and refresh token |
+| 5    	| System finds user account using the refresh token |
 | 6		| System verifies the provided username matches found account's username |
-| 7		| Usernames do not match. System returns error "unauthorized".
+| 7		| Usernames do not match. System returns error "Unauthorized"| 
 
 
 ### Use case 4: Log out
@@ -358,7 +358,7 @@ Post condition (for all): User is not authorized anymore
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| User is logged out and not authorized any more	|
-|  Nominal Scenario     | User asks to log out, and system removes authorization and logs user out |
+|  Nominal Scenario     | User asks to log out. System removes authorization and logs user out. |
 |  Variants     | User is already logged out. System notifies user logged out. |
 |  Exceptions     		| User does not have account. Wrong email/password combination. |
 
@@ -368,11 +368,11 @@ Post condition (for all): User is not authorized anymore
 |  Post condition   | User is logged out and not authorized any more |
 | Step#	| Description  			|
 | 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System uses refresh token to search for the user.	|
-| 4		| System sends empty access and refresh tokens. |
-| 5 	| System clears stored user's refresh token. |
-| 6		| System returns  "logged out"|
+| 2     |  System verifies non empty access and refresh tokens |
+| 3		| System uses refresh token to search for the user	|
+| 4		| System sends empty access and refresh tokens |
+| 5 	| System clears stored user's refresh token |
+| 6		| System returns  "Logged out"|
 
 
 | Scenario 4.2 		| 	Variant			|
@@ -381,8 +381,9 @@ Post condition (for all): User is not authorized anymore
 |  Post condition   | User is still logged out and not authorized |
 | Step#	| Description  			|
 | 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System finds empty token so user is already logged out and system returns  "logged out"|
+| 2     |  System verifies non empty access and refresh tokens |
+| 3		| System finds empty token so user is already logged out |
+| 4		| System returns  "Logged out"|
 
 | Scenario 4.3 		| 	Exception			|
 | ------------- 	|-----------------| 
@@ -390,9 +391,9 @@ Post condition (for all): User is not authorized anymore
 |  Post condition   | User not authorized |
 | Step#	| Description  			|
 | 1     | User asks to log out |
-| 2     |  System verifies non empty access and refresh tokens. |
-| 3		| System uses refresh token to search for the user.	|
-| 4		| System does not find user using the refresh token and returns error "user not found"|
+| 2     |  System verifies non empty access and refresh tokens |
+| 3		| System uses refresh token to search for the user	|
+| 4		| System does not find user using the refresh token and returns error "User not found"|
 
 
 
@@ -409,7 +410,7 @@ Post condition: Category is created
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A category is created	|
-|  Nominal Scenario     | User asks to create a  category, system creates it |
+|  Nominal Scenario     | User asks to create a  category. System creates it. |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 5.1 		| 	Nominal			|
@@ -434,7 +435,7 @@ Post condition: Category is created
 | 2     |  System asks type and color of the category |
 | 3		| User provides type and color	|
 | 4		| System verifies access token |
-| 5		| System finds empty token and returns error "unauthorized" |
+| 5		| System finds empty token and returns error "Unauthorized" |
 
 
 
@@ -447,7 +448,7 @@ Post condition: Category is created
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All categories are displayed	|
-|  Nominal Scenario     | User asks to view all categories, system displays them |
+|  Nominal Scenario     | User asks to view all categories. System displays them. |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 6.1 		| 	Nominal			|
@@ -467,7 +468,7 @@ Post condition: Category is created
 | 1     | User asks to view all categories|
 | 2     |  System verifies access token |
 | 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 4		| System returns error "Unauthorized"|
 
 
 
@@ -482,7 +483,7 @@ Post condition: Transaction is created
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is created	|
-|  Nominal Scenario     | User asks to create a  transaction, system creates it |
+|  Nominal Scenario     | User asks to create a  transaction. System creates it |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 7.1 		| 	Nominal			|
@@ -507,7 +508,7 @@ Post condition: Transaction is created
 | 2     |  System asks name, amount and type of the transaction |
 | 3		| User provides the name, amount and type 	|
 | 4		| System verifies access token |
-| 5		| System finds empty token and returns error "unauthorized" |
+| 5		| System finds empty token and returns error "Unauthorized" |
 
 
 ### Use case 8: View transactions
@@ -519,7 +520,7 @@ Post condition: Transaction is created
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All transactions are displayed	|
-|  Nominal Scenario     | User asks to view all transactions, system displays them |
+|  Nominal Scenario     | User asks to view all transactions. System displays them |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 8.1 		| 	Nominal			|
@@ -539,7 +540,7 @@ Post condition: Transaction is created
 | 1     | User asks to view all transactions|
 | 2     |  System verifies access token |
 | 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 4		| System returns error "Unauthorized"|
 
 ### Use case  9: Delete transaction
 <!--Precondition: User logged in
@@ -553,7 +554,7 @@ Post condition: Transaction is deleted
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| A transaction is deleted	|
-|  Nominal Scenario     | User asks to delete a  transaction, system deletes it |
+|  Nominal Scenario     | User asks to delete a  transaction. System deletes it |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 9.1 		| 	Nominal			|
@@ -575,7 +576,7 @@ Post condition: Transaction is deleted
 | 1     | User asks to delete a transaction providing the transaction id |
 | 2		| System verifies access token |
 | 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 4		| System returns error "Unauthorized"|
 
 
 ### Use case 10: View transactions grouped by category
@@ -587,7 +588,7 @@ Post condition: Transaction is deleted
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
 |  Post condition     	| All transactions grouped by categories are displayed	|
-|  Nominal Scenario     | User asks to view all transactions grouped by categories, system displays them |
+|  Nominal Scenario     | User asks to view all transactions grouped by categories. System displays them |
 |  Exceptions     		| User is not authorized |
 
 | Scenario 10.1 		| 	Nominal			|
@@ -607,7 +608,7 @@ Post condition: Transaction is deleted
 | 1     | User asks to view all transactions grouped by categories|
 | 2     |  System verifies access token |
 | 3     |  System finds invalid access token |
-| 4		| System returns error "unauthorized"|
+| 4		| System returns error "Unauthorized"|
 
 
 # Glossary
