@@ -76,11 +76,11 @@ EZWallet (read EaSy Wallet) is a software application designed to help individua
 
 \<GUIs will be described graphically in a separate document>
 -->
-| Actor 		| Logical Interface 	| Physical Interface  |
-| ------------- |-----------------| ------------------|
-| User, Admin  	|GUI			 		| PC, Smartphone, Tablet |
-| Google AdSense| Internet link, api		| https://adsense.google.com/start/
-| Paypal Checkout 	| Internet link, api | https://developer.paypal.com/docs/checkout/ |
+| Actor 			| Logical Interface 	| Physical Interface  |
+| ------------- 	|-----------------		| ------------------|
+| User, Admin  		|GUI			 		| PC, Smartphone, Tablet |
+| Google AdSense	| Internet link, api	| https://adsense.google.com/start/
+| Paypal Checkout 	| Internet link, api	| https://developer.paypal.com/docs/checkout/ |
 
 # Stories and personas
 Persona 1: student, male, 20, low income.
@@ -143,14 +143,14 @@ Persona 3: unemployed, male, 35, no income with little savings.
 <!--
 \<Describe constraints on functional requirements>
 -->
-| ID        | Type (efficiency, reliability, ..)           | Description  | Refers to |
-| ------------- |-------------| -----| -----|
-| NFR1 | Usability | no training required, user rating > 4,5/5, freemium conversion rate 10% | FR:1.1,1.2,1.3,1.4,2,3,4 |
-| NFR2 | Efficiency | < 0.2ms function response time | All FR |
-| NFR3 | Reliability | > 99.99% uptime, < 1hr/year downtime | FR:1.1,1.2,1.3,1.4,2,3,4 |
-| NFR4 | Portability | Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled | FR:1.1,1.2,1.3,1.4,2,3,4 |
-| NFR5 | Security | GDPR, CCPA, ISO/IEC 27000-series compliance | All FR |
-| NFR6 | Maintainability | < 24 hr app migration to different service, < 6 hr recovery after failure | All FR |
+| ID   | Type (efficiency, reliability, ..) 	| Description  | Refers to |
+| ---- |-------------		| -----																		| -----|
+| NFR1 | Usability			| no training required, user rating > 4,5/5, freemium conversion rate 10% 	| FR:1.1,1.2,1.3,1.4,2,3,4 |
+| NFR2 | Efficiency			| < 0.2ms function response time 											| All FR |
+| NFR3 | Reliability		| > 99.99% uptime, < 1hr/year downtime 										| FR:1.1,1.2,1.3,1.4,2,3,4 |
+| NFR4 | Portability		|Latest stable Firefox, Chrome, Edge browsers with JS and cookies enabled 	| FR:1.1,1.2,1.3,1.4,2,3,4 |
+| NFR5 | Security			| GDPR, CCPA, ISO/IEC 27000-series compliance							 	| All FR |
+| NFR6 | Maintainability	| < 24 hr app migration to different service, < 6 hr recovery after failure | All FR |
 
 
 # Use case diagram and use cases
