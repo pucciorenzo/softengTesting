@@ -1,6 +1,6 @@
 # Requirements Document - current EZWallet
 
-Date: 
+Date: 28.04.2023
 
 Version: V1 - description of EZWallet in CURRENT form (as received by teachers)
 
@@ -93,7 +93,7 @@ Persona 1: student, male, 20, low income.
 * Story: Rented a house, needs to keep track of his expenses so he can pays his rent each month.
 
 Persona 2: employee, female, 42, medium income, married with children, providing for the whole family.
-* Story: Since she’s the only one working in the family, she needs to know how family spends money.
+* Story: Since she is the only one working in the family, she needs to know how family spends money.
 
 
 
@@ -115,12 +115,12 @@ Persona 2: employee, female, 42, medium income, married with children, providing
 | + FR1.4 	| Log out 		|
 | + FR1.5 	| Authenticate and authorize	|
 | <b>FR2</b>		| <b>Manage categories</b> | 
-| + FR2.1	| Define category	|
+| + FR2.1	| Create category	|
 | + FR2.2	| View categories	|
 | <b>FR3</b>		| <b>Manage transactions</b>	|
-| + FR3.1	| add transaction		|
+| + FR3.1	| Create transaction		|
 | + FR3.2	| View transactions		|
-| + FR3.3	| remove transaction	|
+| + FR3.3	| Delete transaction	|
 | <b>FR4</b>		| <b>View transactions grouped by category</b>|
 
 
@@ -175,7 +175,7 @@ Post condition: User is not registered
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User does not have an account 	|
-|  Post condition     	| User has account 		|
+|  Post condition     	| User has an account 		|
 |  Nominal Scenario     | User starts registration process. The system asks user their details to create an account. User provides the details which is used by the system to create an account for the user.|
 |  Exceptions     		| User already has an account |
 
@@ -226,7 +226,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 ### Use case 2: Log in
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
-|  Precondition     	| User has account		|
+|  Precondition     	| User has an account		|
 |  Post condition     	| User is authorized 	|
 |  Nominal Scenario     | User enter  email and password to login. System verifies credentials and authorizes user. |
 |  Variants     | User is already logged in and has access token. System notifies user already logged in. |
@@ -235,7 +235,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 <!--##### Scenario 2.1 : Nominal -->
 | Scenario 2.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account and user is logged out |
+|  Precondition     | User has an account and user is logged out |
 |  Post condition   | User is logged in and authorized |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
@@ -251,7 +251,7 @@ Post condition  (for all exceptional scenarios): user is not authorized
 <!--##### Scenario 2.2 : Nominal -->
 | Scenario 2.2 		| 	Variant			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account and user is logged in |
+|  Precondition     | User has an account and user is logged in |
 |  Post condition   | User is still logged in and authorized |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
@@ -275,10 +275,10 @@ Post condition  (for all exceptional scenarios): user is not authorized
 | 5		| System does not find account |
 | 6		| System returns error "need to register." |
 
-<!--##### Scenario 2.3 : Exception -->
-| Scenario 2.3 		| 	Exception			|
+<!--##### Scenario 2.4 : Exception -->
+| Scenario 2.4 		| 	Exception			|
 | ------------- 	|-----------------| 
-|  Precondition     | User has account, is not logged in and provides either wrong existing email or wrong password |
+|  Precondition     | User has an account, is not logged in and provides either wrong existing email or wrong password |
 |  Post condition   | User is neither logged in nor authorized |
 | Step#	| Description  			|
 | 1    	| User asks to log in |  
@@ -326,8 +326,8 @@ Post condition  (for all exceptional scenarios): user is not authorized
 
 | Scenario 3.3 		| 	Exception			|
 | ------------- 	|-------------| 
-|  Precondition     | User  |
-|  Post condition   | User's account is displayed |
+|  Precondition     | User is logged in |
+|  Post condition   | User's account is not displayed |
 | Step#	| Description  			|
 | 1    	| User asks to view his account |
 | 2    	| System asks username |  
