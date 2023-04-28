@@ -17,9 +17,10 @@ Version: 2.1.1
     + [password reset page](#password-reset-page)
 - [Main page section](#main-page-section)
     + [main page](#main-page)
+    + [set new budget](#set-new-budget)
+    + [show statistics for a range of dates](#show-statistics-for-a-range-of-dates)
     + [settings menu](#settings-menu)
     + [remove ads](#remove-ads)
-    + [set new budget](#set-new-budget)
 - [Change username](#change-username)
 - [Change password](#change-password)
 - [Categories section](#categories-section)
@@ -53,12 +54,17 @@ Version: 2.1.1
 ## Main page section
 ### Main page
 ![main](guiV2/V2%20main%20page.png){width=40%}
+### Set new budget
+![new budget](guiV2/V2%20main%20page%20new%20budget.png){width=40%}
+![new budget set](guiV2/V2%20main%20page%20budget%20set.png){width=40%}
+### Show statistics for a range of dates
+![select range](guiV2/V2%20main%20page%20date%20picker.png)
+![show range](guiV2/V2%20main%20page%20range.png)
 ### Settings menu
 ![main settings](guiV2/V2%20main%20page%20settings.png){width=40%}
 ### Remove ads
 ![remove ads](guiV2/V2%20main%20page%20remove%20ads.png){width=40%}
-### Set new budget
-![new budget](guiV2/V2%20main%20page%20new%20budget.png){width=40%}
+
 
 ## Change username
 ![change username](guiV2/V2%20change%20username.png){width=40%}

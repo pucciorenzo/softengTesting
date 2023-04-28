@@ -95,9 +95,6 @@ Persona 1: student, male, 20, low income.
 Persona 2: employee, female, 42, medium income, married with children, providing for the whole family.
 * Story: Since she’s the only one working in the family, she needs to know how family spends money.
 
-Persona 3: unemployed, male, 35, no income with little savings.
-* Story: Needs to keep track of his expenses and which are the categories where he spends too much.
-
 
 
 # Functional and non functional requirements

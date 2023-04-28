@@ -24,28 +24,27 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-		+ [use case 1: create account        ](#use-case-1-create-account			)          
-		+ [use case 2: log in                ](#use-case-2-log-in					)               
-		+ [use case 3: view account          ](#use-case-3-view-account				)               
-		+ [use case 4: log out               ](#use-case-4-log-out					)          
-		+ [use case 5: reset password        ](#use-case-5-reset-password			)               
-		+ [use case 6: change password       ](#use-case-6-change-password			)               
-		+ [use case 7: change username       ](#use-case-7-change-username			)                    
-		+ [use case 8: create a category     ](#use-case-8-create-a-category		)                    
-		+ [use case 9: view categories       ](#use-case-9-view-categories			)                    
-		+ [use case 10: edit category        ](#use-case-10-edit-category			)                    
-		+ [use case 11: delete category      ](#use-case-11-delete-category			)		                    
-		+ [use case 12: create a transaction ](#use-case-12-create-a-transaction	)               
-		+ [use case 13: view a transaction   ](#use-case-13-view-a-transaction		)               
-		+ [use case 14: list all transactions](#use-case-14-list-all-transactions	)                    
-		+ [use case 15: delete transaction   ](#use-case-15-delete-transaction		)               
-		+ [use case 16: remove ads           ](#use-case-16-remove-ads				)     
-		+ [use case 17: show ads           	 ](#use-case-17-show-ads				  )
-		+ [use case 18: set a budget         ](#use-case-18-set-a-budget			)          
-		+ [use case 19: edit a budget        ](#use-case-19-edit-a-budget			)          
-		+ [use case 20: delete budget        ](#use-case-20-delete-budget			)          
-		+ [use case 21: view statistics      ](#use-case-21-view-statistics			)               
-		+ [use case 22: analyse userbase     ](#use-case-22-analyse-userbase		)          
+		+ [use case 1: create account     	   		](#use-case-1-create-account				)          
+		+ [use case 2: log in             	   		](#use-case-2-log-in						)               
+		+ [use case 3: view account            		](#use-case-3-view-account					)               
+		+ [use case 4: log out            	  	    ](#use-case-4-log-out						)          
+		+ [use case 5: reset password     	  	 	](#use-case-5-reset-password				)               
+		+ [use case 6: change password      	  	](#use-case-6-change-password				)               
+		+ [use case 7: change username      		](#use-case-7-change-username				)                    
+		+ [use case 8: create a category    		](#use-case-8-create-a-category				)                    
+		+ [use case 9: view categories      		](#use-case-9-view-categories				)                    
+		+ [use case 10: edit category       		](#use-case-10-edit-category				)                    
+		+ [use case 11: delete category     		](#use-case-11-delete-category				)		                    
+		+ [use case 12: create a transaction 		](#use-case-12-create-a-transaction			)               
+		+ [use case 13: history of all transactions	](#use-case-14-history-of-all-transactions	)                    
+		+ [use case 14: delete transaction   		](#use-case-15-delete-transaction			)               
+		+ [use case 15: remove ads           		](#use-case-16-remove-ads					)     
+		+ [use case 16: show ads           	 		](#use-case-17-show-ads			  			)
+		+ [use case 17: set a budget         		](#use-case-18-set-a-budget					)          
+		+ [use case 18: edit a budget        		](#use-case-19-edit-a-budget				)          
+		+ [use case 19: delete budget        		](#use-case-20-delete-budget				)          
+		+ [use case 20: view statistics      		](#use-case-21-view-statistics				)               
+		+ [use case 21: analyse userbase     		](#use-case-22-analyse-userbase				)          
 - [Glossary](#glossary)
 - [System design](#system-design)
 - [Deployment diagram](#deployment-diagram)
@@ -91,7 +90,7 @@ Persona 2: employee, female, 42, medium income, married with children, providing
 * Story: Since she’s the only one working in the family, she needs to know how family spends money.
 
 Persona 3: unemployed, male, 35, no income with little savings.
-* Story: Needs to keep track of his expenses and which are the categories where he spends too much.
+* Story: Needs to adhere to a monthly budget and needs to know if he spends too much at certain times on non-essential categories.
 
 
 
@@ -676,6 +675,7 @@ Post condition: Transaction is created
 | 5		| System creates and stores the transaction |
 | 6 	| System returns "transaction created successfully" |
 
+<!--
 ### Use case 13: View a transaction
 
 | Actors Involved      	| User 			|
@@ -691,9 +691,9 @@ Post condition: Transaction is created
 | Step#	| Description  			|
 | 1     | User asks to view a transaction |
 | 2     |  System displays complete transaction details |
+-->
 
-
-### Use case 14: List all transactions
+### Use case 14: History of all transactions
 <!--Precondition: User logged in
 *	User asks to view all transactions
 *	System provides all existing transactions
@@ -701,16 +701,16 @@ Post condition: Transaction is created
 | Actors Involved      	| User 			|
 | ------------- 		|-------------| 
 |  Precondition     	| User is logged in	|
-|  Post condition     	| List of all transactions are displayed	|
-|  Nominal Scenario     | User asks to view all transactions, system displays them |
+|  Post condition     	| List of all transactions made is displayed	|
+|  Nominal Scenario     | User asks to view the history of all transactions, system displays them |
 
 | Scenario 14.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
 |  Precondition     | User is logged in |
-|  Post condition   | List of all transactions are displayed |
+|  Post condition   | List of all transactions made is displayed |
 | Step#	| Description  			|
-| 1     | User asks to view all transactions|
-| 2		| System displays a list of all transactions |
+| 1     | User asks to view the history of all transactions|
+| 2		| System displays a list of all transactions ever made |
 
 ### Use case  15: Delete transaction
 <!--Precondition: User logged in
@@ -906,8 +906,8 @@ Post condition: Transaction is deleted
 
 | Scenario 21.1 		| 	Nominal			|
 | ------------- 	|-----------------| 
-|  Precondition     | Category does not exist |
-|  Post condition   | Category is created |
+|  Precondition     | User is registered |
+|  Post condition   | System displays current month's transaction, remaining budget if set, pie-chart of transactions per categories |
 | Step#	| Description  			|
 | 1     | User logs in or user asks to go to homepage |
 | 2     |  System shows homepage with current month's transaction list, remaining budget if set, a pie-chart of transaction amount per categories |
