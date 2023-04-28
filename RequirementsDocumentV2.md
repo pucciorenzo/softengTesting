@@ -8,6 +8,7 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 | Version number | Change |
 | ----------------- |-----------|
 | 1.0.0 				| same as V1 |
+| 2.0.0 				| same as V1 |
 
 # Contents
 
@@ -23,17 +24,38 @@ Version: V2 - description of EZWallet in FUTURE form (as proposed by the team)
 - [Use case diagram and use cases](#use-case-diagram-and-use-cases)
 	+ [Use case diagram](#use-case-diagram)
 	+ [Use cases](#use-cases)
-		+ [Use case 1: Create account](#use-case-1-create-account)
-		+ [Use case 2: Log in](#use-case-2-log-in)
-		+ [Use case 3: View account](#use-case-3-view-account)
-		+ [Use case 4: Log out](#use-case-4-log-out)
-		+ [Use case 5: Create category](#use-case-5-create-a-category)
-		+ [Use case 6: View categories](#use-case-6-view-categories)
-		+ [Use case 7: Create transaction](#use-case-7-create-a-transaction)
-		+ [Use case 8: View transactions](#use-case-8-view-transactions)
-		+ [Use case 9: Delete transaction](#use-case-9-delete-transaction)
-		+ [Use case 10: View transactions grouped by categories](#use-case-10-view-transactions-grouped-by-category)
-		+ [Use case 11: Remove ads](#use-case-11-remove-ads)
+		+ [Use case 1: Create account        ](#Use-case-1-Create-account        )          
+		+ [Use case 2: Log in                ](#Use-case-2-Log-in                )               
+		+ [Use case 3: View account          ](#Use-case-3-View-account          )               
+		+ [Use case 4: Log out               ](#Use-case-4-Log-out               )          
+		+ [Use case 5: Reset Password        ](#Use-case-5-Reset-Password        )               
+		+ [Use case 6: Change Password       ](#Use-case-6-Change-Password       )               
+		+ [Use case 7: Change username       ](#Use-case-7-Change-username       )                    
+		+ [Use case 8: Create a category     ](#Use-case-8-Create-a-category     )                    
+		+ [Use case 9: View categories       ](#Use-case-9-View-categories       )                    
+		+ [Use case 10: Edit category        ](#Use-case-10-Edit-category        )                    
+		+ [Use case 11: Delete category      ](#Use-case-11-Delete-category     )                    
+		+ [Use case 12: Create a transaction ](#Use-case-12-Create-a-transaction )               
+		+ [Use case 13: View a transaction   ](#Use-case-13-View-a-transaction   )               
+		+ [Use case 14: List all transactions](#Use-case-14-List-all-transactions)                    
+		+ [Use case 15: Delete transaction   ](#Use-case-15-Delete-transaction  )               
+		+ [Use case 16: Remove ads           ](#Use-case-16-Remove-ads           )     
+		+ [Use case 17: Set a budget         ](#Use-case-17-Set-a-budget         )          
+		+ [Use case 18: Edit a budget        ](#Use-case-18-Edit-a-budget        )          
+		+ [Use case 19: Delete budget        ](#Use-case-19-Delete-budget        )          
+		+ [Use case 20: View statistics      ](#Use-case-20-View-statistics      )               
+		+ [Use case 21: Analyse userbase     ](#Use-case-21-Analyse-userbase     )          
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 
 
