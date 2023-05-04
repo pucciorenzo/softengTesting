@@ -90,8 +90,8 @@ export const createTransaction = async (req, res) => {
         if (!cookie.accessToken) {
             return res.status(401).json({ message: "Unauthorized" }) // unauthorized
         }
-        const { name, amount, type } = req.body;
-        const new_transactions = new transactions({ name, amount, type });
+        const { username, amount, type } = req.body;
+        const new_transactions = new transactions({ username, amount, type });
         new_transactions.save()
             .then(data => res.json(data))
             .catch(err => { throw err })
