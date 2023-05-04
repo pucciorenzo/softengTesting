@@ -131,6 +131,8 @@ Version: V2 - description of EZWallet in FUTURE form
 
 ![GlossaryV2](images/GlossaryV2.png)
 
+Users can only be members of a single group.
+
 # System Design
 
 There is only one component in the system. A client would be needed, but it is not available in V2.
