@@ -57,35 +57,29 @@ Version: V2 - description of EZWallet in FUTURE form
 | FR11 | register |  create a new user |
 | FR12| login |  authorize access for a given user |
 | FR13| logout | stop authorization for a given user|
-| FR14 | registerAdmin | ??? |
+| FR14 | registerAdmin | create a new Admin |
 | FR15 | getUsers | return all users |
 | FR16 | getUser | return info about a specific user |
 | FR17 | deleteUser | cancel a user |
 | FR2 | Manage groups | ------------- |
-| FR21 | create group | create a new group |
+| FR21 | createGroup | create a new group |
 | FR22| getGroups | return all groups |
 | FR23| getGroup | return info about a specific group |
-| FR24| addToGroup | add a given user to a given group |
-| FR25| insertInGroup | add many users to a given group |
-| FR26| removeFromGroup | ???? |
-| FR27 | pullFromGroup | ? |
-| FR28| removeGroup | cancel a group, users members of the group remain unchanged |
+| FR24| addToGroup | add many users to a given group |
+| FR26| removeFromGroup | remove many users from a given group |
+| FR28| deleteGroup | cancel a group, users members of the group remain unchanged |
 |  FR3   |  Manage  transactions| -------------|
-|FR301| create transaction| create a new transaction|
-|FR302| getAllTransactions | return all transactions (by all users)|
-| FR303| getTransactionsByUser  | return transactions of a given user|
-| FR304| getTransactionsByUserByCategory| return transactions of a given user and a given category|
-| FR305| getTransactionsByGroup | return all transaction of all users of a given group|
-| FR306| getTransactionsByGroupByCategory | return all transaction of all users of a given group, filtered by a given category|
-| FR307| getUserTransactions |  ??? getTransactionsByUser |
-| FR308| getUserTransactionsByCategory | ?? getTransactionsByUserByCategory|
-| FR309| getGroupTransactions | ???getTransactionsByGroup |
-| FR310 | getGroupTransactionsByCategory |   ???getTransactionsByGroupByCategory|
-| FR311| deleteTransaction | delete a given transaction|
-| FR312| deleteTransactions | delete all transactions|
+|FR31| createTransaction| create a new transaction|
+|FR32| getAllTransactions | return all transactions (by all users)|
+| FR33| getTransactionsByUser  | return transactions of a given user. transactions may be filtered by date, by period, by max / min amount|
+| FR34| getTransactionsByUserByCategory| return transactions of a given user and a given category|
+| FR35| getTransactionsByGroup | return all transactions of all users of a given group|
+| FR36| getTransactionsByGroupByCategory | return all transactions of all users of a given group, filtered by a given category|
+| FR37| deleteTransaction | delete a given transaction|
+| FR38| deleteTransactions | delete many transactions|
 |  FR4  |  Manage categories | -------------|
-| FR41| create category | create a new category|
-| FR42| update category | modify existing category|
+| FR41| createCategory | create a new category|
+| FR42| updateCategory | modify existing category|
 | FR43| deleteCategory | delete a given category|
 | FR44 | getCategories | list all categories|
 
@@ -95,15 +89,32 @@ Version: V2 - description of EZWallet in FUTURE form
 
 ## Access rights
 | Function        | User  | Admin |
-| :------------- |:-------------|:---|
-| register |||
-| login |||
-| logout |||
-| registerAdmin |||
-| getUsers |||
-| getUser |||
-| deleteUser |||
-| ... |||
+| :------------- |:-------------:|:---:|
+| register |X|X|
+| login |X|X|
+| logout |X|X|
+| registerAdmin ||X|
+| getUsers ||X|
+| getUser |X (only his/her information)|X (any user)|
+| deleteUser ||X|
+| createGroup | X | X |
+| getGroups|  | X |
+| getGroup| X (only own group) | X (any group) |
+| addToGroup| X (only own group) | X (any group) |
+| removeFromGroup|X (only own group) | X (any group) |
+| deleteGroup| | X (any group) |
+|createTransaction| X| X|
+|getAllTransactions|  | X|
+| getTransactionsByUser| X (only his/her transactions)  | X (any user's transactions)|
+| getTransactionsByUserByCategory|  X (only his/her transactions)  | X (any user's transactions)|
+| getTransactionsByGroup|   X (only own group's transactions)  | X (any group's transactions)|
+| getTransactionsByGroupByCategory|   X (only own group's transactions)  | X (any group's transactions)|
+| deleteTransaction| X | X|
+| deleteTransactions|  | X|
+| createCategory|  | X|
+| updateCategory|  | X|
+| deleteCategory|  | X|
+| getCategories | X | X|
 
 
 
