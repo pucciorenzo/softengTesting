@@ -89,5 +89,6 @@ ezwallet
 
 Each `index.html` file opens an HTML page where it is possible to view the detailed report of the code coverage, showing for each file the lines covered by test cases and the lines that are still missing. The image below shows an example based on the V1 test cases.
 ![coverage_V1](images/coverage_V1.png)
+
 The files `users.unit.test.js` and `users.integration.test.js` contain two examples of how to set up test cases for the respective type; keep in mind that they refer to a function whose implementation is not complete for V2's requirement, and will have to be changed as a consequence after the function has been implemented correctly.
 The Gitlab CI will not distinguish between unit and integration testing, as it will execute `npm run test:coverage` and execute all test files together; moreover, if there is at least one failing test case among all the test files, the CI test job will end with failure.
