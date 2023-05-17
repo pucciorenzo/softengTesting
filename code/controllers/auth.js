@@ -15,6 +15,13 @@ export const register = async (req, res) => {
         const { username, email, password } = req.body;
         const existingUser = await User.findOne({ email: req.body.email });
         if (existingUser) return res.status(400).json({ message: "you are already registered" });
+
+        //--//
+        const existingUsername = await User.findOne({ username: req.body.username });
+        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        // validate username and password here?
+        //--//
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
             username,
@@ -36,9 +43,29 @@ export const register = async (req, res) => {
  */
 export const registerAdmin = async (req, res) => {
     try {
-        const { username, email, password } = req.body
+        const { username, email, password } = req.body;
+
+        //--//
+        const hasAdminRights = 1; //await Admin.findOne({ email: req.body.email });
+        if (!hasAdminRights) return res.status(400).json({ message: "you cannot register as admin" });
+        //--//
+
         const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) return res.status(400).json({ message: "you are already registered" });
+
+        //--// if (existingUser) return res.status(400).json({ message: "you are already registered" });
+        if (existingUser) {
+            if (existingUser.role == "Admin") return res.status(400).json({ message: "you are already registered" });
+            else {
+                existingUser.role = "Admin";
+                await existingUser.save();
+                return res.status(200).json('admin added succesfully');
+            }
+        }
+        const existingUsername = await User.findOne({ username: req.body.username });
+        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        // validate username and password here?
+        //--//
+
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
             username,
@@ -50,7 +77,6 @@ export const registerAdmin = async (req, res) => {
     } catch (err) {
         res.status(500).json(err);
     }
-
 }
 
 /**
@@ -62,10 +88,10 @@ export const registerAdmin = async (req, res) => {
     - error 400 is returned if the supplied password does not match with the one in the database
  */
 export const login = async (req, res) => {
-    const { email, password } = req.body
-    const cookie = req.cookies
-    const existingUser = await User.findOne({ email: email })
-    if (!existingUser) return res.status(400).json('please you need to register')
+    const { email, password } = req.body;
+    const cookie = req.cookies;
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) return res.status(400).json('please you need to register');
     try {
         const match = await bcrypt.compare(password, existingUser.password)
         if (!match) return res.status(400).json('wrong credentials')
