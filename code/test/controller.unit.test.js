@@ -55,11 +55,20 @@ describe(
                 jest.spyOn(categories.prototype, 'save').mockImplementation(() => { throw new Error("Could not save") });
                 const response = await request(app).post("/api/categories").set('Cookie', 'accessToken=accessToken').set('body', savedCategory);
                 expect(response.status).toBe(400);
-                expect(response.body).toStrictEqual({ error: "Could not save" });
+                expect(response.body).toStrictEqual( {error:"Could not save"} );
             }
         );
     }
 );
+
+/**
+ * Edit a category's type or color
+  - Request Body Content: An object having attributes `type` and `color` equal to the new values to assign to the category
+  - Response `data` Content: An object with parameter `message` that confirms successful editing and a parameter `count` that is equal to the count of transactions whose category was changed with the new type
+  - Optional behavior:
+    - error 401 returned if the specified category does not exist
+    - error 401 is returned if new parameters have invalid values
+ */
 
 describe("updateCategory", () => {
     test('Dummy test, change it', () => {
