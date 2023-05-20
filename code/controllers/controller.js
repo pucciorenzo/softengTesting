@@ -7,19 +7,22 @@ import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./
   - Request Body Content: An object having attributes `type` and `color`
   - Response `data` Content: An object having attributes `type` and `color`
  */
-export const createCategory = (req, res) => {
+export const createCategory = async (req, res) => {
     try {
-        const cookie = req.cookies
-        if (!cookie.accessToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!userAuth.authorized) {
+            return res.status(401).json({ message: userAuth.cause }) // unauthorized
         }
         const { type, color } = req.body;
         const new_categories = new categories({ type, color });
-        new_categories.save()
+        new_categories.save() //auto throws duplicate type error
             .then(data => res.json(data))
-            .catch(err => { throw err })
+            .catch(err => { throw err });
+        let data = await categories.find({ type: type })
+        let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
+        return res.json(filter);
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -33,9 +36,33 @@ export const createCategory = (req, res) => {
  */
 export const updateCategory = async (req, res) => {
     try {
-
+        //request admin access
+        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
+        //if not admin, deny
+        if (!userAuth.authorized) {
+            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        }
+        // get old type from parameter
+        const oldType = req.params.type;
+        //get new type and its color from parameter
+        const { type, color } = req.body;
+        let result;
+        //if changing type,
+        if (type != oldType) {
+            //if the new type already exist, return 401 error
+            result = await categories.findOne({ type: type });
+            if (result) return res.status(401).json({ message: "new type exists" });
+        }
+        //update type
+        result = await categories.updateOne({ type: oldType }, { type: type, color: color });
+        //if no type was updated, return category did not exist
+        if (result.matchedCount == 0) return res.status(401).json({ message: "category does not exist" });
+        //update transactions with new type
+        result = await transactions.updateMany({ type: oldType }, { type: type });
+        //return successful and transactions update count
+        return res.status(200).json({ message: "category updated successfully.", count: result.modifiedCount });
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -45,12 +72,44 @@ export const updateCategory = async (req, res) => {
   - Response `data` Content: An object with parameter `message` that confirms successful deletion and a parameter `count` that is equal to the count of affected transactions (deleting a category sets all transactions with that category to have `investment` as their new category)
   - Optional behavior:
     - error 401 is returned if the specified category does not exist
+    
+it can delete more than one category as it receives an array of types
+it must return with an error if there is at least one type in the array that does not exist
+at least one category must remain in the database after deletion (if there are three categories in the database and the method is called to delete all the categories, then the first category in the database cannot be deleted)
+all the transactions that have a category that is deleted must have their category changed to the first category type rather than to the default category. Transactions with a category that does not exist are not fetched by the aggregate method, which performs a join operation.
+
  */
 export const deleteCategory = async (req, res) => {
     try {
-
+        //verify admin
+        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!userAuth.authorized) {
+            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        }
+        //verify non empty delete list
+        if (req.body.types === []) return res.status(401).json({ message: "empty categories" });
+        let result;
+        //check all categories to be deleted exist
+        req.body.types.forEach(async (type) => {
+            result = await categories.countDocuments({ type: type });
+            if (!result) return res.status(401).json({ message: "at least one type does not exist" });
+        });
+        //delete categories, keep atleast one
+        req.body.types.forEach(async (type) => {
+            //only when mpre than one categories remain
+            if (categories.estimatedDocumentCount() > 1) {
+                await categories.deleteOne({ type: type });
+            }
+        });
+        //get first category in database
+        const firstCategory = await categories.findOne({});
+        //replace all deleted types in transaction with first type
+        result = await transactions.updateMany({ type: { $in: req.body.types } }), { type: firstCategory.type };
+        //get modified count and return with successful message
+        const count = result.modifiedCount;
+        return res.status(200).json({ message: "deleted successfully", count: count });
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message });
     }
 }
 
@@ -63,17 +122,15 @@ export const deleteCategory = async (req, res) => {
  */
 export const getCategories = async (req, res) => {
     try {
-        const cookie = req.cookies
-        if (!cookie.accessToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+        const userAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (!userAuth.authorized) {
+            return res.status(401).json({ message: userAuth.cause }) // unauthorized
         }
         let data = await categories.find({})
-
         let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-
-        return res.json(filter)
+        return res.json(filter);
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
