@@ -36,48 +36,89 @@ export const handleDateFilterParams = (req) => {
  * @returns true if the user satisfies all the conditions of the specified `authType` and false if at least one condition is not satisfied
  *  Refreshes the accessToken if it has expired and the refreshToken is still valid
  */
+
 export const verifyAuth = (req, res, info) => {
     const cookie = req.cookies
     if (!cookie.accessToken || !cookie.refreshToken) {
         return { authorized: false, cause: "Unauthorized" };
     }
+
+    //start decoding tokens and refresh if needed
+    let decodedAccessToken, decodedRefreshToken;
     try {
-        const decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
-        const decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
-        if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
-            return { authorized: false, cause: "Token is missing information" }
+        //decode refresh token
+        decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
+    }
+    catch (err) {
+        if (err.name === "TokenExpiredError") {
+            return { authorized: false, cause: "Perform login again" };
+        } else {
+            return { authorized: false, cause: err.name }
         }
-        if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
-            return { authorized: false, cause: "Token is missing information" }
-        }
-        if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
-            return { authorized: false, cause: "Mismatched users" };
-        }
-        return { authorized: true, cause: "Authorized" }
+    };
+
+    try {
+        //decode access token
+        decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
     } catch (err) {
         if (err.name === "TokenExpiredError") {
-            try {
-                const refreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY)
-                const newAccessToken = jwt.sign({
-                    username: refreshToken.username,
-                    email: refreshToken.email,
-                    id: refreshToken.id,
-                    role: refreshToken.role
-                }, process.env.ACCESS_KEY, { expiresIn: '1h' })
-                res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
-                res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-                return { authorized: true, cause: "Authorized" }
-            } catch (err) {
-                if (err.name === "TokenExpiredError") {
-                    return { authorized: false, cause: "Perform login again" }
-                } else {
-                    return { authorized: false, cause: err.name }
-                }
-            }
-        } else {
-            return { authorized: false, cause: err.name };
+            const newAccessToken = jwt.sign({
+                username: refreshToken.username,
+                email: refreshToken.email,
+                id: refreshToken.id,
+                role: refreshToken.role
+            }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
+            res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
+            decodedAccessToken = newAccessToken;
+        }
+    };
+
+
+    if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
+        return { authorized: false, cause: "Token is missing information" }
+    }
+    if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
+        return { authorized: false, cause: "Token is missing information" }
+    }
+    if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
+        return { authorized: false, cause: "Mismatched token users" };
+    }
+
+
+    if (info.authType === 'Simple') {
+        return { authorized: true, cause: "Authorized" };
+    }
+
+    if (info.authType === 'User') {
+        if (decodedAccessToken.role === 'User' && decodedAccessToken.username === req.params.username) {
+            return { authorized: true, cause: "Authorized" };
+        }
+        else {
+            return { authorized: false, cause: "Mismatched username" };
         }
     }
+
+    if (info.authType === 'Admin') {
+        if (decodedAccessToken.role === 'Admin') {
+            return { authorized: true, cause: "Authorized" };
+        }
+        else {
+            return { authorized: false, cause: "Not admin" };
+        }
+    }
+
+    //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
+    if (info.authType === 'Group') {
+        if (info.emails.includes(accessToken.email)) {
+            return { authorized: true, cause: "Authorized" };
+        }
+        else {
+            return { authorized: false, cause: "User not in group" };
+        }
+    }
+
+    return { authorized: false, cause: "unknown. Try again" };
 }
 
 /**
