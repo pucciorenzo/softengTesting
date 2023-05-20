@@ -18,7 +18,7 @@ export const register = async (req, res) => {
 
         //--//
         const existingUsername = await User.findOne({ username: req.body.username });
-        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        if (existingUsername) return res.status(400).json({ message: "username already taken" });
         // validate username and password here?
         //--//
 
@@ -33,6 +33,7 @@ export const register = async (req, res) => {
         res.status(400).json(err);
     }
 };
+
 
 /**
  * Register a new user in the system with an Admin role
@@ -62,7 +63,7 @@ export const registerAdmin = async (req, res) => {
             }
         }
         const existingUsername = await User.findOne({ username: req.body.username });
-        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        if (existingUsername) return res.status(400).json({ message: "username already taken" });
         // validate username and password here?
         //--//
 
@@ -129,17 +130,17 @@ export const login = async (req, res) => {
     - error 400 is returned if the user does not exist
  */
 export const logout = async (req, res) => {
-    const refreshToken = req.cookies.refreshToken
-    if (!refreshToken) return res.status(400).json("user not found")
-    const user = await User.findOne({ refreshToken: refreshToken })
-    if (!user) return res.status(400).json('user not found')
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return res.status(400).json("User not found. Are you logged in?");
+    const user = await User.findOne({ refreshToken: refreshToken });
+    if (!user) return res.status(400).json('user not found. Are you registered?')
     try {
-        user.refreshToken = null
-        res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
-        res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true })
-        const savedUser = await user.save()
-        res.status(200).json('logged out')
+        user.refreshToken = null;
+        res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
+        res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
+        const savedUser = await user.save();
+        res.status(200).json('logged out successfully');
     } catch (error) {
-        res.status(400).json(error)
+        res.status(400).json(error);
     }
 }
