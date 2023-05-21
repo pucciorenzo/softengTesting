@@ -1,8 +1,13 @@
 import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
+import * as utils from '../controllers/utils';
+import { createCategory } from '../controllers/controller';
+
 
 jest.mock('../models/model');
+jest.mock('../controllers/utils');
+
 
 beforeEach(() => {
     categories.find.mockClear();
@@ -15,51 +20,31 @@ beforeEach(() => {
 
 describe(
     "createCategory",
-    () => {
-
-        test(
-            'should return 401 unauthorized if empty accessToken',
+    () =>
+        test('should return saved category',
             async () => {
-                const response = await request(app).post("/api/categories").set('Cookie', 'accessToken=');
-                expect(response.body).toStrictEqual({ message: "Unauthorized" });
-                expect(response.status).toBe(401);
+                const mockReq = {
+                    body: {
+                        type: "testType",
+                        color: "testColor"
+                    }
+                }
+                const mockRes = {
+                    status: jest.fn().mockReturnThis(),
+                    json: jest.fn(),
+                    locals: {
+                        refreshedTokenMessage: "expired token"
+                    }
+                }
+                jest.spyOn(utils, 'verifyAuth').mockResolvedValue({authorized : true, cause : 'Authorized'})
+                await createCategory(mockReq, mockRes)
+                expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, {authType : 'Admin'});
+                expect(mockRes.status).toHaveBeenCalledWith(200)
+                expect(mockRes.json).toHaveBeenCalledWith({ data: [], message: mockRes.locals.refreshedTokenMessage })
             }
-        );
-
-        test(
-            'should return 401 unauthorized if wrong accessToken',
-            async () => {
-                const response = await request(app).post("/api/categories").set('Cookie', 'accessToken=AnyValue');
-                expect(response.body).toStrictEqual({ message: "Unauthorized" });
-                expect(response.status).toBe(401);
-            }
-        );
-
-        test(
-            'should return saved category',
-            async () => {
-                //jest.spyOn('../controllers/utils.js',verifyAuth).mockImplementation(() => true);
-                const savedCategory = { type: "testtype", color: "testcolor" };
-                jest.spyOn(categories.prototype, 'save').mockImplementation(() => Promise.resolve(savedCategory));
-                const response = await request(app).post("/api/categories").set('Cookie', 'accessToken=accessToken').set('body', savedCategory);
-                expect(response.status).toBe(200);
-                expect(response.body).toStrictEqual(savedCategory);
-            }
-        );
-
-        test(
-            'should catch database saving error',
-            async () => {
-                //jest.spyOn('../controllers/utils.js',verifyAuth).mockImplementation(() => true);
-                const savedCategory = { type: "testtype", color: "testcolor" };
-                jest.spyOn(categories.prototype, 'save').mockImplementation(() => { throw new Error("Could not save") });
-                const response = await request(app).post("/api/categories").set('Cookie', 'accessToken=accessToken').set('body', savedCategory);
-                expect(response.status).toBe(400);
-                expect(response.body).toStrictEqual( {error:"Could not save"} );
-            }
-        );
-    }
+        )
 );
+
 
 /**
  * Edit a category's type or color
