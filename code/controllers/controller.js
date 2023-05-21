@@ -9,9 +9,9 @@ import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./
  */
 export const createCategory = async (req, res) => {
     try {
-        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!userAuth.authorized) {
-            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         const { type, color } = req.body;
         const new_categories = new categories({ type, color });
@@ -37,10 +37,10 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
     try {
         //request admin access
-        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         //if not admin, deny
-        if (!userAuth.authorized) {
-            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        if (!adminAuth.authorized) {
+            return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         // get old type from parameter
         const oldType = req.params.type;
@@ -82,9 +82,9 @@ all the transactions that have a category that is deleted must have their catego
 export const deleteCategory = async (req, res) => {
     try {
         //verify admin
-        const userAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!userAuth.authorized) {
-            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         //verify non empty delete list
         if (req.body.types === []) return res.status(401).json({ message: "empty categories" });
@@ -122,9 +122,9 @@ export const deleteCategory = async (req, res) => {
  */
 export const getCategories = async (req, res) => {
     try {
-        const userAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!userAuth.authorized) {
-            return res.status(401).json({ message: userAuth.cause }) // unauthorized
+        const simpleAuth = verifyAuth(req, res, { simpleAuth: 'Simple' });
+        if (!simpleAuth.authorized) {
+            return res.status(401).json({ message: simpleAuth.cause }) // unauthorized
         }
         let data = await categories.find({})
         let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
@@ -143,17 +143,17 @@ export const getCategories = async (req, res) => {
  */
 export const createTransaction = async (req, res) => {
     try {
-        const cookie = req.cookies
-        if (!cookie.accessToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (!simpleAuth.authorized) {
+            return res.status(401).json({ message: simpleAuth.cause }) // unauthorized
         }
         const { username, amount, type } = req.body;
         const new_transactions = new transactions({ username, amount, type });
         new_transactions.save()
             .then(data => res.json(data))
-            .catch(err => { throw err })
+            .catch(err => { throw err });
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -166,9 +166,10 @@ export const createTransaction = async (req, res) => {
  */
 export const getAllTransactions = async (req, res) => {
     try {
-        const cookie = req.cookies
-        if (!cookie.accessToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+        //verify admin
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         /**
          * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -188,7 +189,7 @@ export const getAllTransactions = async (req, res) => {
             res.json(data);
         }).catch(error => { throw (error) })
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -205,11 +206,42 @@ export const getTransactionsByUser = async (req, res) => {
     try {
         //Distinction between route accessed by Admins or Regular users for functions that can be called by both
         //and different behaviors and access rights
-        if (req.url.indexOf("/transactions/users/") >= 0) {
-        } else {
+        /* if (req.url.indexOf("/transactions/users/") >= 0) {
+         } else {
+         }
+         */
+
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
         }
+
+        //user self access and admin any access
+        /**
+        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
+        */
+        transactions.aggregate([
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                },
+                $match: {
+                    username: req.params.username
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]).then((result) => {
+            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
+            res.json(data);
+        }).catch(error => { throw (error) })
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -223,10 +255,48 @@ export const getTransactionsByUser = async (req, res) => {
  */
 export const getTransactionsByUserByCategory = async (req, res) => {
     try {
+        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
+        //and different behaviors and access rights
+        /* if (req.url.indexOf("/transactions/users/") >= 0) {
+         } else {
+         }
+         */
+
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
+        }
+
+        //user self access and admin any access
+        /**
+        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
+        */
+        transactions.aggregate([
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                },
+                $match: {
+                    username: req.params.username,
+                    type: req.params.category
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]).then((result) => {
+            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
+            res.json(data);
+        }).catch(error => { throw (error) })
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
+
 
 /**
  * Return all transactions made by members of a specific group
@@ -236,12 +306,53 @@ export const getTransactionsByUserByCategory = async (req, res) => {
     - error 401 is returned if the group does not exist
     - empty array must be returned if there are no transactions made by the group
  */
+//router.get("/transactions/groups/:name", getTransactionsByGroup)
 export const getTransactionsByGroup = async (req, res) => {
     try {
+        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
+        //and different behaviors and access rights
+        /* if (req.url.indexOf("/transactions/users/") >= 0) {
+         } else {
+         }
+         */
+        let group = await Group.findOne({ name: req.params.name });
+        if (!group) return res.status(401).json("group does not exist");
+
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => { return member.email }) });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
+        }
+        //user self access and admin any access
+        /**
+        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
+        */
+        transactions.aggregate([
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                },
+                $match: {
+                    username: {
+                        $in: group.members.map(member => { return member.user.username })
+                    }
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]).then((result) => {
+            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
+            res.json(data);
+        }).catch(error => { throw (error) })
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
+
 
 /**
  * Return all transactions made by members of a specific group filtered by a specific category
@@ -253,10 +364,53 @@ export const getTransactionsByGroup = async (req, res) => {
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
+        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
+        //and different behaviors and access rights
+        /* if (req.url.indexOf("/transactions/users/") >= 0) {
+         } else {
+         }
+         */
+        let group = await Group.findOne({ name: req.params.name });
+        if (!group) return res.status(401).json("group does not exist");
+        let category = await categories.findOne({ name: req.params.category });
+        if (!group) return res.status(401).json("category does not exist");
+
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => { return member.email }) });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
+        }
+        //user self access and admin any access
+        /**
+        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
+        */
+        transactions.aggregate([
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                },
+                $match: {
+                    username: {
+                        $in: group.members.map(member => { return member.user.username })
+                    },
+                    type: req.params.category
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]).then((result) => {
+            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
+            res.json(data);
+        }).catch(error => { throw (error) })
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
+
 
 /**
  * Delete a transaction made by a specific user
@@ -267,14 +421,21 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
  */
 export const deleteTransaction = async (req, res) => {
     try {
-        const cookie = req.cookies
-        if (!cookie.accessToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
         }
-        let data = await transactions.deleteOne({ _id: req.body._id });
-        return res.json("deleted");
+        let user = User.findOne({ name: req.params.username });
+        if (!user) return res.status(401).json("user does not exist");
+        let transaction = await transactions.findOne({ username: user.username, _id: req.params._id });
+        if (!transaction) return res.status(401).json("transaction does not exist");
+        await transactions.deleteOne({ _id: req.params._id });
+        return res.json("deleted successfully")
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
 
@@ -287,7 +448,20 @@ export const deleteTransaction = async (req, res) => {
  */
 export const deleteTransactions = async (req, res) => {
     try {
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            return res.status(401).json({ message: adminAuth.cause })
+        }
+        const ids = req.body._ids;
+        ids.forEach(async id => {
+            let transaction = await transactions.findOne({ _id: req.params._id });
+            if (!transaction) return res.status(401).json("at least one transaction does not exist");
+        })
+        ids.forEach(async id => {
+            await transactions.deleteOne({ _id: req.params._id });
+        })
+        return res.json("all trnasactions deleted succsssfully")
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(500).json({ error: error.message })
     }
 }
