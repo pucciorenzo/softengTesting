@@ -2,6 +2,18 @@ import { categories, transactions } from "../models/model.js";
 import { Group, User } from "../models/User.js";
 import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./utils.js";
 
+
+/**
+API return content
+All data returned by APIs must be a JSON object with the following structure:
+{
+  "data": { "param": "returned data" },
+  "message": "message"
+}
+where data represents the content that the API is expected to return (array, object, value...) and message is an optional message that is stored in the parameter res.locals.message.
+*/
+
+
 /**
  * Create a new category
   - Request Body Content: An object having attributes `type` and `color`
@@ -16,11 +28,10 @@ export const createCategory = async (req, res) => {
         const { type, color } = req.body;
         const new_categories = new categories({ type, color });
         new_categories.save() //auto throws duplicate type error
-            .then(data => res.json(data))
+            .then(data => res.status(200).json({data : data, message : "category added"}))
             .catch(err => { throw err });
-        let data = await categories.find({ type: type })
-        let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-        return res.json(filter);
+        //let data = await categories.find({ type: type })
+        //return res.json({data : data, message : "category added"});
     } catch (error) {
         res.status(500).json({ error: error.message })
     }

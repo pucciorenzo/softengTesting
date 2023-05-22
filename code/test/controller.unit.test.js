@@ -1,9 +1,10 @@
 import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
-import * as utils from '../controllers/utils';
 import { createCategory } from '../controllers/controller';
-import { verifyAuth } from '../controllers/utils';
+
+import * as utils from '../controllers/utils';
+
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -16,6 +17,8 @@ beforeEach(() => {
     transactions.deleteOne.mockClear();
     transactions.aggregate.mockClear();
     transactions.prototype.save.mockClear();
+
+    utils.verifyAuth.mockClear();
 });
 
 describe(
@@ -36,12 +39,15 @@ describe(
                         message: "category added"
                     }
                 }
-                utils.verifyAuth.mockImplementation(() => Promise.resolve({ authorized: true, cause: 'Authorized' }));
-                // jest.spyOn(utils, 'verifyAuth').mockResolvedValue({authorized : true, cause : 'Authorized'})
-                await createCategory(mockReq, mockRes)
+                //jest.spyOn(utils, 'verifyAuth').mockResolvedValue({ authorized: true, cause: 'Authorized' });
+                utils.verifyAuth = jest.fn(() => { return { authorized: true, cause: 'Authorized' } });
+                jest.spyOn(categories.prototype, 'save').mockResolvedValue({ type: "testType", color: "testColor" });
+                jest.spyOn(categories, 'find').mockResolvedValue({ type: "testType", color: "testColor" });
+                await createCategory(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-                expect(mockRes.json).toHaveBeenCalledWith({ data: { type: "testType", color: "testColor" }, message: mockRes.locals.message })
+                //expect(categories.find).toHaveBeenCalledWith({ type: "testType" });
                 expect(mockRes.status).toHaveBeenCalledWith(200)
+                expect(mockRes.json).toHaveBeenCalledWith({ data: { type: "testType", color: "testColor" }, message: mockRes.locals.message })
             }
         )
 );
