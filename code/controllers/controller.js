@@ -27,7 +27,7 @@ export const createCategory = async (req, res) => {
         }
         const { type, color } = req.body;
         const new_categories = new categories({ type, color });
-        new_categories.save() //auto throws duplicate type error
+        await new_categories.save() //auto throws duplicate type error
             .then(data => res.status(200).json({ data: data, message: "category added" }))
             .catch(err => { throw err });
         //let data = await categories.find({ type: type })
@@ -161,7 +161,7 @@ export const createTransaction = async (req, res) => {
         }
         const { username, amount, type } = req.body;
         const new_transactions = new transactions({ username, amount, type });
-        new_transactions.save()
+        await new_transactions.save()
             .then(data => res.json(data))
             .catch(err => { throw err });
     } catch (error) {
