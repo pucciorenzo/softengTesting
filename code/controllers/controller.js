@@ -28,7 +28,7 @@ export const createCategory = async (req, res) => {
         const { type, color } = req.body;
         const new_categories = new categories({ type, color });
         new_categories.save() //auto throws duplicate type error
-            .then(data => res.status(200).json({data : data, message : "category added"}))
+            .then(data => res.status(200).json({ data: data, message: "category added" }))
             .catch(err => { throw err });
         //let data = await categories.find({ type: type })
         //return res.json({data : data, message : "category added"});
@@ -54,24 +54,25 @@ export const updateCategory = async (req, res) => {
             return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         // get old type from parameter
-        const oldType = req.params.type;
+        const oldType = req.params.category;
         //get new type and its color from parameter
         const { type, color } = req.body;
         let result;
+        //if category to modify does not exist
+        result = await categories.findOne({ type: oldType });
+        if (!result) return res.status(401).json({ message: "category does not exist" });
         //if changing type,
         if (type != oldType) {
             //if the new type already exist, return 401 error
             result = await categories.findOne({ type: type });
-            if (result) return res.status(401).json({ message: "new type exists" });
+            if (result) return res.status(401).json({ message: "new category exists" });
         }
         //update type
         result = await categories.updateOne({ type: oldType }, { type: type, color: color });
-        //if no type was updated, return category did not exist
-        if (result.matchedCount == 0) return res.status(401).json({ message: "category does not exist" });
         //update transactions with new type
         result = await transactions.updateMany({ type: oldType }, { type: type });
         //return successful and transactions update count
-        return res.status(200).json({ message: "category updated successfully.", count: result.modifiedCount });
+        return res.status(200).json({ data: { count: result.modifiedCount }, message: "category updated successfully." });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
