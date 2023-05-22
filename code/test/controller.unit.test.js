@@ -3,7 +3,7 @@ import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import * as utils from '../controllers/utils';
 import { createCategory } from '../controllers/controller';
-
+import { verifyAuth } from '../controllers/utils';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -33,14 +33,15 @@ describe(
                     status: jest.fn().mockReturnThis(),
                     json: jest.fn(),
                     locals: {
-                        refreshedTokenMessage: "expired token"
+                        message: "category added"
                     }
                 }
-                jest.spyOn(utils, 'verifyAuth').mockResolvedValue({authorized : true, cause : 'Authorized'})
+                utils.verifyAuth.mockImplementation(() => Promise.resolve({ authorized: true, cause: 'Authorized' }));
+                // jest.spyOn(utils, 'verifyAuth').mockResolvedValue({authorized : true, cause : 'Authorized'})
                 await createCategory(mockReq, mockRes)
-                expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, {authType : 'Admin'});
+                expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
+                expect(mockRes.json).toHaveBeenCalledWith({ data: { type: "testType", color: "testColor" }, message: mockRes.locals.message })
                 expect(mockRes.status).toHaveBeenCalledWith(200)
-                expect(mockRes.json).toHaveBeenCalledWith({ data: [], message: mockRes.locals.refreshedTokenMessage })
             }
         )
 );
