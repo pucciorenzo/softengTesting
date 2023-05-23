@@ -300,7 +300,7 @@ describe(
 
             const mockReq = {
                 params: {
-                    category: "oldType"
+                    type: "oldType"
                 },
                 body: {
                     type: "newType",
@@ -326,9 +326,9 @@ describe(
 
             await updateCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.category });
+            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
-            expect(transactions.updateMany).toHaveBeenCalledWith({ type: mockReq.params.category }, { type: mockReq.body.type });
+            expect(transactions.updateMany).toHaveBeenCalledWith({ type: mockReq.params.type }, { type: mockReq.body.type });
             expect(mockRes.status).toHaveBeenCalledWith(200);
             expect(mockRes.json).toHaveBeenCalledWith({ data: { count: 5 }, message: "category updated successfully." });
         }

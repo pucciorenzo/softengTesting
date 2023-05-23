@@ -54,7 +54,7 @@ export const updateCategory = async (req, res) => {
             return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         // get old type from parameter
-        const oldType = req.params.category;
+        const oldType = req.params.type;
         //get new type and its color from parameter
         const { type, color } = req.body;
         let result;
@@ -99,24 +99,27 @@ export const deleteCategory = async (req, res) => {
             return res.status(401).json({ message: adminAuth.cause }) // unauthorized
         }
         //verify non empty delete list
-        if (req.body.types === []) return res.status(401).json({ message: "empty categories" });
+        const typeArray = req.body.types.map(String);
+        if (typeArray.length === 0) return res.status(401).json({ message: "empty categories" });
         let result;
         //check all categories to be deleted exist
-        req.body.types.forEach(async (type) => {
-            result = await categories.countDocuments({ type: type });
-            if (!result) return res.status(401).json({ message: "at least one type does not exist" });
-        });
+        for (const type of typeArray) {
+            const result = await categories.countDocuments({ type: type });
+            if (!result) {
+                return res.status(401).json({ message: "at least one type does not exist" });
+            }
+        }
         //delete categories, keep atleast one
-        req.body.types.forEach(async (type) => {
-            //only when mpre than one categories remain
-            if (categories.estimatedDocumentCount() > 1) {
+        for (const type of typeArray) {
+            //only when more than one categories remain
+            if (await categories.estimatedDocumentCount() > 1) {
                 await categories.deleteOne({ type: type });
             }
-        });
+        };
         //get first category in database
         const firstCategory = await categories.findOne({});
         //replace all deleted types in transaction with first type
-        result = await transactions.updateMany({ type: { $in: req.body.types } }), { type: firstCategory.type };
+        result = await transactions.updateMany({ type: { $in: typeArray } }, { type: firstCategory.type });
         //get modified count and return with successful message
         const count = result.modifiedCount;
         return res.status(200).json({ message: "deleted successfully", count: count });
@@ -134,7 +137,7 @@ export const deleteCategory = async (req, res) => {
  */
 export const getCategories = async (req, res) => {
     try {
-        const simpleAuth = verifyAuth(req, res, { simpleAuth: 'Simple' });
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
         if (!simpleAuth.authorized) {
             return res.status(401).json({ message: simpleAuth.cause }) // unauthorized
         }
@@ -155,14 +158,19 @@ export const getCategories = async (req, res) => {
  */
 export const createTransaction = async (req, res) => {
     try {
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!simpleAuth.authorized) {
-            return res.status(401).json({ message: simpleAuth.cause }) // unauthorized
+        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!adminAuth.authorized) {
+            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!userAuth.authorized) {
+                return res.status(401).json({ message: userAuth.cause })
+            }
         }
         const { username, amount, type } = req.body;
+        if (username != req.params.username) return res.status(401).json({ message: "cannot add other user's transaction" });
+
         const new_transactions = new transactions({ username, amount, type });
         await new_transactions.save()
-            .then(data => res.json(data))
+            .then(data => res.status(200).json({ data: data.map(v => Object.assign({}, { username: v.username, type: v.type, amount: v.amount, date: v.date })) }))
             .catch(err => { throw err });
     } catch (error) {
         res.status(500).json({ error: error.message })
@@ -198,7 +206,7 @@ export const getAllTransactions = async (req, res) => {
             { $unwind: "$categories_info" }
         ]).then((result) => {
             let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.json(data);
+            res.status(200).json(data);
         }).catch(error => { throw (error) })
     } catch (error) {
         res.status(500).json({ error: error.message })
