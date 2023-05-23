@@ -167,7 +167,7 @@ describe(
 
             const mockReq = {
                 params: {
-                    category: "oldType"
+                    type: "oldType"
                 },
                 body: {
                     type: "newType",
@@ -187,7 +187,7 @@ describe(
 
             await updateCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.category });
+            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(mockRes.status).toHaveBeenCalledWith(401);
             expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
         }
@@ -199,7 +199,7 @@ describe(
 
             const mockReq = {
                 params: {
-                    category: "oldType"
+                    type: "oldType"
                 },
                 body: {
                     type: "newType",
@@ -219,7 +219,7 @@ describe(
 
             await updateCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.category });
+            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
             expect(mockRes.status).toHaveBeenCalledWith(401);
             expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
@@ -232,7 +232,7 @@ describe(
 
             const mockReq = {
                 params: {
-                    category: "oldType"
+                    type: "oldType"
                 },
                 body: {
                     type: "newType",
@@ -252,7 +252,7 @@ describe(
             categories.updateOne.mockImplementationOnce(() => { throw new Error(mockRes.locals.message) });
             await updateCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.category });
+            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
             expect(mockRes.status).toHaveBeenCalledWith(500);
             expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
@@ -287,7 +287,7 @@ describe(
 
             await updateCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.category });
+            expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
             expect(mockRes.status).toHaveBeenCalledWith(500);
             expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
