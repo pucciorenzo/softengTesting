@@ -122,7 +122,7 @@ export const deleteCategory = async (req, res) => {
         result = await transactions.updateMany({ type: { $in: typeArray } }, { type: firstCategory.type });
         //get modified count and return with successful message
         const count = result.modifiedCount;
-        return res.status(200).json({ message: "deleted successfully", count: count });
+        return res.status(200).json({ data: { count: count }, message: "deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -143,7 +143,7 @@ export const getCategories = async (req, res) => {
         }
         let data = await categories.find({})
         let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-        return res.json(filter);
+        return res.status(200).json(filter);
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
@@ -169,8 +169,9 @@ export const createTransaction = async (req, res) => {
         if (username != req.params.username) return res.status(401).json({ message: "cannot add other user's transaction" });
 
         const new_transactions = new transactions({ username, amount, type });
-        await new_transactions.save()
-            .then(data => res.status(200).json(data)).catch(err => { throw err });
+        await new_transactions.save().
+            then(data => res.status(200).json({ data: data, message: "transaction created successfully" })).
+            catch(err => { throw err });
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
