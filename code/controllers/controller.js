@@ -249,7 +249,9 @@ export const getTransactionsByUser = async (req, res) => {
                     localField: "type",
                     foreignField: "type",
                     as: "categories_info"
-                },
+                }
+            },
+            {
                 $match: {
                     username: req.params.username
                 }
@@ -300,7 +302,9 @@ export const getTransactionsByUserByCategory = async (req, res) => {
                     localField: "type",
                     foreignField: "type",
                     as: "categories_info"
-                },
+                }
+            },
+            {
                 $match: {
                     username: req.params.username,
                     type: req.params.category
@@ -355,7 +359,9 @@ export const getTransactionsByGroup = async (req, res) => {
                     localField: "type",
                     foreignField: "type",
                     as: "categories_info"
-                },
+                }
+            }
+            , {
                 $match: {
                     username: {
                         $in: group.members.map(member => { return member.user.username })
@@ -412,7 +418,9 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                     localField: "type",
                     foreignField: "type",
                     as: "categories_info"
-                },
+                }
+            }
+            , {
                 $match: {
                     username: {
                         $in: group.members.map(member => { return member.user.username })
