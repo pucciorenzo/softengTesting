@@ -82,7 +82,7 @@ describe(
             await createCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
             expect(mockRes.status).toHaveBeenCalledWith(401);
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
 
         }
     ),
@@ -159,7 +159,7 @@ describe(
                 await updateCategory(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
                 expect(mockRes.status).toHaveBeenCalledWith(401);
-                expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+                expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
             }
         ),
 
@@ -191,7 +191,7 @@ describe(
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(mockRes.status).toHaveBeenCalledWith(401);
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
         }
     ),
 
@@ -224,7 +224,7 @@ describe(
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.params.type });
             expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
             expect(mockRes.status).toHaveBeenCalledWith(401);
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
         }
     ),
 
@@ -361,7 +361,7 @@ describe("deleteCategory", () => {
             await deleteCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
             expect(mockRes.status).toHaveBeenCalledWith(401);
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
 
         });
 
@@ -387,7 +387,7 @@ describe("deleteCategory", () => {
             await deleteCategory(mockReq, mockRes);
             expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
             expect(mockRes.status).toHaveBeenCalledWith(401);
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
 
         });
 
@@ -428,7 +428,7 @@ describe("deleteCategory", () => {
             expect(categories.countDocuments).toHaveBeenCalledWith({ type: "E" });
             expect(categories.countDocuments).toHaveBeenCalledWith({ type: "F" });
             expect(categories.countDocuments).toHaveBeenCalledWith({ type: "G" });
-            expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+            expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
             expect(mockRes.status).toHaveBeenCalledWith(401);
 
         }
@@ -607,7 +607,7 @@ describe(
                 await getCategories(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Simple' });
                 expect(mockRes.status).toHaveBeenCalledWith(401);
-                expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+                expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
             }
         );
 
@@ -756,10 +756,13 @@ describe(
                     .mockImplementationOnce(() => { return { authorized: true, cause: "authorized" } })
                     ;
                 jest.spyOn(transactions.prototype, 'save').mockResolvedValueOnce(mockSavedData);
+                jest.spyOn(categories, 'findOne').mockResolvedValueOnce(1);
 
                 await createTransaction(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockReq.params.username });
+                expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
+                expect(transactions.prototype.save).toHaveBeenCalled();
                 expect(mockRes.status).toHaveBeenCalledWith(200);
                 expect(mockRes.json).toHaveBeenCalledWith({ data: mockSavedData, message: mockRes.locals.message });
             }
@@ -804,7 +807,7 @@ describe(
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockReq.params.username });
                 expect(mockRes.status).toHaveBeenCalledWith(401);
-                expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+                expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
             }
         );
 
@@ -846,13 +849,60 @@ describe(
                 await createTransaction(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
                 expect(mockRes.status).toHaveBeenCalledWith(401);
-                expect(mockRes.json).toHaveBeenCalledWith({ message: mockRes.locals.message });
+                expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
+
+            }
+        );
+
+        test(
+            'should return category does not exist',
+            async () => {
+                const mockReq = {
+                    params: {
+                        username: "userA"
+                    },
+                    body: {
+                        username: "userA",
+                        type: "A",
+                        amount: 1
+                    }
+                }
+
+                const mockRes = {
+                    status: jest.fn().mockReturnThis(),
+                    json: jest.fn(),
+                    locals: {
+                        message: "category does not exist"
+                    }
+                }
+
+                const mockSavedData = {
+                    _id: 1,
+                    username: "userA",
+                    type: "A",
+                    amount: 1
+                }
+
+                utils.verifyAuth
+                    .mockImplementationOnce(() => { return { authorized: false, cause: "unauthorized" } })
+                    .mockImplementationOnce(() => { return { authorized: true, cause: "authorized" } })
+                    ;
+                jest.spyOn(categories, 'findOne').mockResolvedValueOnce(null);
+
+                await createTransaction(mockReq, mockRes);
+                expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
+                //expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockReq.params.username });
+                expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
+                //expect(transactions.prototype.save).toHaveBeenCalled();
+                expect(mockRes.status).toHaveBeenCalledWith(401);
+                expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
             }
         );
 
         test(
             'should return caught error',
             async () => {
+
                 const mockReq = {
                     params: {
                         username: "userA"
@@ -872,23 +922,22 @@ describe(
                     }
                 }
 
-                const mockSavedData = {
-                    _id: 1,
-                    username: "userA",
-                    type: "A",
-                    amount: 1
-                }
-
                 utils.verifyAuth
-                    .mockImplementationOnce(() => { return { authorized: true, cause: "authorized" } })
+                    .mockImplementationOnce(() => { return { authorized: false, cause: "authorized" } })
                     .mockImplementationOnce(() => { return { authorized: true, cause: "authorized" } })
                     ;
-                jest.spyOn(transactions.prototype, 'save').mockRejectedValueOnce(new Error(mockRes.locals.message))
+                jest.spyOn(categories, 'findOne').mockResolvedValueOnce(1);
+                jest.spyOn(transactions.prototype, 'save').mockRejectedValueOnce(new Error(mockRes.locals.message));
 
                 await createTransaction(mockReq, mockRes);
                 expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-                expect(mockRes.status).toHaveBeenCalledWith(500);
+                expect(utils.verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockReq.params.username });
+                expect(categories.findOne).toHaveBeenCalledWith({ type: mockReq.body.type });
+                expect(transactions.prototype.save).toHaveBeenCalled();
+                //expect(transactions.prototype.save).toThrow();
                 expect(mockRes.json).toHaveBeenCalledWith({ error: mockRes.locals.message });
+                expect(mockRes.status).toHaveBeenCalledWith(500);
+
             }
         );
 
