@@ -10,12 +10,12 @@ import { verifyAuth } from "./utils.js";
     - empty array is returned if there are no users
  */
 export const getUsers = async (req, res) => {
-    try {
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json(error.message);
-    }
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 }
 
 /**
@@ -26,19 +26,21 @@ export const getUsers = async (req, res) => {
     - error 401 is returned if the user is not found in the system
  */
 export const getUser = async (req, res) => {
-    try {
-        const cookie = req.cookies
-        if (!cookie.accessToken || !cookie.refreshToken) {
-            return res.status(401).json({ message: "Unauthorized" }) // unauthorized
-        }
-        const username = req.params.username
-        const user = await User.findOne({ refreshToken: cookie.refreshToken })
-        if (!user) return res.status(401).json({ message: "User not found" })
-        if (user.username !== username) return res.status(401).json({ message: "Unauthorized" })
-        res.status(200).json(user)
-    } catch (error) {
-        res.status(500).json(error.message)
+  try {
+    const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username })
+    if (userAuth.authorized) {
+      //User auth successful
+    } else {
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" })
+      if (adminAuth.authorized) {
+        //Admin auth successful
+      } else {
+        res.status(401).json({ error: adminAuth.cause })
+      }
     }
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
 }
 
 /**
@@ -53,10 +55,10 @@ export const getUser = async (req, res) => {
     - error 401 is returned if all the `memberEmails` either do not exist or are already in a group
  */
 export const createGroup = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -68,10 +70,10 @@ export const createGroup = async (req, res) => {
     - empty array is returned if there are no groups
  */
 export const getGroups = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -83,10 +85,10 @@ export const getGroups = async (req, res) => {
     - error 401 is returned if the group does not exist
  */
 export const getGroup = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -101,10 +103,10 @@ export const getGroup = async (req, res) => {
     - error 401 is returned if all the `memberEmails` either do not exist or are already in a group
  */
 export const addToGroup = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -118,10 +120,10 @@ export const addToGroup = async (req, res) => {
     - error 401 is returned if all the `memberEmails` either do not exist or are not in the group
  */
 export const removeFromGroup = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -134,10 +136,10 @@ export const removeFromGroup = async (req, res) => {
     - error 401 is returned if the user does not exist 
  */
 export const deleteUser = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
 
 /**
@@ -148,8 +150,8 @@ export const deleteUser = async (req, res) => {
     - error 401 is returned if the group does not exist
  */
 export const deleteGroup = async (req, res) => {
-    try {
-    } catch (err) {
-        res.status(500).json(err.message)
-    }
+  try {
+  } catch (err) {
+    res.status(500).json(err.message)
+  }
 }
