@@ -163,7 +163,7 @@ export const logout = async (req, res) => {
         return res.status(401).json({ error: "unauthorized. Are you logged in?" }) // unauthorized
     }
 
-    const user = await User.findOne({ refreshToken: refreshToken });
+    const user = await User.findOne({ refreshToken: req.cookies.refreshToken });
     if (!user) return res.status(400).json({ error: 'user not found. Are you registered?' })
     try {
         user.refreshToken = null;

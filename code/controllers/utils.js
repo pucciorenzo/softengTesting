@@ -63,10 +63,10 @@ export const verifyAuth = (req, res, info) => {
     } catch (err) {
         if (err.name === "TokenExpiredError") {
             const newAccessToken = jwt.sign({
-                username: refreshToken.username,
-                email: refreshToken.email,
-                id: refreshToken.id,
-                role: refreshToken.role
+                username: decodedRefreshToken.username,
+                email: decodedRefreshToken.email,
+                id: decodedRefreshToken.id,
+                role: decodedRefreshToken.role
             }, process.env.ACCESS_KEY, { expiresIn: '1h' })
             res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
             res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
