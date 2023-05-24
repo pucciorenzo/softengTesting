@@ -9,7 +9,31 @@ import jwt from 'jsonwebtoken'
  * @throws an error if the query parameters include `date` together with at least one of `from` or `upTo`
  */
 export const handleDateFilterParams = (req) => {
-}
+    const { date, from, upTo } = req.query;
+  
+    if (date && (from || upTo)) {
+      throw new Error("Cannot use 'date' parameter with 'from' or 'upTo' parameters.");
+    }
+  
+    if (date) {
+      return { date: { $gte: date } };
+    }
+  
+    if (from && upTo) {
+      return { date: { $gte: from, $lte: upTo } };
+    }
+  
+    if (from) {
+      return { date: { $gte: from } };
+    }
+  
+    if (upTo) {
+      return { date: { $lte: upTo } };
+    }
+  
+    return {}; // No date filtering parameters provided
+  };
+  
 
 /**
  * Handle possible authentication modes depending on `authType`
@@ -94,4 +118,27 @@ export const verifyAuth = (req, res, info) => {
  *  Example: {amount: {$gte: 100}} returns all transactions whose `amount` parameter is greater or equal than 100
  */
 export const handleAmountFilterParams = (req) => {
-}
+    const { amount, minAmount, maxAmount } = req.query;
+  
+    if (amount && (minAmount || maxAmount)) {
+      throw new Error("Cannot use 'amount' parameter with 'minAmount' or 'maxAmount' parameters.");
+    }
+  
+    if (amount) {
+      return { amount: { $gte: parseInt(amount) } };
+    }
+  
+    if (minAmount && maxAmount) {
+      return { amount: { $gte: parseInt(minAmount), $lte: parseInt(maxAmount) } };
+    }
+  
+    if (minAmount) {
+      return { amount: { $gte: parseInt(minAmount) } };
+    }
+  
+    if (maxAmount) {
+      return { amount: { $lte: parseInt(maxAmount) } };
+    }
+  
+    return {}; // No amount filtering parameters provided
+  };  
