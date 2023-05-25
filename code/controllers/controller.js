@@ -171,9 +171,9 @@ export const createTransaction = async (req, res) => {
             return res.status(401).json({ error: "category does not exist" });
         }
         const new_transactions = new transactions({ username, amount, type });
-        await new_transactions.save() 
-        .then(data => res.status(200).json({ data: data, message: "transaction created successfully" }))
-        .catch(err => { throw err });
+        await new_transactions.save()
+            .then(data => res.status(200).json({ data: data, message: "transaction created successfully" }))
+            .catch(err => { throw err });
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
@@ -367,7 +367,7 @@ export const getTransactionsByGroup = async (req, res) => {
             , {
                 $match: {
                     username: {
-                        $in: group.members.map(member => { return member.user.username })
+                        $in: group.members.map(async (member) => { return (await User.findOne({ email: member.email })) })
                     }
                 }
             },
