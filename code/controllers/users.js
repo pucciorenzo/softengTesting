@@ -67,7 +67,7 @@ export const createGroup = async (req, res) => {
     }
 
     const name = req.body.name; //group name
-    const members = req.body.members; //member emails
+    const memberEmails = req.body.memberEmails; //member emails
 
     // check if group exists
     if (await Group.findOne({ name: name })) {
@@ -79,13 +79,13 @@ export const createGroup = async (req, res) => {
     let alreadyInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeAddedMembersArray = [];
-    for (const email in members) {
+    for (const email of memberEmails) {
       let user = await User.findOne({ email: email });
       if (!user) {
         notFoundMembersArray.push(email);
         continue;
       }
-      if ((await Group.findOne({ 'members.email': email }))) {
+      if ((await Group.findOne({ members: { $elemMatch: { email: email } } }))) {
         alreadyInGroupMembersArray.push(email);
         continue;
       }
@@ -130,7 +130,7 @@ export const getGroups = async (req, res) => {
     //check if authorized as admin
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if (!adminAuth.authorized) {
-      return res.status(401).json({ error: simpleAuth.cause });
+      return res.status(401).json({ error: adminAuth.cause });
     }
 
     //retreive groups
@@ -154,10 +154,32 @@ export const getGroups = async (req, res) => {
  */
 export const getGroup = async (req, res) => {
   try {
-  } catch (err) {
-    res.status(500).json(err.message)
+
+    //check group exists
+    let group = await Group.findOne({ name: req.params.name });
+    if (!group) return res.status(401).json({ error: "group does not exist" });
+
+    //authorize
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if (!adminAuth.authorized) {
+      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
+      if (!groupAuth.authorized) {
+        return res.status(401).json({ error: groupAuth.cause });
+      }
+    }
+
+    return res.status(200).json({
+      data: {
+        name: group.name,
+        members: group.members
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
 }
+
 
 /**
  * Add new members to a group
@@ -170,8 +192,56 @@ export const getGroup = async (req, res) => {
     - error 401 is returned if the group does not exist
     - error 401 is returned if all the `memberEmails` either do not exist or are already in a group
  */
+//expecting emails : [] in body
+
 export const addToGroup = async (req, res) => {
   try {
+
+    //check group exists
+    let group = await Group.findOne({ name: req.params.name });
+    if (!group) return res.status(401).json({ error: "group does not exist" });
+
+    //retreive member emails
+    const emailArray = req.body.emails.map(String);
+    if (emailArray.length === 0) return res.status(401).json({ error: "no members to add" });
+
+    //authorize
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if (!adminAuth.authorized) {
+      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
+      if (!groupAuth.authorized) {
+        return res.status(401).json({ error: groupAuth.cause });
+      }
+    }
+
+    //categorize emails
+    let alreadyInGroupMembersArray = [];
+    let notFoundMembersArray = [];
+    let canBeAddedMembersArray = [];
+    for (const email in members) {
+      let user = await User.findOne({ email: email });
+      if (!user) {
+        notFoundMembersArray.push(email);
+        continue;
+      }
+      if ((await Group.findOne({ 'members.email': email }))) {
+        alreadyInGroupMembersArray.push(email);
+        continue;
+      }
+      canBeAddedMembersArray.push({ email: email, user: user._id });
+    }
+
+    //check if at least one member can be added
+    if (!canBeAddedMembersArray.length) {
+      return res.status(401).json({ error: "no members available to add" });
+    }
+
+
+
+
+
+
+
   } catch (err) {
     res.status(500).json(err.message)
   }
