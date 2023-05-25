@@ -127,10 +127,22 @@ export const createGroup = async (req, res) => {
  */
 export const getGroups = async (req, res) => {
   try {
-  } catch (err) {
-    res.status(500).json(err.message)
+    //check if authorized as admin
+    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+    if (!adminAuth.authorized) {
+      return res.status(401).json({ error: simpleAuth.cause });
+    }
+
+    //retreive groups
+    let data = await Group.find({})
+    let filter = data.map(v => Object.assign({}, { name: v.name, members: v.members }))
+    return res.status(200).json({ data: filter });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message })
   }
 }
+
 
 /**
  * Return information of a specific group
