@@ -401,7 +401,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         let group = await Group.findOne({ name: req.params.name });
         if (!group) return res.status(401).json("group does not exist");
         let category = await categories.findOne({ name: req.params.category });
-        if (!group) return res.status(401).json("category does not exist");
+        if (!category) return res.status(401).json("category does not exist");
 
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
