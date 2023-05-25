@@ -18,7 +18,9 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: "please logout first" }); // unauthorized
         }
 
-        const { username, email, password } = req.body;
+        const username = req.body.username;
+        const email = req.body.email;
+        const password = req.body.password;
 
         const existingUser = await User.findOne({ email: req.body.email });
         if (existingUser) return res.status(400).json({ error: "you are already registered" });

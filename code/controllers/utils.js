@@ -110,7 +110,7 @@ export const verifyAuth = (req, res, info) => {
 
     //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
     if (info.authType === 'Group') {
-        if (info.emails.includes(accessToken.email)) {
+        if (info.emails.includes(decodedAccessToken.email)) {
             return { authorized: true, cause: "Authorized" };
         }
         else {
