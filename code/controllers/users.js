@@ -62,6 +62,9 @@ export const createGroup = async (req, res) => {
   try {
     //check logged in
     const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
+    if (!simpleAuth.authorized) {
+      return res.status(401).json({ error: simpleAuth.cause });
+    }
 
     const name = req.body.name; //group name
     const members = req.body.members; //member emails
@@ -88,6 +91,12 @@ export const createGroup = async (req, res) => {
       }
       canBeAddedMembersArray.push({ email: email, user: user._id });
     }
+
+    //check if at least one member can be added
+    if (!canBeAddedMembersArray.length) {
+      return res.status(401).json({ error: "no members available to add" });
+    }
+
     //create and save
     const newGroup = await Group.create({
       name: name,
