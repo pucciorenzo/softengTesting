@@ -11,8 +11,14 @@ import { verifyAuth } from "./utils.js";
  */
 export const getUsers = async (req, res) => {
   try {
+    //request admin access
+    const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+    //if not admin, deny
+    if (!adminAuth.authorized) {
+      return res.status(401).json({ error: adminAuth.cause }) // unauthorized
+    }
     const users = await User.find();
-    res.status(200).json(users);
+    res.status(200).json({ data: users });
   } catch (error) {
     res.status(500).json(error.message);
   }
@@ -27,17 +33,15 @@ export const getUsers = async (req, res) => {
  */
 export const getUser = async (req, res) => {
   try {
-    const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username })
-    if (userAuth.authorized) {
-      //User auth successful
-    } else {
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" })
-      if (adminAuth.authorized) {
-        //Admin auth successful
-      } else {
-        res.status(401).json({ error: adminAuth.cause })
+    const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+    if (!adminAuth.authorized) {
+      const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+      if (!userAuth.authorized) {
+        return res.status(401).json({ error: userAuth.cause })
       }
     }
+    const user = await User.findOne({ username: req.params.username });
+    return res.status(200).json({ data: user, message: "" });
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
@@ -56,8 +60,51 @@ export const getUser = async (req, res) => {
  */
 export const createGroup = async (req, res) => {
   try {
+    //check logged in
+    const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
+
+    const name = req.body.name; //group name
+    const members = req.body.members; //member emails
+
+    // check if group exists
+    if (await Group.findOne({ name: name })) {
+      return res.status(401).json({ error: "group already exists" });
+    }
+
+    //start creating groups//
+    //categorize emails
+    let alreadyInGroupMembersArray = [];
+    let notFoundMembersArray = [];
+    let canBeAddedMembersArray = [];
+    for (const email in members) {
+      let user = await User.findOne({ email: email });
+      if (!user) {
+        notFoundMembersArray.push(email);
+        continue;
+      }
+      if ((await Group.findOne({ 'members.email': email }))) {
+        alreadyInGroupMembersArray.push(email);
+        continue;
+      }
+      canBeAddedMembersArray.push({ email: email, user: user._id });
+    }
+    //create and save
+    const newGroup = await Group.create({
+      name: name,
+      members: canBeAddedMembersArray
+    });
+    await newGroup.save();
+
+    return res.status(200).json({
+      data: {
+        group: newGroup,
+        alreadyInGroup: alreadyInGroupMembersArray,
+        membersNotFound: notFoundMembersArray
+      },
+    });
+
   } catch (err) {
-    res.status(500).json(err.message)
+    res.status(500).json({ error: err.message });
   }
 }
 
