@@ -9,30 +9,48 @@ import jwt from 'jsonwebtoken'
  * @throws an error if the query parameters include `date` together with at least one of `from` or `upTo`
  */
 export const handleDateFilterParams = (req) => {
-    const { date, from, upTo } = req.query;
-  
-    if (date && (from || upTo)) {
-      throw new Error("Cannot use 'date' parameter with 'from' or 'upTo' parameters.");
-    }
-  
-    if (date) {
-      return { date: { $gte: date } };
-    }
-  
-    if (from && upTo) {
-      return { date: { $gte: from, $lte: upTo } };
-    }
-  
-    if (from) {
-      return { date: { $gte: from } };
-    }
-  
-    if (upTo) {
-      return { date: { $lte: upTo } };
-    }
-  
-    return {}; // No date filtering parameters provided
+  const { from, upTo, date } = req.query;
+
+  const parseDateString = (str) => {
+    return new Date(`${str}T00:00:00.000Z`);
   };
+
+  if (date && (from || upTo)) {
+    return res.status(400).json({ message: 'Cannot include date parameter with from or upTo parameters.' });
+  }
+
+  if (date) {
+    if(!validateParams(date, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const parsedDate = parseDateString(date);
+    const fromDate = new Date(parsedDate);
+    const upToDate = new Date(parsedDate);
+    upToDate.setHours(23, 59, 59, 999);
+    return { date: { $gte: fromDate, $lte: upToDate } };
+  }
+
+  const filter = {};
+
+  if (from) {
+    if(!validateParams(from, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const fromDate = parseDateString(from);
+    filter.date = { ...(filter.date || {}), $gte: fromDate };
+  }
+
+  if (upTo) {
+    if(!validateParams(upTo, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const upToDate = parseDateString(upTo);
+    upToDate.setHours(23, 59, 59, 999);
+    filter.date = { ...(filter.date || {}), $lte: upToDate.toISOString() };
+  }
+
+  return filter;
+};
   
 
 /**
@@ -61,48 +79,49 @@ export const handleDateFilterParams = (req) => {
  *  Refreshes the accessToken if it has expired and the refreshToken is still valid
  */
 export const verifyAuth = (req, res, info) => {
-    const cookie = req.cookies
-    if (!cookie.accessToken || !cookie.refreshToken) {
-        return { authorized: false, cause: "Unauthorized" };
-    }
-    try {
-        const decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
-        const decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
-        if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
-            return { authorized: false, cause: "Token is missing information" }
-        }
-        if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
-            return { authorized: false, cause: "Token is missing information" }
-        }
-        if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
-            return { authorized: false, cause: "Mismatched users" };
-        }
-        return { authorized: true, cause: "Authorized" }
-    } catch (err) {
-        if (err.name === "TokenExpiredError") {
-            try {
-                const refreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY)
-                const newAccessToken = jwt.sign({
-                    username: refreshToken.username,
-                    email: refreshToken.email,
-                    id: refreshToken.id,
-                    role: refreshToken.role
-                }, process.env.ACCESS_KEY, { expiresIn: '1h' })
-                res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
-                res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-                return { authorized: true, cause: "Authorized" }
-            } catch (err) {
-                if (err.name === "TokenExpiredError") {
-                    return { authorized: false, cause: "Perform login again" }
-                } else {
-                    return { authorized: false, cause: err.name }
-                }
-            }
-        } else {
-            return { authorized: false, cause: err.name };
-        }
-    }
+  const cookie = req.cookies
+  if (!cookie.accessToken || !cookie.refreshToken) {
+      return { authorized: false, cause: "Unauthorized" };
+  }
+  try {
+      const decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
+      const decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
+      if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
+          return { authorized: false, cause: "Token is missing information" }
+      }
+      if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
+          return { authorized: false, cause: "Token is missing information" }
+      }
+      if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
+          return { authorized: false, cause: "Mismatched users" };
+      }
+      return { authorized: true, cause: "Authorized" }
+  } catch (err) {
+      if (err.name === "TokenExpiredError") {
+          try {
+              const refreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY)
+              const newAccessToken = jwt.sign({
+                  username: refreshToken.username,
+                  email: refreshToken.email,
+                  id: refreshToken.id,
+                  role: refreshToken.role
+              }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+              res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
+              res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+              return { authorized: true, cause: "Authorized" }
+          } catch (err) {
+              if (err.name === "TokenExpiredError") {
+                  return { authorized: false, cause: "Perform login again" }
+              } else {
+                  return { authorized: false, cause: err.name }
+              }
+          }
+      } else {
+          return { authorized: false, cause: err.name };
+      }
+  }
 }
+
 
 /**
  * Handle possible amount filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
@@ -119,27 +138,52 @@ The code example shows the date as a string, but it must actually be a Date obje
  */
 
 export const handleAmountFilterParams = (req) => {
-    const { amount, minAmount, maxAmount } = req.query;
-  
-    if (amount && (minAmount || maxAmount)) {
-      throw new Error("Cannot use 'amount' parameter with 'minAmount' or 'maxAmount' parameters.");
-    }
-  
-    if (amount) {
-      return { amount: { $gte: parseInt(amount) } };
-    }
-  
-    if (minAmount && maxAmount) {
-      return { amount: { $gte: parseInt(minAmount), $lte: parseInt(maxAmount) } };
-    }
-  
-    if (minAmount) {
-      return { amount: { $gte: parseInt(minAmount) } };
-    }
-  
-    if (maxAmount) {
-      return { amount: { $lte: parseInt(maxAmount) } };
-    }
-  
-    return {}; // No amount filtering parameters provided
-  };  
+  const { min, max } = req.query;
+
+  if (min && max) {
+    if(!validateParams(min, "handleAmountFilterParams"))
+      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
+    if(!validateParams(max, "handleAmountFilterParams"))
+      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
+    return {
+      amount: {
+        $gte: parseInt(min),
+        $lte: parseInt(max),
+      },
+    };
+  }
+
+  if (min) {
+    validateNumber(min);
+    return { amount: { $gte: parseInt(min) } };
+  }
+
+  if (max) {
+    validateNumber(max);
+    return { amount: { $lte: parseInt(max) } };
+  }
+
+  return {};
+};
+
+export const validateParams = (toCheck, functionName) => {
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  switch(functionName){
+    case "register":
+    case "registerAdmin":
+      return validateEmail(toCheck.query.email);
+    case "createGroup":
+      toCheck.query.memberEmails.forEach(email => {
+        if(!validateEmail(email)) return false;
+      });
+      break;
+    case "handleDateFilterParams":
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      return dateRegex.test(toCheck);
+    case "handleAmountFilterParams":
+      return /^\d+$/.test(toCheck);
+  }
+}

@@ -18,7 +18,7 @@ export const register = async (req, res) => {
 
         //--//
         const existingUsername = await User.findOne({ username: req.body.username });
-        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        if (existingUsername) return res.status(400).json({ message: "username already taken" });
         // validate username and password here?
         //--//
 
@@ -62,7 +62,7 @@ export const registerAdmin = async (req, res) => {
             }
         }
         const existingUsername = await User.findOne({ username: req.body.username });
-        if (existingUser) return res.status(400).json({ message: "username already taken" });
+        if (existingUsername) return res.status(400).json({ message: "username already taken" });
         // validate username and password here?
         //--//
 
