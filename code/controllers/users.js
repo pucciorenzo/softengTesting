@@ -432,16 +432,18 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteUser = async (req, res) => {
   try {
 
-    const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
+    //Returns a 400 error if the request body does not contain all the necessary attributes
+
 
     const email = req.body.email;
-
     /*
     Returns a 400 error if the request body does not contain all the necessary attributes
     Returns a 400 error if the email passed in the request body is an empty string
     Returns a 400 error if the email passed in the request body is not in correct email format
     */
+
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
 
     const user = await User.findOne({ email: email });
     if (!user) return res.status(401).json({ error: "user not found" });
@@ -479,16 +481,36 @@ export const deleteUser = async (req, res) => {
 }
 
 /**
- * Delete a group
-  - Request Body Content: A string equal to the `name` of the group to be deleted
-  - Response `data` Content: A message confirming successful deletion
-  - Optional behavior:
-    - error 401 is returned if the group does not exist
+ * deleteGroup
+Request Parameters: None
+Request Body Content: A string equal to the name of the group to be deleted
+Example: {name: "Family"}
+Response data Content: A message confirming successful deletion
+Example: res.status(200).json({data: {message: "Group deleted successfully"} , refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if the name passed in the request body is an empty string
+Returns a 400 error if the name passed in the request body does not represent a group in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const deleteGroup = async (req, res) => {
   try {
 
+    //Returns a 400 error if the request body does not contain all the necessary attributes
+
+    const name = req.body.name;
+    if (name === "") return res.status(400).json({ error: "empty string" });
+
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
+
+    const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
+    if (!deletedCount) return res.status(401).json({ error: "group not found" });
+    if (deletedCount > 1) throw new Error('multiple groups deleted!');
+
+    return res.status(200).json({ data: { message: "Group deleted successfully" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
   } catch (err) {
     res.status(500).json(err.message)
   }
+
 }
