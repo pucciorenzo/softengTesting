@@ -102,16 +102,21 @@ export const createGroup = async (req, res) => {
       name: name,
       members: canBeAddedMembersArray
     });
-    await newGroup.save();
-
-    return res.status(200).json({
-      data: {
-        group: newGroup,
-        alreadyInGroup: alreadyInGroupMembersArray,
-        membersNotFound: notFoundMembersArray
-      },
-    });
-
+    await newGroup.save()
+      .then(data =>
+        res.status(200).json(
+          {
+            data: {
+              group: {
+                name: data.name,
+                members: data.members.map(m => { return m.email })
+              },
+              alreadyInGroup: alreadyInGroupMembersArray,
+              membersNotFound: notFoundMembersArray
+            },
+            refreshedTokenMessage: res.locals.refreshedTokenMessage
+          }
+        ));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -201,34 +206,48 @@ export const addToGroup = async (req, res) => {
     let group = await Group.findOne({ name: req.params.name });
     if (!group) return res.status(401).json({ error: "group does not exist" });
 
-    //retreive member emails
-    const emailArray = req.body.emails.map(String);
-    if (emailArray.length === 0) return res.status(401).json({ error: "no members to add" });
-
     //authorize
-    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-    if (!adminAuth.authorized) {
+    if (req.url.endsWith("/add")) {
+      //user route
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
       if (!groupAuth.authorized) {
         return res.status(401).json({ error: groupAuth.cause });
       }
+    } else if (req.url.endsWith("/insert")) {
+      //admin exclusive
+      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
+      if (!adminAuth.authorized) {
+        return res.status(401).json({ error: adminAuth.cause });
+      }
+    }
+    else {
+      throw new Error('unknown route');
+    }
+
+    //retreive member emails
+    const emailArray = req.body.emails.map(String);
+    if (emailArray.length === 0) {
+      return res.status(401).json({ error: "no members to add" });
     }
 
     //categorize emails
     let alreadyInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeAddedMembersArray = [];
-    for (const email in members) {
+    for (const email of emailArray) {
       let user = await User.findOne({ email: email });
       if (!user) {
         notFoundMembersArray.push(email);
+        //console.log(email+"notfound");
         continue;
       }
       if ((await Group.findOne({ 'members.email': email }))) {
         alreadyInGroupMembersArray.push(email);
+        //console.log(email+"ingroup");
         continue;
       }
       canBeAddedMembersArray.push({ email: email, user: user._id });
+      //console.log(email+"canadd");
     }
 
     //check if at least one member can be added
@@ -236,11 +255,22 @@ export const addToGroup = async (req, res) => {
       return res.status(401).json({ error: "no members available to add" });
     }
 
-
-
-
-
-
+    group.members.push(...canBeAddedMembersArray);
+    await group.save()
+      .then(data =>
+        res.status(200).json(
+          {
+            data: {
+              group: {
+                name: data.name,
+                members: data.members.map(m => { return m.email })
+              },
+              alreadyInGroup: alreadyInGroupMembersArray,
+              membersNotFound: notFoundMembersArray
+            },
+            refreshedTokenMessage: res.locals.refreshedTokenMessage
+          }
+        ));
 
   } catch (err) {
     res.status(500).json(err.message)
