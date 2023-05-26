@@ -413,18 +413,68 @@ export const removeFromGroup = async (req, res) => {
 }
 
 /**
- * Delete a user
-  - Request Parameters: None
-  - Request Body Content: A string equal to the `email` of the user to be deleted
-  - Response `data` Content: An object having an attribute that lists the number of `deletedTransactions` and a boolean attribute that
-    specifies whether the user was also `deletedFromGroup` or not.
-  - Optional behavior:
-    - error 401 is returned if the user does not exist 
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * deleteUser
+Request Parameters: None
+Request Body Content: A string equal to the email of the user to be deleted
+Example: {email: "luigi.red@email.com"}
+Response data Content: An object having an attribute that lists the number of deletedTransactions and an attribute that specifies whether the user was also deletedFromGroup or not
+Example: res.status(200).json({data: {deletedTransaction: 1, deletedFromGroup: true}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+If the user is the last user of a group then the group is deleted as well
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if the email passed in the request body is an empty string
+Returns a 400 error if the email passed in the request body is not in correct email format
+Returns a 400 error if the email passed in the request body does not represent a user in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const deleteUser = async (req, res) => {
   try {
+
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
+
+    const email = req.body.email;
+
+    /*
+    Returns a 400 error if the request body does not contain all the necessary attributes
+    Returns a 400 error if the email passed in the request body is an empty string
+    Returns a 400 error if the email passed in the request body is not in correct email format
+    */
+
+    const user = await User.findOne({ email: email });
+    if (!user) return res.status(401).json({ error: "user not found" });
+
+    await User.deleteOne(user);
+    const deletedTransaction = (await transactions.deleteMany({ username: user.username })).deletedCount;
+
+    let deletedFromGroup = false;
+    const group = await Group.findOne({ members: { $elemMatch: { email: email } } });
+    if (group) {
+      deletedFromGroup = true;
+      const membersCount = group.members.length;
+      if (membersCount <= 0) throw new Error('illegal group with 0 members encontered');
+      if (membersCount == 1) await Group.deleteOne(group);
+      if (membersCount > 1) {
+        group.members.pull(group.members.filter(m => m.email == email).map(m => m._id));
+        await group.save()
+          .then(g => console.log(g));
+      }
+    }
+    return res.status(200)
+      .json(
+        {
+          data: {
+            deletedTransaction: deletedTransaction,
+            deletedFromGroup: deletedFromGroup
+          },
+          refreshedTokenMessage: res.locals.refreshedTokenMessage
+        }
+      );
+
   } catch (err) {
-    res.status(500).json(err.message)
+    res.status(500).json({ error: err.message });
   }
 }
 
@@ -437,6 +487,7 @@ export const deleteUser = async (req, res) => {
  */
 export const deleteGroup = async (req, res) => {
   try {
+
   } catch (err) {
     res.status(500).json(err.message)
   }
