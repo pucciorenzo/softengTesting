@@ -123,12 +123,12 @@ export const createGroup = async (req, res) => {
 }
 
 /**
- * Return all the groups
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having a string attribute for the `name` of the group
-    and an array for the `members` of the group
-  - Optional behavior:
-    - empty array is returned if there are no groups
+ * getGroups
+Request Parameters: None
+Request Body Content: None
+Response data Content: An array of objects, each one having a string attribute for the name of the group and an array for the members of the group
+Example: res.status(200).json({data: [{name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}] refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const getGroups = async (req, res) => {
   try {
@@ -140,8 +140,8 @@ export const getGroups = async (req, res) => {
 
     //retreive groups
     let data = await Group.find({})
-    let filter = data.map(v => Object.assign({}, { name: v.name, members: v.members }))
-    return res.status(200).json({ data: filter });
+    let filter = data.map(v => Object.assign({}, { name: v.name, members: v.members.map(m => m.email) }))
+    return res.status(200).json({ data: filter, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -150,24 +150,28 @@ export const getGroups = async (req, res) => {
 
 
 /**
- * Return information of a specific group
-  - Request Body Content: None
-  - Response `data` Content: An object having a string attribute for the `name` of the group and an array for the 
-    `members` of the group
-  - Optional behavior:
-    - error 401 is returned if the group does not exist
+ * getGroup
+Request Parameters: A string equal to the name of the requested group
+Example: /api/groups/Family
+Request Body Content: None
+Response data Content: An object having a string attribute for the name of the group and an array for the members of the group
+Example: res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}} refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the group name passed as a route parameter does not represent a group in the database
+Returns a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)
  */
 export const getGroup = async (req, res) => {
   try {
 
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
-    if (!group) return res.status(401).json({ error: "group does not exist" });
+    if (!group) return res.status(400).json({ error: "group does not exist" });
+
+    const members = group.members.map(m => m.email);
 
     //authorize
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
     if (!adminAuth.authorized) {
-      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
+      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: members });
       if (!groupAuth.authorized) {
         return res.status(401).json({ error: groupAuth.cause });
       }
@@ -176,8 +180,9 @@ export const getGroup = async (req, res) => {
     return res.status(200).json({
       data: {
         name: group.name,
-        members: group.members
-      }
+        members: members
+      },
+      refreshedTokenMessage: res.locals.refreshedTokenMessage
     });
 
   } catch (error) {
