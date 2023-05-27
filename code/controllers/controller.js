@@ -394,7 +394,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         }
 
         //user route
-        else if (req.url.endsWith("/transactions/category/") >= 0) {
+        else if (req.url.includes("/transactions/category/") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.authorized) {
                 return res.status(401).json({ error: userAuth.cause })
@@ -449,29 +449,39 @@ Returns a 400 error if the group name passed as a route parameter does not repre
 Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name
  */
-//router.get("/transactions/groups/:name", getTransactionsByGroup)
 export const getTransactionsByGroup = async (req, res) => {
     try {
-        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
-        //and different behaviors and access rights
-        /* if (req.url.indexOf("/transactions/users/") >= 0) {
-         } else {
-         }
-         */
-        let group = await Group.findOne({ name: req.params.name });
-        if (!group) return res.status(401).json("group does not exist");
 
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
-            const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => { return member.email }) });
-            if (!userAuth.authorized) {
+        if (!req.params.name) return res.status(400).json({ error: "no group name" });
+
+        let group = await Group.findOne({ name: req.params.name }).populate('members.user');
+        if (!group) return res.status(400).json("group does not exist");
+        //console.log(group);
+
+        //authenticate//
+        //admin route
+        if (req.url.includes("/transactions/groups/") >= 0) {
+            const auth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!auth.authorized) {
+                return res.status(401).json({ error: adminAuth.cause })
+            }
+        }
+        //user route
+        else if (req.url.endsWith("/transactions") >= 0) {
+            const auth = verifyAuth(req, res,
+                {
+                    authType: "Group",
+                    emails: group.members.map(member => member.email)
+                }
+            );
+            if (!auth.authorized) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
-        //user self access and admin any access
-        /**
-        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-        */
+        else {
+            throw new Error('unknown route');
+        }
+
         transactions.aggregate([
             {
                 $lookup: {
@@ -484,16 +494,18 @@ export const getTransactionsByGroup = async (req, res) => {
             , {
                 $match: {
                     username: {
-                        $in: group.members.map(async (member) => { return (await User.findOne({ email: member.email })) })
+                        $in: group.members.map(m => m.user.username)
                     }
-                }
+                },
             },
             { $unwind: "$categories_info" }
         ]).then((result) => {
+            //console.log(result);
             let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
             res.json(data);
         }).catch(error => { throw (error) })
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message })
     }
 }
@@ -523,8 +535,8 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
             const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => { return member.email }) });
-            if (!userAuth.authorized) {
-                return res.status(401).json({ error: userAuth.cause })
+            if (!groupAuth.authorized) {
+                return res.status(401).json({ error: groupAuth.cause })
             }
         }
         //user self access and admin any access
