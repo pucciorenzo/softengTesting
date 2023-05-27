@@ -330,13 +330,12 @@ export const getTransactionsByUser = async (req, res) => {
             if (!userAuth.authorized) {
                 return res.status(401).json({ error: userAuth.cause })
             }
-            //admin route
         }
         else {
             throw new Error('unknown route');
         }
 
-        if (! await User.findOne({ username: username })) return res.status(401).json({ error: "user does not exist" });
+        if (! await User.findOne({ username: username })) return res.status(400).json({ error: "user does not exist" });
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -367,31 +366,47 @@ export const getTransactionsByUser = async (req, res) => {
 }
 
 /**
- * Return all transactions made by a specific user filtered by a specific category
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects
-  - Optional behavior:
-    - empty array is returned if there are no transactions made by the user with the specified category
-    - error 401 is returned if the user or the category does not exist
+ * The behavior defined below applies only for the specified route
+Request Parameters: A string equal to the username of the involved user, a string equal to the requested category
+Example: /api/users/Mario/transactions/category/food (user route)
+Example: /api/transactions/users/Mario/category/food (admin route)
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, type, amount, date and color, filtered so that type is the same for all objects
+Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00", color: "red"} ] refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the username passed as a route parameter does not represent a user in the database
+Returns a 400 error if the category passed as a route parameter does not represent a category in the database
+Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions/category/:category
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username/category/:category
  */
 export const getTransactionsByUserByCategory = async (req, res) => {
     try {
-        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
-        //and different behaviors and access rights
-        /* if (req.url.indexOf("/transactions/users/") >= 0) {
-         } else {
-         }
-         */
 
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        const username = req.params.username;
+        const category = req.params.category;
+        let queryParams;
+
+        //admin route
+        if (req.url.includes("/transactions/users/") >= 0) {
+            const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!adminAuth.authorized) {
+                return res.status(401).json({ error: adminAuth.cause })
+            }
+        }
+
+        //user route
+        else if (req.url.endsWith("/transactions/category/") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.authorized) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
+        else {
+            throw new Error('unknown route');
+        }
 
-        //user self access and admin any access
+        if (! await User.findOne({ username: username })) return res.status(400).json({ error: "user does not exist" });
+        if (! await categories.findOne({ type: category })) return res.status(400).json({ error: "category does not exist" });
+
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
@@ -406,15 +421,16 @@ export const getTransactionsByUserByCategory = async (req, res) => {
             },
             {
                 $match: {
-                    username: req.params.username,
-                    type: req.params.category
+                    username: username,
+                    type: category
                 }
             },
             { $unwind: "$categories_info" }
         ]).then((result) => {
-            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.json(data);
-        }).catch(error => { throw (error) })
+            let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        });
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
