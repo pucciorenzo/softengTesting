@@ -298,32 +298,46 @@ export const getAllTransactions = async (req, res) => {
 }
 
 /**
- * Return all transactions made by a specific user
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - error 401 is returned if the user does not exist
-    - empty array is returned if there are no transactions made by the user
-    - if there are query parameters and the function has been called by a Regular user then the returned transactions must be filtered according to the query parameters
+ * getTransactionsByUser
+Request Parameters: A string equal to the username of the involved user
+Example: /api/users/Mario/transactions (user route)
+Example: /api/transactions/users/Mario (admin route)
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, type, amount, date and color
+Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00", color: "red"}, {username: "Mario", amount: 70, type: "health", date: "2023-05-19T10:00:00", color: "green"} ] refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the username passed as a route parameter does not represent a user in the database
+Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username
+Can be filtered by date and amount if the necessary query parameters are present and if the route is /api/users/:username/transactions ****
  */
 export const getTransactionsByUser = async (req, res) => {
     try {
-        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
-        //and different behaviors and access rights
-        /* if (req.url.indexOf("/transactions/users/") >= 0) {
-         } else {
-         }
-         */
 
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        const username = req.params.username;
+        let queryParams;
+
+        //admin route
+        if (req.url.includes("transactions/users") >= 0) {
+            const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!adminAuth.authorized) {
+                return res.status(401).json({ error: adminAuth.cause })
+            }
+        }
+
+        //user route
+        else if (req.url.endsWith("/transactions") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.authorized) {
                 return res.status(401).json({ error: userAuth.cause })
             }
+            //admin route
+        }
+        else {
+            throw new Error('unknown route');
         }
 
-        //user self access and admin any access
+        if (! await User.findOne({ username: username })) return res.status(401).json({ error: "user does not exist" });
+
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
@@ -338,14 +352,15 @@ export const getTransactionsByUser = async (req, res) => {
             },
             {
                 $match: {
-                    username: req.params.username
+                    username: username
                 }
             },
             { $unwind: "$categories_info" }
         ]).then((result) => {
-            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.json(data);
-        }).catch(error => { throw (error) })
+            let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        });
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
