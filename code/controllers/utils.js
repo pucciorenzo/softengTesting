@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { User } from '../models/User';
+import { User } from '../models/User.js'
 
 /**
  * Handle possible date filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
@@ -44,21 +44,20 @@ export const verifyAuth = (req, res, info) => {
         return { authorized: false, cause: "Unauthorized" };
     }
 
-    //if (! await User.findOne({ refreshToken: cookie.refreshToken })) return { authorized: false, cause: "refresh token revoked. Login again." }
+    //if (!(await User.findOne({ refreshToken: refreshToken }))) return { authorized: false, cause: "refresh token revoked. Did you log out?" };
 
     //start decoding tokens and refresh if needed
     let decodedAccessToken, decodedRefreshToken;
     try {
         //decode refresh token
         decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
-    }
-    catch (err) {
+    } catch (err) {
         if (err.name === "TokenExpiredError") {
             return { authorized: false, cause: "Perform login again" };
         } else {
             return { authorized: false, cause: err.name }
         }
-    };
+    }
 
     try {
         //decode access token
