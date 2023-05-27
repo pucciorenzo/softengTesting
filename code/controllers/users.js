@@ -3,36 +3,53 @@ import { transactions } from "../models/model.js";
 import { verifyAuth } from "./utils.js";
 
 /**
- * Return all the users
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `email` and `role`
-  - Optional behavior:
-    - empty array is returned if there are no users
+ getUsers
+Request Parameters: None
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, email and role
+Example: res.status(200).json({data: [{username: "Mario", email: "mario.red@email.com"}, {username: "Luigi", email: "luigi.red@email.com"}, {username: "admin", email: "admin@email.com"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const getUsers = async (req, res) => {
   try {
-    //request admin access
+
+    //authenticate admin
     const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-    //if not admin, deny
     if (!adminAuth.authorized) {
       return res.status(401).json({ error: adminAuth.cause }) // unauthorized
     }
+
     const users = await User.find();
-    res.status(200).json({ data: users });
+    res.status(200).json(
+      {
+        data: users.map(
+          user => {
+            return { username: user.username, email: user.email, role: user.role }
+          }
+        ),
+        refreshedTokenMessage: res.locals.refreshedTokenMessage
+      }
+    )
+
   } catch (error) {
     res.status(500).json(error.message);
   }
 }
 
 /**
- * Return information of a specific user
-  - Request Body Content: None
-  - Response `data` Content: An object having attributes `username`, `email` and `role`.
-  - Optional behavior:
-    - error 401 is returned if the user is not found in the system
+ * getUser
+Request Parameters: A string equal to the username of the involved user
+Example: /api/users/Mario
+Request Body Content: None
+Response data Content: An object having attributes username, email and role.
+Example: res.status(200).json({data: {username: "Mario", email: "mario.red@email.com", role: "Regular"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the username passed as the route parameter does not represent a user in the database
+Returns a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)
  */
 export const getUser = async (req, res) => {
   try {
+
+    //authenticate
     const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
     if (!adminAuth.authorized) {
       const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
@@ -40,38 +57,60 @@ export const getUser = async (req, res) => {
         return res.status(401).json({ error: userAuth.cause })
       }
     }
+
+    //retreive user
     const user = await User.findOne({ username: req.params.username });
-    return res.status(200).json({ data: user, message: "" });
+    if (!user) return res.status(400).json({ error: "user not found" });
+
+    return res.status(200).json({ data: { username: user.username, email: user.email, role: user.role }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
 }
 
 /**
- * Create a new group
-  - Request Body Content: An object having a string attribute for the `name` of the group and an array that lists all the `memberEmails`
-  - Response `data` Content: An object having an attribute `group` (this object must have a string attribute for the `name`
-    of the created group and an array for the `members` of the group), an array that lists the `alreadyInGroup` members
-    (members whose email is already present in a group) and an array that lists the `membersNotFound` (members whose email
-    +does not appear in the system)
-  - Optional behavior:
-    - error 401 is returned if there is already an existing group with the same name
-    - error 401 is returned if all the `memberEmails` either do not exist or are already in a group
+ * createGroup
+Request Parameters: None
+Request request body Content: An object having a string attribute for the name of the group and an array that lists all the memberEmails
+Example: {name: "Family", memberEmails: ["mario.red@email.com", "luigi.red@email.com"]}
+Response data Content: An object having an attribute group (this object must have a string attribute for the name of the created group and an array for the members of the group), an array that lists the alreadyInGroup members (members whose email is already present in a group) and an array that lists the membersNotFound (members whose email does not appear in the system)
+Example: res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}, membersNotFound: [], alreadyInGroup: []} refreshedTokenMessage: res.locals.refreshedTokenMessage})
+If the user who calls the API does not have their email in the list of emails then their email is added to the list of members
+Returns a 400 error if the request body does not contain all the necessary attributes *
+Returns a 400 error if the group name passed in the request body is an empty string * 
+Returns a 400 error if the group name passed in the request body represents an already existing group in the database *
+Returns a 400 error if all the provided emails represent users that are already in a group or do not exist in the database *
+Returns a 400 error if the user who calls the API is already in a group 
+Returns a 400 error if at least one of the member emails is not in a valid email format
+Returns a 400 error if at least one of the member emails is an empty string *
+Returns a 401 error if called by a user who is not authenticated (authType = Simple) *
  */
+
 export const createGroup = async (req, res) => {
   try {
-    //check logged in
+
+    const name = req.body.name; //group name
+    const memberEmails = req.body.memberEmails.map(String); //member emails
+
+    if (!name || !memberEmails) return res.status(400).json({ error: "incomplete attributes" });
+
+    if (name === "") return res.status(400).json({ error: "empty group name" });
+
+    //Returns a 400 error if at least one of the member emails is not in a valid email format
+
+    //Returns a 400 error if at least one of the member emails is an empty string
+    if (memberEmails.includes("")) return res.status(400).json({ error: "at least one empty email string" }); //why different than validate?
+
+    //authenticate
     const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
     if (!simpleAuth.authorized) {
       return res.status(401).json({ error: simpleAuth.cause });
     }
 
-    const name = req.body.name; //group name
-    const memberEmails = req.body.memberEmails.map(String); //member emails
-
     // check if group exists
     if (await Group.findOne({ name: name })) {
-      return res.status(401).json({ error: "group already exists" });
+      return res.status(400).json({ error: "group already exists" });
     }
 
     //start creating groups//
@@ -94,7 +133,7 @@ export const createGroup = async (req, res) => {
 
     //check if at least one member can be added
     if (!canBeAddedMembersArray.length) {
-      return res.status(401).json({ error: "no members available to add" });
+      return res.status(400).json({ error: "no members available to add" });
     }
 
     //create and save
