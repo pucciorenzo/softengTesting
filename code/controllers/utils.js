@@ -70,7 +70,12 @@ export const verifyAuth = (req, res, info) => {
             }, process.env.ACCESS_KEY, { expiresIn: '1h' })
             res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
             res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
-            decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);;
+            try {
+                decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);
+            }
+            catch (err) {
+                return { authorized: false, cause: err.name }
+            }
         }
     };
 
