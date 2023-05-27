@@ -4,34 +4,47 @@ import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./
 
 
 /**
-API return content
-All data returned by APIs must be a JSON object with the following structure:
-{
-  "data": { "param": "returned data" },
-  "message": "message"
-}
-where data represents the content that the API is expected to return (array, object, value...) and message is an optional message that is stored in the parameter res.locals.message.
-*/
+ * Error response:
+ * res.status(errorCode).json({ error: "Error message" });
+ */
 
 
 /**
- * Create a new category
-  - Request Body Content: An object having attributes `type` and `color`
-  - Response `data` Content: An object having attributes `type` and `color`
+ * createCategory
+Request Parameters: None
+Request Body Content: An object having attributes type and color
+Example: {type: "food", color: "red"}
+Response data Content: An object having attributes type and color
+Example: res.status(200).json({data: {type: "food", color: "red"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the parameters in the request body is an empty string
+Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const createCategory = async (req, res) => {
     try {
+        //get attributes
+        const { type, color } = req.body;
+
+        //validate attributes
+        if (!type || !color) return res.status(400).json({ error: "incomplete attribute" });
+        if (type == "" || color == "") return res.status(400).json({ error: "empty string" });
+
+        //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
-            return res.status(401).json({ error: adminAuth.cause }) // unauthorized
+            return res.status(401).json({ error: adminAuth.cause })
         }
-        const { type, color } = req.body;
+
+        //check if category exists
+        const existingCategory = categories.findOne({ type: type });
+        if (existingCategory) return res.status(400).json({ error: "category already exists" });
+
+        //create and save category
         const new_categories = new categories({ type, color });
         await new_categories.save() //auto throws duplicate type error
-            .then(data => res.status(200).json({ data: data, message: "category added" }))
-            .catch(err => { throw err });
-        //let data = await categories.find({ type: type })
-        //return res.json({data : data, message : "category added"});
+            .then(data => res.status(200).json({ data: { type: data.type, color: data.color }, refreshedTokenMessage: res.locals.refreshedTokenMessage }));
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
