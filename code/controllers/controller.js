@@ -40,7 +40,7 @@ export const createCategory = async (req, res) => {
         }
 
         //check if category exists
-        const existingCategory = categories.findOne({ type: type });
+        const existingCategory = await categories.findOne({ type: type });
         if (existingCategory) return res.status(400).json({ error: "category already exists" });
 
         //create and save category
@@ -438,12 +438,16 @@ export const getTransactionsByUserByCategory = async (req, res) => {
 
 
 /**
- * Return all transactions made by members of a specific group
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - error 401 is returned if the group does not exist
-    - empty array must be returned if there are no transactions made by the group
+ * getTransactionsByGroup
+Request Parameters: A string equal to the name of the requested group
+Example: /api/groups/Family/transactions (user route)
+Example: /api/transactions/groups/Family (admin route)
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, type, amount, date and color
+Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00", color: "red"}, {username: "Mario", amount: 70, type: "health", date: "2023-05-19T10:00:00", color: "green"}, {username: "Luigi", amount: 20, type: "food", date: "2023-05-19T10:00:00", color: "red"} ] refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the group name passed as a route parameter does not represent a group in the database
+Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name
  */
 //router.get("/transactions/groups/:name", getTransactionsByGroup)
 export const getTransactionsByGroup = async (req, res) => {
