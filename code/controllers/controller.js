@@ -482,28 +482,30 @@ export const getTransactionsByGroup = async (req, res) => {
             throw new Error('unknown route');
         }
 
-        transactions.aggregate([
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "type",
-                    foreignField: "type",
-                    as: "categories_info"
-                }
-            }
-            , {
-                $match: {
-                    username: {
-                        $in: group.members.map(m => m.user.username)
+        transactions.aggregate(
+            [
+                {
+                    $lookup: {
+                        from: "categories",
+                        localField: "type",
+                        foreignField: "type",
+                        as: "categories_info"
                     }
+                }
+                , {
+                    $match: {
+                        username: {
+                            $in: group.members.map(m => m.user.username)
+                        }
+                    },
                 },
-            },
-            { $unwind: "$categories_info" }
-        ]).then((result) => {
+                { $unwind: "$categories_info" }
+            ]
+        ).then((result) => {
             //console.log(result);
-            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.json(data);
-        }).catch(error => { throw (error) })
+            let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message })
