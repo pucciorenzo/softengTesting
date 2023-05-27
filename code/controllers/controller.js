@@ -111,50 +111,64 @@ export const updateCategory = async (req, res) => {
 }
 
 /**
- * Delete a category
-  - Request Body Content: An array of strings that lists the `types` of the categories to be deleted
-  - Response `data` Content: An object with parameter `message` that confirms successful deletion and a parameter `count` that is equal to the count of affected transactions (deleting a category sets all transactions with that category to have `investment` as their new category)
-  - Optional behavior:
-    - error 401 is returned if the specified category does not exist
-    
-it can delete more than one category as it receives an array of types
-it must return with an error if there is at least one type in the array that does not exist
-at least one category must remain in the database after deletion (if there are three categories in the database and the method is called to delete all the categories, then the first category in the database cannot be deleted)
-all the transactions that have a category that is deleted must have their category changed to the first category type rather than to the default category. Transactions with a category that does not exist are not fetched by the aggregate method, which performs a join operation.
-
+ * deleteCategory
+Request Parameters: None
+Request Body Content: An array of strings that lists the types of the categories to be deleted
+Example: {types: ["health"]}
+Response data Content: An object with an attribute message that confirms successful deletion and an attribute count that specifies the number of transactions that have had their category type changed
+Example: res.status(200).json({data: {message: "Categories deleted", count: 1}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Given N = categories in the database and T = categories to delete:
+If N > T then all transactions with a category to delete must have their category set to the oldest category that is not in T
+If N = T then the oldest created category cannot be deleted and all transactions must have their category set to that category
+In case any of the following errors apply then no category is deleted
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if called when there is only one category in the database
+Returns a 400 error if at least one of the types in the array is an empty string
+Returns a 400 error if at least one of the types in the array does not represent a category in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const deleteCategory = async (req, res) => {
     try {
+        //get attributes
+        const types = req.body.types;
+        //validate attributes
+        if (!types || !Array.isArray(types)) return res.status(400).json({ error: "incomplete attribute" });
+        if (types.length === 0) return res.status(400).json({ error: "no categories to delete" });
+        const typeArray = types.map(String);
+        if (typeArray.includes("")) return res.status(400).json({ error: "empty strings" });
+
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
             return res.status(401).json({ error: adminAuth.cause }) // unauthorized
         }
-        //verify non empty delete list
-        const typeArray = req.body.types.map(String);
-        if (typeArray.length === 0) return res.status(401).json({ error: "empty categories" });
-        let result;
+
+        if (await categories.countDocuments({}) <= 1) return res.status(400).json({ error: "only zero or one category exists" });
+
         //check all categories to be deleted exist
         for (const type of typeArray) {
-            const result = await categories.countDocuments({ type: type });
-            if (!result) {
-                return res.status(401).json({ error: "at least one type does not exist" });
+            if (! await categories.countDocuments({ type: type })) {
+                return res.status(400).json({ error: "at least one type does not exist" });
             }
         }
-        //delete categories, keep atleast one
-        for (let type of typeArray) {
-            //only when more than one categories remain
-            if (await categories.countDocuments() > 1) {
+
+        //delete categories, keep atleast one, generate list of deleted types
+        let deletedTypeArray = [];
+        for (const type of typeArray) {
+            if (await categories.countDocuments({}) > 1) {
                 await categories.deleteOne({ type: type });
+                deletedTypeArray.push(type);
             }
         };
+
         //get first category in database
-        const firstCategory = await categories.findOne({});
-        //replace all deleted types in transaction with first type
-        result = await transactions.updateMany({ type: { $in: typeArray } }, { type: firstCategory.type });
-        //get modified count and return with successful message
-        const count = result.modifiedCount;
-        return res.status(200).json({ data: { count: count }, message: "deleted successfully" });
+        const firstCategoryType = (await categories.findOne({})).type;
+
+        //replace all deleted types in transaction with first type and get count modified
+        const count = (await transactions.updateMany({ type: { $in: deletedTypeArray } }, { type: firstCategoryType })).modifiedCount;
+
+        return res.status(200).json({ data: { message: "Categories deleted", count: count }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
