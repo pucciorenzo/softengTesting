@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { verifyAuth } from './utils.js';
+import validator from 'validator';
 
 /**
  * register
@@ -27,7 +28,7 @@ export const register = async (req, res) => {
 
         if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
 
-        //Returns a 400 error if the email in the request body is not in a valid email format
+        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 
         //**optional? check if logged out */
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
@@ -35,11 +36,8 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: "please logout first" });
         }
 
-        let existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) return res.status(400).json({ error: "email already registered" });
-
-        existingUser = await User.findOne({ username: req.body.username });
-        if (existingUser) return res.status(400).json({ error: "username already taken" });
+        if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+        if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
 
         const hashedPassword = await bcrypt.hash(password, 12);
         const newUser = await User.create({
@@ -50,12 +48,13 @@ export const register = async (req, res) => {
         });
 
         await newUser.save();
+
         return res.status(200).json({ data: { message: "User added successfully" } });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-};
+}
 
 
 /**
@@ -72,12 +71,8 @@ Returns a 400 error if the username in the request body identifies an already ex
 Returns a 400 error if the email in the request body identifies an already existing user
  */
 export const registerAdmin = async (req, res) => {
-    try {
-
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.authorized) {
-            return res.status(400).json({ error: "please logout first" }); // unauthorized
-        }
+    /**
+     try {
 
         const { username, email, password } = req.body;
 
@@ -87,6 +82,11 @@ export const registerAdmin = async (req, res) => {
 
         const hasAdminRights = 1; //await Admin.findOne({ email: email });
         if (!hasAdminRights) return res.status(400).json({ error: "you cannot register as admin" });
+
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (simpleAuth.authorized) {
+            return res.status(400).json({ error: "please logout first" }); // unauthorized
+        }
 
         let existingUser = await User.findOne({ email: email });
         if (existingUser) {
@@ -115,6 +115,45 @@ export const registerAdmin = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+*/
+    try {
+
+        const username = req.body.username;
+        const email = req.body.email;
+        const password = req.body.password;
+
+        if (!username || !email || !password) return res.status(400).json({ error: "incomplete attributes" });
+
+        if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
+
+        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
+
+        //**optional? check if logged out */
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (simpleAuth.authorized) {
+            return res.status(400).json({ error: "please logout first" });
+        }
+
+        if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+        if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const newUser = await User.create({
+            username,
+            email,
+            password: hashedPassword,
+            role: 'Admin'
+        });
+
+        await newUser.save();
+
+        return res.status(200).json({ data: { message: "User added successfully" } });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 
 /**
  * login
@@ -130,49 +169,52 @@ Returns a 400 error if the email in the request body does not identify a user in
 Returns a 400 error if the supplied password does not match with the one in the database
  */
 export const login = async (req, res) => {
-
-    /**optional ? */
-    const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-    if (simpleAuth.authorized) {
-        return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
-    }
-
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "incomplete attributes" });
-    if (email == "" || password == "") return res.status(400).json({ error: "empty strings" });
-
-    //validate email format
-
-    const existingUser = await User.findOne({ email: email });
-    if (!existingUser) return res.status(400).json({ error: 'user not found. register first' });
-
     try {
 
-        const match = await bcrypt.compare(password, existingUser.password)
+        /**optional ? */
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (simpleAuth.authorized) {
+            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
+        }
+
+        const email = req.body.email;
+        const password = req.body.password;
+
+        if (!email || !password) return res.status(400).json({ error: "incomplete attributes" });
+
+        if (email == "" || password == "") return res.status(400).json({ error: "empty strings" });
+
+        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
+
+        const user = await User.findOne({ email: email });
+        if (!user) return res.status(400).json({ error: 'user not found. register first' });
+
+        const match = await bcrypt.compare(password, user.password)
         if (!match) return res.status(400).json({ error: 'wrong credentials' });
 
         //CREATE ACCESSTOKEN
         const accessToken = jwt.sign({
-            email: existingUser.email,
-            id: existingUser.id,
-            username: existingUser.username,
-            role: existingUser.role
+            email: user.email,
+            id: user.id,
+            username: user.username,
+            role: user.role
         }, process.env.ACCESS_KEY, { expiresIn: '1h' });
 
         //CREATE REFRESH TOKEN
         const refreshToken = jwt.sign({
-            email: existingUser.email,
-            id: existingUser.id,
-            username: existingUser.username,
-            role: existingUser.role
+            email: user.email,
+            id: user.id,
+            username: user.username,
+            role: user.role
         }, process.env.ACCESS_KEY, { expiresIn: '7d' });
 
         //SAVE REFRESH TOKEN TO DB
-        existingUser.refreshToken = refreshToken;
-        await existingUser.save();
+        user.refreshToken = refreshToken;
+        await user.save();
 
         res.cookie("accessToken", accessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
         res.cookie('refreshToken', refreshToken, { httpOnly: true, domain: "localhost", path: '/api', maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'none', secure: true })
+
         return res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } });
 
     } catch (error) {
@@ -190,25 +232,30 @@ Returns a 400 error if the request does not have a refresh token in the cookies
 Returns a 400 error if the refresh token in the request's cookies does not represent a user in the database
  */
 export const logout = async (req, res) => {
-
-    /**optional */
-    const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-    if (!simpleAuth.authorized) {
-        return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
-    }
-
-    const refreshToken = req.cookies.refreshToken;
-    console.log(refreshToken)
-    if (!refreshToken || refreshToken.length == 0) return res.status(400).json({ error: "no refresh token found" });
-
-    const user = await User.findOne({ refreshToken: refreshToken });
-    if (!user) return res.status(400).json({ error: 'user not found. Are you registered or logged in?' })
     try {
+
+        /**optional */
+        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        if (!simpleAuth.authorized) {
+            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
+        }
+
+        const refreshToken = req.cookies.refreshToken;
+        //console.log(refreshToken)
+        if (!refreshToken || refreshToken == "" || refreshToken.length == 0) return res.status(400).json({ error: "no refresh token found" });
+
+        const user = await User.findOne({ refreshToken: refreshToken });
+        if (!user) return res.status(400).json({ error: 'user not found. Are you registered or logged in?' });
+
+
         user.refreshToken = null;
+        await user.save();
+
         res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
         res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
-        await user.save();
+
         return res.status(200).json({ data: { message: "User logged out" } });
+
     } catch (error) {
         res.status(500).json({ error: err.message });
     }
