@@ -23,6 +23,7 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const createCategory = async (req, res) => {
     try {
+
         //get attributes
         const { type, color } = req.body;
 
@@ -51,41 +52,59 @@ export const createCategory = async (req, res) => {
 }
 
 /**
- * Edit a category's type or color
-  - Request Body Content: An object having attributes `type` and `color` equal to the new values to assign to the category
-  - Response `data` Content: An object with parameter `message` that confirms successful editing and a parameter `count` that is equal to the count of transactions whose category was changed with the new type
-  - Optional behavior:
-    - error 401 returned if the specified category does not exist
-    - error 401 is returned if new parameters have invalid values
+ * updateCategory
+Request Parameters: A string equal to the type of the category that must be edited
+Example: api/categories/food
+Request Body Content: An object having attributes type and color equal to the new values to assign to the category
+Example: {type: "Food", color: "yellow"}
+Response data Content: An object with parameter message that confirms successful editing and a parameter count that is equal to the count of transactions whose category was changed with the new type
+Example: res.status(200).json({data: {message: "Category edited successfully", count: 2}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+In case any of the following errors apply then the category is not updated, and transactions are not changed
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the parameters in the request body is an empty string
+Returns a 400 error if the type of category passed as a route parameter does not represent a category in the database
+Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const updateCategory = async (req, res) => {
     try {
-        //request admin access
+        // get attributes
+        const currentType = req.params.type;
+        const newType = req.body.type;
+        const newColor = req.body.color;
+
+
+        //validate attributes
+        if (!currentType || !newType || !newColor) return res.status(400).json({ error: "incomplete attribute" });
+        if (currentType == "" || newType == "" || newColor == "") return res.status(400).json({ error: "empty string" });
+
+        //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        //if not admin, deny
         if (!adminAuth.authorized) {
             return res.status(401).json({ error: adminAuth.cause }) // unauthorized
         }
-        // get old type from parameter
-        const oldType = req.params.type;
-        //get new type and its color from parameter
-        const { type, color } = req.body;
-        let result;
-        //if category to modify does not exist
-        result = await categories.findOne({ type: oldType });
-        if (!result) return res.status(401).json({ error: "category does not exist" });
-        //if changing type,
-        if (type != oldType) {
-            //if the new type already exist, return 401 error
-            result = await categories.findOne({ type: type });
-            if (result) return res.status(401).json({ error: "new category exists" });
-        }
-        //update type
-        result = await categories.updateOne({ type: oldType }, { type: type, color: color });
-        //update transactions with new type
-        result = await transactions.updateMany({ type: oldType }, { type: type });
+
+        //confirm category to be updated exists
+        const currentCategory = await categories.findOne({ type: currentType });
+        if (!currentCategory) return res.status(400).json({ error: "category does not exist" });
+
+        //confirm new category type does not exist
+        if (
+            (newType != currentType) &&
+            (await categories.findOne({ type: newType }))
+        ) return res.status(401).json({ error: "new category exists" });
+
+        //update category
+        currentCategory.type = newType;
+        currentCategory.color = newColor;
+        await currentCategory.save();
+
+        //update transactions
+        const count = (await transactions.updateMany({ type: currentType }, { type: newType })).modifiedCount;
+
         //return successful and transactions update count
-        return res.status(200).json({ data: { count: result.modifiedCount }, message: "category updated successfully." });
+        return res.status(200).json({ data: { message: "Category edited successfully", count: count } });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
