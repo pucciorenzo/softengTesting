@@ -2,6 +2,8 @@ import { categories, transactions } from "../models/model.js";
 import { Group, User } from "../models/User.js";
 import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./utils.js";
 
+import validator from 'validator';
+
 
 /**
  * Error response:
@@ -175,65 +177,91 @@ export const deleteCategory = async (req, res) => {
 }
 
 /**
- * Return all the categories
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `type` and `color`
-  - Optional behavior:
-    - empty array is returned if there are no categories
+ * getCategories
+Request Parameters: None
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes type and color
+Example: res.status(200).json({data: [{type: "food", color: "red"}, {type: "health", color: "green"}], refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 401 error if called by a user who is not authenticated (authType = Simple)
  */
 export const getCategories = async (req, res) => {
     try {
+
+        //authenticate
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
         if (!simpleAuth.authorized) {
             return res.status(401).json({ error: simpleAuth.cause }) // unauthorized
         }
+
         let data = await categories.find({})
         let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-        return res.status(200).json({ data: filter });
+        return res.status(200).json({ data: filter, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
 }
 
 /**
- * Create a new transaction made by a specific user
-  - Request Body Content: An object having attributes `username`, `type` and `amount`
-  - Response `data` Content: An object having attributes `username`, `type`, `amount` and `date`
-  - Optional behavior:
-    - error 401 is returned if the username or the type of category does not exist
+ createTransaction
+Request Parameters: A string equal to the username of the involved user
+Example: /api/users/Mario/transactions
+Request Body Content: An object having attributes username, type and amount
+Example: {username: "Mario", amount: 100, type: "food"}
+Response data Content: An object having attributes username, type, amount and date
+Example: res.status(200).json({data: {username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the parameters in the request body is an empty string
+Returns a 400 error if the type of category passed in the request body does not represent a category in the database
+Returns a 400 error if the username passed in the request body is not equal to the one passed as a route parameter
+Returns a 400 error if the username passed in the request body does not represent a user in the database
+Returns a 400 error if the username passed as a route parameter does not represent a user in the database
+Returns a 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)
+Returns a 401 error if called by an authenticated user who is not the same user as the one in the route parameter (authType = User)
  */
 export const createTransaction = async (req, res) => {
     try {
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
-            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.authorized) {
-                return res.status(401).json({ error: userAuth.cause })
-            }
-        }
+        //get attributes
         const { username, amount, type } = req.body;
-        if (username != req.params.username) return res.status(401).json({ error: "cannot add other user's transaction" });
+
+        //validate attributes
+        if (!username || !amount || !type) return res.status(400).json({ error: "incomplete attribute" });
+        if (username == "" || amount == "" || type == "") return res.status(400).json({ error: "empty strings" });
+        if (!validator.isFloat(amount)) return res.status(400).json({ error: "amount cannot be parsed as floating value" });
+        if (username != req.params.username) return res.status(400).json({ error: "cannot add other user's transaction" });
+
+        //authenticate
+        const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+        if (!userAuth.authorized) {
+            return res.status(401).json({ error: userAuth.cause })
+        }
+
+        if (!(await User.findOne({ username: username }))) return res.status(401).json({ error: "user with the username not found" });
+
         if (!(await categories.findOne({ type: type }))) {
             return res.status(401).json({ error: "category does not exist" });
         }
+
         const new_transactions = new transactions({ username, amount, type });
         await new_transactions.save()
-            .then(data => res.status(200).json({ data: data, message: "transaction created successfully" }))
-            .catch(err => { throw err });
+            .then(data => res.status(200).json({ data: { username: data.username, amount: data.amount, type: data.type, date: data.date }, refreshedTokenMessage: res.locals.refreshedTokenMessage }));
+
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
 }
 
 /**
- * Return all transactions made by all users
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`
-  - Optional behavior:
-    - empty array must be returned if there are no transactions
+ * getAllTransactions
+Request Parameters: None
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, type, amount, date and color
+Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00", color: "red"}, {username: "Mario", amount: 70, type: "health", date: "2023-05-19T10:00:00", color: "green"}, {username: "Luigi", amount: 20, type: "food", date: "2023-05-19T10:00:00", color: "red"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const getAllTransactions = async (req, res) => {
     try {
+
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
@@ -252,10 +280,18 @@ export const getAllTransactions = async (req, res) => {
                 }
             },
             { $unwind: "$categories_info" }
-        ]).then((result) => {
-            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.status(200).json(data);
-        }).catch(error => { throw (error) })
+        ]).then(
+            (result) => {
+                let data = result.map(
+                    v =>
+                        Object.assign({},
+                            { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }
+                        )
+                );
+                res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+            }
+        );
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }

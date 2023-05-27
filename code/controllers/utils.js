@@ -96,7 +96,7 @@ export const verifyAuth = (req, res, info) => {
     }
 
     if (info.authType === 'User') {
-        if (decodedAccessToken.role === 'User' && decodedAccessToken.username === req.params.username) {
+        if (decodedAccessToken.username === req.params.username) {
             return { authorized: true, cause: "Authorized" };
         }
         else {
