@@ -454,7 +454,7 @@ export const getTransactionsByGroup = async (req, res) => {
 
         if (!req.params.name) return res.status(400).json({ error: "no group name" });
 
-        let group = await Group.findOne({ name: req.params.name }).populate('members.user');
+        const group = await Group.findOne({ name: req.params.name }).populate('members.user');
         if (!group) return res.status(400).json("group does not exist");
         //console.log(group);
 
@@ -514,63 +514,87 @@ export const getTransactionsByGroup = async (req, res) => {
 
 
 /**
- * Return all transactions made by members of a specific group filtered by a specific category
-  - Request Body Content: None
-  - Response `data` Content: An array of objects, each one having attributes `username`, `type`, `amount`, `date` and `color`, filtered so that `type` is the same for all objects.
-  - Optional behavior:
-    - error 401 is returned if the group or the category does not exist
-    - empty array must be returned if there are no transactions made by the group with the specified category
+ * getTransactionsByGroupByCategory
+Request Parameters: A string equal to the name of the requested group, a string equal to the requested category
+Example: /api/groups/Family/transactions/category/food (user route)
+Example: /api/transactions/groups/Family/category/food (admin route)
+Request Body Content: None
+Response data Content: An array of objects, each one having attributes username, type, amount, date and color, filtered so that type is the same for all objects.
+Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "food", date: "2023-05-19T00:00:00", color: "red"}, {username: "Luigi", amount: 20, type: "food", date: "2023-05-19T10:00:00", color: "red"} ] refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the group name passed as a route parameter does not represent a group in the database
+Returns a 400 error if the category passed as a route parameter does not represent a category in the database
+Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions/category/:category
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name/category/:category
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
-        //Distinction between route accessed by Admins or Regular users for functions that can be called by both
-        //and different behaviors and access rights
-        /* if (req.url.indexOf("/transactions/users/") >= 0) {
-         } else {
-         }
-         */
-        let group = await Group.findOne({ name: req.params.name });
-        if (!group) return res.status(401).json("group does not exist");
-        let category = await categories.findOne({ name: req.params.category });
-        if (!category) return res.status(401).json("category does not exist");
 
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
-            const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => { return member.email }) });
-            if (!groupAuth.authorized) {
-                return res.status(401).json({ error: groupAuth.cause })
+        if (!req.params.name) return res.status(400).json({ error: "no group paramter" });
+        if (!req.params.category) return res.status(400).json({ error: "no category parameter" });
+
+
+        const group = await Group.findOne({ name: req.params.name }).populate('members.user');
+        if (!group) return res.status(400).json("group does not exist");
+        //console.log(group);
+
+        const category = await categories.findOne({ type: req.params.category });
+        if (!category) return res.status(400).json("category does not exist");
+
+        //authenticate//
+        //admin route
+        if (req.url.includes("/transactions/groups/") >= 0) {
+            const auth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!auth.authorized) {
+                return res.status(401).json({ error: adminAuth.cause })
             }
         }
-        //user self access and admin any access
-        /**
-        * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-        */
-        transactions.aggregate([
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "type",
-                    foreignField: "type",
-                    as: "categories_info"
+        //user route
+        else if (req.url.includes("/transactions/category/") >= 0) {
+            const auth = verifyAuth(req, res,
+                {
+                    authType: "Group",
+                    emails: group.members.map(member => member.email)
                 }
+            );
+            if (!auth.authorized) {
+                return res.status(401).json({ error: userAuth.cause })
             }
-            , {
-                $match: {
-                    username: {
-                        $in: group.members.map(member => { return member.user.username })
-                    },
-                    type: req.params.category
+        }
+        else {
+            throw new Error('unknown route');
+        }
+
+        transactions.aggregate(
+            [
+                {
+                    $lookup: {
+                        from: "categories",
+                        localField: "type",
+                        foreignField: "type",
+                        as: "categories_info"
+                    }
                 }
-            },
-            { $unwind: "$categories_info" }
-        ]).then((result) => {
-            let data = result.map(v => Object.assign({}, { _id: v._id, username: v.username, amount: v.amount, type: v.type, color: v.categories_info.color, date: v.date }))
-            res.json(data);
-        }).catch(error => { throw (error) })
+                , {
+                    $match: {
+                        username: {
+                            $in: group.members.map(m => m.user.username)
+                        },
+                        type: category.type
+                    },
+                },
+                { $unwind: "$categories_info" }
+            ]
+        ).then((result) => {
+            //console.log(result);
+            let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message })
     }
 }
+
 
 
 /**
