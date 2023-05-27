@@ -270,7 +270,7 @@ export const getAllTransactions = async (req, res) => {
         /**
          * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
          */
-        transactions.aggregate([
+        await transactions.aggregate([
             {
                 $lookup: {
                     from: "categories",
@@ -340,7 +340,7 @@ export const getTransactionsByUser = async (req, res) => {
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
-        transactions.aggregate([
+        await transactions.aggregate([
             {
                 $lookup: {
                     from: "categories",
@@ -410,7 +410,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
-        transactions.aggregate([
+        await transactions.aggregate([
             {
                 $lookup: {
                     from: "categories",
@@ -482,7 +482,7 @@ export const getTransactionsByGroup = async (req, res) => {
             throw new Error('unknown route');
         }
 
-        transactions.aggregate(
+        await transactions.aggregate(
             [
                 {
                     $lookup: {
@@ -564,7 +564,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
             throw new Error('unknown route');
         }
 
-        transactions.aggregate(
+        await transactions.aggregate(
             [
                 {
                     $lookup: {
@@ -598,54 +598,81 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
 
 
 /**
- * Delete a transaction made by a specific user
-  - Request Body Content: The `_id` of the transaction to be deleted
-  - Response `data` Content: A string indicating successful deletion of the transaction
-  - Optional behavior:
-    - error 401 is returned if the user or the transaction does not exist
+ * deleteTransaction
+Request Parameters: A string equal to the username of the involved user
+Example: /api/users/Mario/transactions
+Request Body Content: The _id of the transaction to be deleted
+Example: {_id: "6hjkohgfc8nvu786"}
+Response data Content: A string indicating successful deletion of the transaction
+Example: res.status(200).json({data: {message: "Transaction deleted"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if the username passed as a route parameter does not represent a user in the database
+Returns a 400 error if the _id in the request body does not represent a transaction in the database
+Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User)
  */
 export const deleteTransaction = async (req, res) => {
     try {
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
-            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.authorized) {
-                return res.status(401).json({ error: userAuth.cause })
-            }
+
+        const username = req.params.username;
+        const transaction_id = req.body._id;
+
+        if (!username || !transaction_id) return res.status(400).json({ error: "incomplete attributes" });
+
+        //authenticate user
+        const auth = verifyAuth(req, res, { authType: "User", username: username });
+        if (!auth.authorized) {
+            return res.status(401).json({ error: auth.cause })
         }
-        let user = User.findOne({ name: req.params.username });
-        if (!user) return res.status(401).json("user does not exist");
-        let transaction = await transactions.findOne({ username: user.username, _id: req.params._id });
-        if (!transaction) return res.status(401).json("transaction does not exist");
-        await transactions.deleteOne({ _id: req.params._id });
-        return res.json("deleted successfully")
+
+        if (! await User.findOne({ username: username })) return res.status(400).json({ error: "user does not exist" });
+        if (! await transactions.findOne({ _id: transaction_id })) return res.status(400).json({ error: "transaction does not exist" });
+
+        await transactions.deleteOne({ _id: transaction_id });
+
+        return res.status(200).json({ data: { message: "Transaction deleted" }, refreshedTokenMessage: res.locals.refreshedTokenMessage })
+
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message })
     }
 }
 
 /**
- * Delete multiple transactions identified by their ids
-  - Request Body Content: An array of strings that lists the `_ids` of the transactions to be deleted
-  - Response `data` Content: A message confirming successful deletion
-  - Optional behavior:
-    - error 401 is returned if at least one of the `_ids` does not have a corresponding transaction. Transactions that have an id are not deleted in this case
+ * deleteTransactions
+Request Parameters: None
+Request Body Content: An array of strings that lists the _ids of the transactions to be deleted
+Example: {_ids: ["6hjkohgfc8nvu786"]}
+Response data Content: A message confirming successful deletion
+Example: res.status(200).json({data: {message: "Transactions deleted"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+In case any of the following errors apply then no transaction is deleted
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the ids in the array is an empty string
+Returns a 400 error if at least one of the ids in the array does not represent a transaction in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const deleteTransactions = async (req, res) => {
     try {
+
+        const _ids = req.body._ids;
+        if (!_ids || !Array.isArray(_ids) || _ids.length == 0) return res.status(400).json({ error: "incomplete attributes" });
+
+        if (_ids.includes("")) return res.status(400).json({ error: "at least one empty string id" });
+
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.authorized) {
-            return res.status(401).json({ error: adminAuth.cause })
+            return res.status(401).json({ error: adminAuth.cause }) //unauthorized
         }
-        const ids = req.body._ids;
-        ids.forEach(async id => {
-            let transaction = await transactions.findOne({ _id: req.params._id });
-            if (!transaction) return res.status(401).json("at least one transaction does not exist");
-        })
-        ids.forEach(async id => {
-            await transactions.deleteOne({ _id: req.params._id });
-        })
-        return res.json("all trnasactions deleted succsssfully")
+
+        for (const _id of _ids) {
+            if (! await transactions.countDocuments({ _id: _id })) {
+                return res.status(400).json({ error: "at least one transaction does not exist" });
+            }
+        }
+
+        await transactions.deleteMany({ _id: { $in: _ids } })
+
+        return res.status(200).json({ data: { message: "Transactions deleted" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
     } catch (error) {
         res.status(500).json({ error: error.message })
     }
