@@ -35,7 +35,7 @@ export const createCategory = async (req, res) => {
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        if (!adminAuth.flag) {
             return res.status(401).json({ error: adminAuth.cause })
         }
 
@@ -82,7 +82,7 @@ export const updateCategory = async (req, res) => {
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        if (!adminAuth.flag) {
             return res.status(401).json({ error: adminAuth.cause }) // unauthorized
         }
 
@@ -141,7 +141,7 @@ export const deleteCategory = async (req, res) => {
 
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        if (!adminAuth.flag) {
             return res.status(401).json({ error: adminAuth.cause }) // unauthorized
         }
 
@@ -189,7 +189,7 @@ export const getCategories = async (req, res) => {
 
         //authenticate
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!simpleAuth.authorized) {
+        if (!simpleAuth.flag) {
             return res.status(401).json({ error: simpleAuth.cause }) // unauthorized
         }
 
@@ -232,7 +232,7 @@ export const createTransaction = async (req, res) => {
 
         //authenticate
         const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-        if (!userAuth.authorized) {
+        if (!userAuth.flag) {
             return res.status(401).json({ error: userAuth.cause })
         }
 
@@ -264,7 +264,7 @@ export const getAllTransactions = async (req, res) => {
 
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        if (!adminAuth.flag) {
             return res.status(401).json({ error: adminAuth.cause }) // unauthorized
         }
         /**
@@ -319,7 +319,7 @@ export const getTransactionsByUser = async (req, res) => {
         //admin route
         if (req.url.includes("transactions/users") >= 0) {
             const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!adminAuth.authorized) {
+            if (!adminAuth.flag) {
                 return res.status(401).json({ error: adminAuth.cause })
             }
         }
@@ -327,7 +327,7 @@ export const getTransactionsByUser = async (req, res) => {
         //user route
         else if (req.url.endsWith("/transactions") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.authorized) {
+            if (!userAuth.flag) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
@@ -388,7 +388,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         //admin route
         if (req.url.includes("/transactions/users/") >= 0) {
             const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!adminAuth.authorized) {
+            if (!adminAuth.flag) {
                 return res.status(401).json({ error: adminAuth.cause })
             }
         }
@@ -396,7 +396,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         //user route
         else if (req.url.includes("/transactions/category/") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.authorized) {
+            if (!userAuth.flag) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
@@ -462,7 +462,7 @@ export const getTransactionsByGroup = async (req, res) => {
         //admin route
         if (req.url.includes("/transactions/groups/") >= 0) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.authorized) {
+            if (!auth.flag) {
                 return res.status(401).json({ error: adminAuth.cause })
             }
         }
@@ -474,7 +474,7 @@ export const getTransactionsByGroup = async (req, res) => {
                     emails: group.members.map(member => member.email)
                 }
             );
-            if (!auth.authorized) {
+            if (!auth.flag) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
@@ -544,7 +544,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         //admin route
         if (req.url.includes("/transactions/groups/") >= 0) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.authorized) {
+            if (!auth.flag) {
                 return res.status(401).json({ error: adminAuth.cause })
             }
         }
@@ -556,7 +556,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                     emails: group.members.map(member => member.email)
                 }
             );
-            if (!auth.authorized) {
+            if (!auth.flag) {
                 return res.status(401).json({ error: userAuth.cause })
             }
         }
@@ -620,7 +620,7 @@ export const deleteTransaction = async (req, res) => {
 
         //authenticate user
         const auth = verifyAuth(req, res, { authType: "User", username: username });
-        if (!auth.authorized) {
+        if (!auth.flag) {
             return res.status(401).json({ error: auth.cause })
         }
 
@@ -659,7 +659,7 @@ export const deleteTransactions = async (req, res) => {
         if (_ids.includes("")) return res.status(400).json({ error: "at least one empty string id" });
 
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.authorized) {
+        if (!adminAuth.flag) {
             return res.status(401).json({ error: adminAuth.cause }) //unauthorized
         }
 

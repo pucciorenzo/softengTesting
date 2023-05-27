@@ -32,7 +32,7 @@ export const register = async (req, res) => {
 
         //**optional? check if logged out */
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.authorized) {
+        if (simpleAuth.flag) {
             return res.status(400).json({ error: "please logout first" });
         }
 
@@ -84,7 +84,7 @@ export const registerAdmin = async (req, res) => {
         if (!hasAdminRights) return res.status(400).json({ error: "you cannot register as admin" });
 
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.authorized) {
+        if (simpleAuth.flag) {
             return res.status(400).json({ error: "please logout first" }); // unauthorized
         }
 
@@ -130,7 +130,7 @@ export const registerAdmin = async (req, res) => {
 
         //**optional? check if logged out */
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.authorized) {
+        if (simpleAuth.flag) {
             return res.status(400).json({ error: "please logout first" });
         }
 
@@ -173,7 +173,7 @@ export const login = async (req, res) => {
 
         /**optional ? */
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.authorized) {
+        if (simpleAuth.flag) {
             return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
         }
 
@@ -236,7 +236,7 @@ export const logout = async (req, res) => {
 
         /**optional */
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!simpleAuth.authorized) {
+        if (!simpleAuth.flag) {
             return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
         }
 

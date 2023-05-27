@@ -15,7 +15,7 @@ export const getUsers = async (req, res) => {
 
     //authenticate admin
     const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-    if (!adminAuth.authorized) {
+    if (!adminAuth.flag) {
       return res.status(401).json({ error: adminAuth.cause }) // unauthorized
     }
 
@@ -51,9 +51,9 @@ export const getUser = async (req, res) => {
 
     //authenticate
     const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-    if (!adminAuth.authorized) {
+    if (!adminAuth.flag) {
       const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-      if (!userAuth.authorized) {
+      if (!userAuth.flag) {
         return res.status(401).json({ error: userAuth.cause })
       }
     }
@@ -104,7 +104,7 @@ export const createGroup = async (req, res) => {
 
     //authenticate
     const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
-    if (!simpleAuth.authorized) {
+    if (!simpleAuth.flag) {
       return res.status(401).json({ error: simpleAuth.cause });
     }
 
@@ -173,7 +173,7 @@ export const getGroups = async (req, res) => {
   try {
     //check if authorized as admin
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-    if (!adminAuth.authorized) {
+    if (!adminAuth.flag) {
       return res.status(401).json({ error: adminAuth.cause });
     }
 
@@ -209,9 +209,9 @@ export const getGroup = async (req, res) => {
 
     //authorize
     const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-    if (!adminAuth.authorized) {
+    if (!adminAuth.flag) {
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: members });
-      if (!groupAuth.authorized) {
+      if (!groupAuth.flag) {
         return res.status(401).json({ error: groupAuth.cause });
       }
     }
@@ -262,13 +262,13 @@ export const addToGroup = async (req, res) => {
     if (req.url.endsWith("/add")) {
       //user route
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
-      if (!groupAuth.authorized) {
+      if (!groupAuth.flag) {
         return res.status(401).json({ error: groupAuth.cause });
       }
     } else if (req.url.endsWith("/insert")) {
       //admin exclusive
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      if (!adminAuth.authorized) {
+      if (!adminAuth.flag) {
         return res.status(401).json({ error: adminAuth.cause });
       }
     }
@@ -372,13 +372,13 @@ export const removeFromGroup = async (req, res) => {
     if (req.url.endsWith("/remove")) {
       //user route
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
-      if (!groupAuth.authorized) {
+      if (!groupAuth.flag) {
         return res.status(401).json({ error: groupAuth.cause });
       }
     } else if (req.url.endsWith("/pull")) {
       //admin exclusive
       const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      if (!adminAuth.authorized) {
+      if (!adminAuth.flag) {
         return res.status(401).json({ error: adminAuth.cause });
       }
     }
@@ -487,7 +487,7 @@ export const deleteUser = async (req, res) => {
     */
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
+    if (!auth.flag) return res.status(401).json({ error: auth.cause });
 
     const user = await User.findOne({ email: email });
     if (!user) return res.status(401).json({ error: "user not found" });
@@ -545,7 +545,7 @@ export const deleteGroup = async (req, res) => {
     if (name === "") return res.status(400).json({ error: "empty string" });
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.authorized) return res.status(401).json({ error: auth.cause });
+    if (!auth.flag) return res.status(401).json({ error: auth.cause });
 
     const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
     if (!deletedCount) return res.status(401).json({ error: "group not found" });

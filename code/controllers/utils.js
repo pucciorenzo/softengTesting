@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken'
-import { User } from '../models/User.js'
 
 /**
  * Handle possible date filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
@@ -36,15 +35,22 @@ export const handleDateFilterParams = (req) => {
  *              - the accessToken is expired and the refreshToken has a `email` which is in the requested group => success
  * @returns true if the user satisfies all the conditions of the specified `authType` and false if at least one condition is not satisfied
  *  Refreshes the accessToken if it has expired and the refreshToken is still valid
+ * 
+ * new from api.md
+ * verifyAuth
+Verifies that the tokens present in the request's cookies allow access depending on the different criteria.
+Returns an object with a boolean flag that specifies whether access is granted or not and a cause that describes the reason behind failed authentication
+Example: {flag: false, cause: "Unauthorized"}
+Refreshes the accessToken if it has expired and the refreshToken allows authentication; sets the refreshedTokenMessage to inform users that the accessToken must be changed
  */
 
 export const verifyAuth = (req, res, info) => {
     const cookie = req.cookies
     if (!cookie.accessToken || !cookie.refreshToken) {
-        return { authorized: false, cause: "Unauthorized" };
+        return { flag: false, cause: "Unauthorized" };
     }
 
-    //if (!(await User.findOne({ refreshToken: refreshToken }))) return { authorized: false, cause: "refresh token revoked. Did you log out?" };
+    //if (!(await User.findOne({ refreshToken: refreshToken }))) return { flag: false, cause: "refresh token revoked. Did you log out?" };
 
     //start decoding tokens and refresh if needed
     let decodedAccessToken, decodedRefreshToken;
@@ -53,9 +59,9 @@ export const verifyAuth = (req, res, info) => {
         decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
     } catch (err) {
         if (err.name === "TokenExpiredError") {
-            return { authorized: false, cause: "Perform login again" };
+            return { flag: false, cause: "Perform login again" };
         } else {
-            return { authorized: false, cause: err.name }
+            return { flag: false, cause: err.name }
         }
     }
 
@@ -76,56 +82,56 @@ export const verifyAuth = (req, res, info) => {
                 decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);
             }
             catch (err) {
-                return { authorized: false, cause: err.name }
+                return { flag: false, cause: err.name }
             }
         }
     };
 
 
     if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
-        return { authorized: false, cause: "Token is missing information" }
+        return { flag: false, cause: "Token is missing information" }
     }
     if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
-        return { authorized: false, cause: "Token is missing information" }
+        return { flag: false, cause: "Token is missing information" }
     }
     if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
-        return { authorized: false, cause: "Mismatched token users" };
+        return { flag: false, cause: "Mismatched token users" };
     }
 
 
     if (info.authType === 'Simple') {
-        return { authorized: true, cause: "Authorized" };
+        return { flag: true, cause: "Authorized" };
     }
 
     if (info.authType === 'User') {
         if (decodedAccessToken.username === req.params.username) {
-            return { authorized: true, cause: "Authorized" };
+            return { flag: true, cause: "Authorized" };
         }
         else {
-            return { authorized: false, cause: "Mismatched username" };
+            return { flag: false, cause: "Mismatched username" };
         }
     }
 
     if (info.authType === 'Admin') {
         if (decodedAccessToken.role === 'Admin') {
-            return { authorized: true, cause: "Authorized" };
+            return { flag: true, cause: "Authorized" };
         }
         else {
-            return { authorized: false, cause: "Not admin" };
+            return { flag: false, cause: "Not admin" };
         }
     }
 
     //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
     if (info.authType === 'Group') {
         if (info.emails.includes(decodedAccessToken.email)) {
-            return { authorized: true, cause: "Authorized" };
+            return { flag: true, cause: "Authorized" };
         }
         else {
-            return { authorized: false, cause: "User not in group" };
+            return { flag: false, cause: "User not in group" };
         }
     }
 
-    return { authorized: false, cause: "unknown. Try again" };
+    return { flag: false, cause: "unknown. Try again" };
 }
 
 /**
