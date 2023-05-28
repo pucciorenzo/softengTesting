@@ -7,6 +7,22 @@ import jwt from 'jsonwebtoken'
  *  The returned object must handle all possible combination of date filtering parameters, including the case where none are present.
  *  Example: {date: {$gte: "2023-04-30T00:00:00.000Z"}} returns all transactions whose `date` parameter indicates a date from 30/04/2023 (included) onwards
  * @throws an error if the query parameters include `date` together with at least one of `from` or `upTo`
+ * 
+ * API.md
+ * handleDateFilterParams
+Returns an object with a date attribute used for filtering mongoDB's aggregate queries
+The value of date is an object that depends on the query parameters:
+If the query parameters include from then it must include a $gte attribute that specifies the starting date as a Date object in the format YYYY-MM-DDTHH:mm:ss
+Example: /api/users/Mario/transactions?from=2023-04-30 => {date: {$gte: 2023-04-30T00:00:00.000Z}}
+If the query parameters include upTo then it must include a $lte attribute that specifies the ending date as a Date object in the format YYYY-MM-DDTHH:mm:ss
+Example: /api/users/Mario/transactions?upTo=2023-05-10 => {date: {$lte: 2023-05-10T23:59:59.000Z}}
+If both from and upTo are present then both $gte and $lte must be included
+If date is present then it must include both $gte and $lte attributes, these two attributes must specify the same date as a Date object in the format YYYY-MM-DDTHH:mm:ss
+Example: /api/users/Mario/transactions?date=2023-05-10 => {date: {$gte: 2023-05-10T00:00:00.000Z, $lte: 2023-05-10T23:59:59.000Z}}
+If there is no query parameter then it returns an empty object
+Example: /api/users/Mario/transactions => {}
+Throws an error if date is present in the query parameter together with at least one of from or upTo
+Throws an error if the value of any of the three query parameters is not a string that represents a date in the format YYYY-MM-DD
  */
 export const handleDateFilterParams = (req) => {
   const { from, upTo, date } = req.query;
@@ -77,49 +93,104 @@ export const handleDateFilterParams = (req) => {
  *              - the accessToken is expired and the refreshToken has a `email` which is in the requested group => success
  * @returns true if the user satisfies all the conditions of the specified `authType` and false if at least one condition is not satisfied
  *  Refreshes the accessToken if it has expired and the refreshToken is still valid
+ * 
  */
+/** new from api.md
+ * verifyAuth
+Verifies that the tokens present in the request's cookies allow access depending on the different criteria.
+Returns an object with a boolean flag that specifies whether access is granted or not and a cause that describes the reason behind failed authentication
+Example: {flag: false, cause: "Unauthorized"}
+Refreshes the accessToken if it has expired and the refreshToken allows authentication; sets the refreshedTokenMessage to inform users that the accessToken must be changed
+ */
+
 export const verifyAuth = (req, res, info) => {
-  const cookie = req.cookies
-  if (!cookie.accessToken || !cookie.refreshToken) {
-      return { authorized: false, cause: "Unauthorized" };
-  }
-  try {
-      const decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
-      const decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
-      if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
-          return { authorized: false, cause: "Token is missing information" }
-      }
-      if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
-          return { authorized: false, cause: "Token is missing information" }
-      }
-      if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
-          return { authorized: false, cause: "Mismatched users" };
-      }
-      return { authorized: true, cause: "Authorized" }
-  } catch (err) {
-      if (err.name === "TokenExpiredError") {
-          try {
-              const refreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY)
-              const newAccessToken = jwt.sign({
-                  username: refreshToken.username,
-                  email: refreshToken.email,
-                  id: refreshToken.id,
-                  role: refreshToken.role
-              }, process.env.ACCESS_KEY, { expiresIn: '1h' })
-              res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
-              res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-              return { authorized: true, cause: "Authorized" }
-          } catch (err) {
-              if (err.name === "TokenExpiredError") {
-                  return { authorized: false, cause: "Perform login again" }
-              } else {
-                  return { authorized: false, cause: err.name }
-              }
-          }
-      } else {
-          return { authorized: false, cause: err.name };
-      }
-  }
+    const cookie = req.cookies
+    if (!cookie.accessToken || !cookie.refreshToken) {
+        return { flag: false, cause: "Unauthorized" };
+    }
+
+    //if (!(await User.findOne({ refreshToken: refreshToken }))) return { flag: false, cause: "refresh token revoked. Did you log out?" };
+
+    //start decoding tokens and refresh if needed
+    let decodedAccessToken, decodedRefreshToken;
+    try {
+        //decode refresh token
+        decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
+    } catch (err) {
+        if (err.name === "TokenExpiredError") {
+            return { flag: false, cause: "Perform login again" };
+        } else {
+            return { flag: false, cause: err.name }
+        }
+    }
+
+    try {
+        //decode access token
+        decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
+    } catch (err) {
+        if (err.name === "TokenExpiredError") {
+            const newAccessToken = jwt.sign({
+                username: decodedRefreshToken.username,
+                email: decodedRefreshToken.email,
+                id: decodedRefreshToken.id,
+                role: decodedRefreshToken.role
+            }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
+            res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
+            try {
+                decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);
+            }
+            catch (err) {
+                return { flag: false, cause: err.name }
+            }
+        }
+    };
+
+
+    if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
+        return { flag: false, cause: "Token is missing information" }
+    }
+    if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
+        return { flag: false, cause: "Token is missing information" }
+    }
+    if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
+        return { flag: false, cause: "Mismatched token users" };
+    }
+
+
+    if (info.authType === 'Simple') {
+        return { flag: true, cause: "Authorized" };
+    }
+
+    if (info.authType === 'User') {
+        if (decodedAccessToken.username === req.params.username) {
+            return { flag: true, cause: "Authorized" };
+        }
+        else {
+            return { flag: false, cause: "Mismatched username" };
+        }
+    }
+
+    if (info.authType === 'Admin') {
+        if (decodedAccessToken.role === 'Admin') {
+            return { flag: true, cause: "Authorized" };
+        }
+        else {
+            return { flag: false, cause: "Not admin" };
+        }
+    }
+
+    //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
+    if (info.authType === 'Group') {
+        if (info.emails.includes(decodedAccessToken.email)) {
+            return { flag: true, cause: "Authorized" };
+        }
+        else {
+            return { flag: false, cause: "User not in group" };
+        }
+    }
+
+    return { flag: false, cause: "unknown. Try again" };
 }
 
 
@@ -136,7 +207,17 @@ const matchStage = {date: {$gte: 2023-04-30T00:00:00.000Z} }
 return matchStage
 The code example shows the date as a string, but it must actually be a Date object created starting from the parameters (in format YYYY-MM-DD). Parameters used for filtering dates must go from 00:00(for $gte) or up to 23:59 (for $lte). Amount filtering simply requires integer values. All specifications on the parameters for filtering dates still apply (date cannot be present if at least one of from or upTo is also present).
  */
-
+/**new from API.md
+ * handleAmountFilterParams
+Returns an object with an amount attribute used for filtering mongoDB's aggregate queries
+The value of amount is an object that depends on the query parameters:
+If the query parameters include min then it must include a $gte attribute that is an integer equal to min
+Example: /api/users/Mario/transactions?min=10 => `{amount: {$gte: 10} }
+If the query parameters include min then it must include a $lte attribute that is an integer equal to max
+Example: /api/users/Mario/transactions?min=50 => `{amount: {$lte: 50} }
+If both min and max are present then both $gte and $lte must be included
+Throws an error if the value of any of the two query parameters is not a numerical value
+ */
 export const handleAmountFilterParams = (req) => {
   const { min, max } = req.query;
 

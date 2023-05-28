@@ -23,7 +23,8 @@
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.11.1",
-    "npx": "^10.2.2"
+    "npx": "^10.2.2",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "@babel/core": "7.21.3",
