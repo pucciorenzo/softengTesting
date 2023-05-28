@@ -25,7 +25,49 @@ Throws an error if date is present in the query parameter together with at least
 Throws an error if the value of any of the three query parameters is not a string that represents a date in the format YYYY-MM-DD
  */
 export const handleDateFilterParams = (req) => {
-}
+  const { from, upTo, date } = req.query;
+
+  const parseDateString = (str) => {
+    return new Date(`${str}T00:00:00.000Z`);
+  };
+
+  if (date && (from || upTo)) {
+    return res.status(400).json({ message: 'Cannot include date parameter with from or upTo parameters.' });
+  }
+
+  if (date) {
+    if(!validateParams(date, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const parsedDate = parseDateString(date);
+    const fromDate = new Date(parsedDate);
+    const upToDate = new Date(parsedDate);
+    upToDate.setHours(23, 59, 59, 999);
+    return { date: { $gte: fromDate, $lte: upToDate } };
+  }
+
+  const filter = {};
+
+  if (from) {
+    if(!validateParams(from, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const fromDate = parseDateString(from);
+    filter.date = { ...(filter.date || {}), $gte: fromDate };
+  }
+
+  if (upTo) {
+    if(!validateParams(upTo, "handleDateFilterParams")) {
+      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    }
+    const upToDate = parseDateString(upTo);
+    upToDate.setHours(23, 59, 59, 999);
+    filter.date = { ...(filter.date || {}), $lte: upToDate.toISOString() };
+  }
+
+  return filter;
+};
+  
 
 /**
  * Handle possible authentication modes depending on `authType`
@@ -151,6 +193,7 @@ export const verifyAuth = (req, res, info) => {
     return { flag: false, cause: "unknown. Try again" };
 }
 
+
 /**
  * Handle possible amount filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
  * @param req the request object that can contain query parameters
@@ -176,4 +219,52 @@ If both min and max are present then both $gte and $lte must be included
 Throws an error if the value of any of the two query parameters is not a numerical value
  */
 export const handleAmountFilterParams = (req) => {
+  const { min, max } = req.query;
+
+  if (min && max) {
+    if(!validateParams(min, "handleAmountFilterParams"))
+      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
+    if(!validateParams(max, "handleAmountFilterParams"))
+      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
+    return {
+      amount: {
+        $gte: parseInt(min),
+        $lte: parseInt(max),
+      },
+    };
+  }
+
+  if (min) {
+    validateNumber(min);
+    return { amount: { $gte: parseInt(min) } };
+  }
+
+  if (max) {
+    validateNumber(max);
+    return { amount: { $lte: parseInt(max) } };
+  }
+
+  return {};
+};
+
+export const validateParams = (toCheck, functionName) => {
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  switch(functionName){
+    case "register":
+    case "registerAdmin":
+      return validateEmail(toCheck.query.email);
+    case "createGroup":
+      toCheck.query.memberEmails.forEach(email => {
+        if(!validateEmail(email)) return false;
+      });
+      break;
+    case "handleDateFilterParams":
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      return dateRegex.test(toCheck);
+    case "handleAmountFilterParams":
+      return /^\d+$/.test(toCheck);
+  }
 }

@@ -53,6 +53,7 @@ export const register = async (req, res) => {
 
     } catch (err) {
         res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 }
 
@@ -94,6 +95,7 @@ export const registerAdmin = async (req, res) => {
             else {
                 existingUser.role = "Admin";
                 await existingUser.save();
+                return res.status(200).json({ data: 'you are now admin. Username unchanged' });
                 return res.status(200).json({ data: 'you are now admin. Username unchanged' });
             }
         }
@@ -150,6 +152,7 @@ export const registerAdmin = async (req, res) => {
         return res.status(200).json({ data: { message: "User added successfully" } });
 
     } catch (err) {
+        res.status(500).json({ error: err.message });
         res.status(500).json({ error: err.message });
     }
 }
@@ -219,6 +222,7 @@ export const login = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
 }
 
@@ -257,6 +261,7 @@ export const logout = async (req, res) => {
         return res.status(200).json({ data: { message: "User logged out" } });
 
     } catch (error) {
+        res.status(500).json({ error: err.message });
         res.status(500).json({ error: err.message });
     }
 }
