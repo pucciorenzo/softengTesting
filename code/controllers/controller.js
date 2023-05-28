@@ -314,7 +314,8 @@ export const getTransactionsByUser = async (req, res) => {
     try {
 
         const username = req.params.username;
-        let queryParams;
+        let dateFilter = { date: { $gte: "2023-04-30T00:00:00.000Z" } };
+        let amountFilter = {};
 
         //admin route
         if (req.url.includes("transactions/users") >= 0) {
@@ -330,6 +331,8 @@ export const getTransactionsByUser = async (req, res) => {
             if (!userAuth.flag) {
                 return res.status(401).json({ error: userAuth.cause })
             }
+            dateFilter = handleDateFilterParams(req);
+            amountFilter = handleAmountFilterParams(req);
         }
         else {
             throw new Error('unknown route');
@@ -351,7 +354,9 @@ export const getTransactionsByUser = async (req, res) => {
             },
             {
                 $match: {
-                    username: username
+                    username: username,
+                    ...dateFilter,
+                    ...amountFilter
                 }
             },
             { $unwind: "$categories_info" }
