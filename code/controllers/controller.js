@@ -27,10 +27,14 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 const attribute = (v, t) => { return { value: v, type: t } }
 
 const validateAttributes = (attributes) => {
+
     const result = (f, c) => { return { flag: f, cause: c } }
+
     for (const { value, type } of attributes) {
+
         //incomlete/missing attribute
         if (typeof value == undefined || value == null) return { valid: false, cause: "incomplete attribute" };
+
         switch (type) {
             case 'string':
                 {
@@ -49,7 +53,7 @@ const validateAttributes = (attributes) => {
                     if (array.length == 0) return { valid: false, cause: "empty array" };
                     for (const value of array) {
                         let validation = validateAttributes(attribute(value, 'string'));
-                        if (!validation.valid) return result()
+                        if (!validation.valid) return result(false, "at least one empty string");
                     }
                 }
                 break;
@@ -119,9 +123,9 @@ export const updateCategory = async (req, res) => {
 
         //validate attributes
         const validation = validateAttributes([
-            { value: currentType, type: "string" },
-            { value: newType, type: "string" },
-            { value: newColor, type: "string" },
+            attribute(currentType, 'string'),
+            attribute(currentType, "string"),
+            attribute(newColor, 'string'),
         ]);
         if (!validation.valid) return res.status(400).json({ error: validation.cause });
 
