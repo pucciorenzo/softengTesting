@@ -23,6 +23,38 @@ Returns a 400 error if at least one of the parameters in the request body is an 
 Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
+
+
+const validateAttributes = (valueTypeArray) => {
+    for (const { value, type } of valueTypeArray) {
+
+        switch (type) {
+            case 'string':
+                {
+                    //incomlete/missing attribute
+                    if (value == undefined) return { valid: false, cause: "incomplete attribute" };
+                    //not a string
+                    if (typeof value != 'string') return { valid: false, cause: "not string" };
+                    //emty string or all whitespace
+                    if (validator.isEmpty(value, { ignore_whitespace: true })) return { valid: false, cause: "empty string" };
+                }
+                break;
+            case 'stringArray':
+                {
+                    const valueArray = value;
+                    if (valueArray == undefined) || !Array.isArray(types)) return res.status(400).json({ error: "incomplete attribute" });
+                    if (types.length === 0) return res.status(400).json({ error: "no categories to delete" });
+                    const typeArray = types.map(String);
+                    if (typeArray.includes("")) return res.status(400).json({ error: "empty strings" });
+                }
+                break;
+            default:
+                return { valid: false, cause: "unknown type" };
+        }
+    }
+    return { valid: true, cause: "valid" };
+}
+
 export const createCategory = async (req, res) => {
     try {
 
@@ -30,8 +62,12 @@ export const createCategory = async (req, res) => {
         const { type, color } = req.body;
 
         //validate attributes
-        if (!type || !color) return res.status(400).json({ error: "incomplete attribute" });
-        if (type == "" || color == "") return res.status(400).json({ error: "empty string" });
+        const validation = validateAttributes([
+            { value: type, type: "string" },
+            { value: color, type: "string" },
+        ]);
+        if (!validation.valid) return res.status(400).json({ error: validation.cause });
+
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
@@ -77,8 +113,12 @@ export const updateCategory = async (req, res) => {
 
 
         //validate attributes
-        if (!currentType || !newType || !newColor) return res.status(400).json({ error: "incomplete attribute" });
-        if (currentType == "" || newType == "" || newColor == "") return res.status(400).json({ error: "empty string" });
+        const validation = validateAttributes([
+            { value: currentType, type: "string" },
+            { value: newType, type: "string" },
+            { value: newColor, type: "string" },
+        ]);
+        if (!validation.valid) return res.status(400).json({ error: validation.cause });
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
@@ -132,7 +172,7 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteCategory = async (req, res) => {
     try {
         //get attributes
-        const types = req.body.types;
+        const typesToDelete = req.body.types;
         //validate attributes
         if (!types || !Array.isArray(types)) return res.status(400).json({ error: "incomplete attribute" });
         if (types.length === 0) return res.status(400).json({ error: "no categories to delete" });
