@@ -24,15 +24,16 @@ Returns a 400 error if the type of category passed in the request body represent
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 
+const attribute = (v, t) => { return { value: v, type: t } }
 
-const validateAttributes = (valueTypeArray) => {
-    for (const { value, type } of valueTypeArray) {
-
+const validateAttributes = (attributes) => {
+    const result = (f, c) => { return { flag: f, cause: c } }
+    for (const { value, type } of attributes) {
+        //incomlete/missing attribute
+        if (typeof value == undefined || value == null) return { valid: false, cause: "incomplete attribute" };
         switch (type) {
             case 'string':
                 {
-                    //incomlete/missing attribute
-                    if (value == undefined) return { valid: false, cause: "incomplete attribute" };
                     //not a string
                     if (typeof value != 'string') return { valid: false, cause: "not string" };
                     //emty string or all whitespace
@@ -41,11 +42,15 @@ const validateAttributes = (valueTypeArray) => {
                 break;
             case 'stringArray':
                 {
-                    const valueArray = value;
-                    if (valueArray == undefined) || !Array.isArray(types)) return res.status(400).json({ error: "incomplete attribute" });
-                    if (types.length === 0) return res.status(400).json({ error: "no categories to delete" });
-                    const typeArray = types.map(String);
-                    if (typeArray.includes("")) return res.status(400).json({ error: "empty strings" });
+                    const array = value;
+                    //not an array
+                    if (!Array.isArray(array)) return { valid: false, cause: "not array" };
+                    //emty string or all whitespace
+                    if (array.length == 0) return { valid: false, cause: "empty array" };
+                    for (const value of array) {
+                        let validation = validateAttributes(attribute(value, 'string'));
+                        if (!validation.valid) return result()
+                    }
                 }
                 break;
             default:
@@ -63,8 +68,8 @@ export const createCategory = async (req, res) => {
 
         //validate attributes
         const validation = validateAttributes([
-            { value: type, type: "string" },
-            { value: color, type: "string" },
+            attribute(type, 'string'),
+            attribute(color, 'string')
         ]);
         if (!validation.valid) return res.status(400).json({ error: validation.cause });
 
