@@ -42,7 +42,7 @@ export const handleDateFilterParams = (req) => {
     const parsedDate = parseDateString(date);
     const fromDate = new Date(parsedDate);
     const upToDate = new Date(parsedDate);
-    upToDate.setHours(23, 59, 59, 999);
+    upToDate.setUTCHours(23, 59, 59, 999);
     return { date: { $gte: fromDate, $lte: upToDate } };
   }
 
@@ -61,8 +61,8 @@ export const handleDateFilterParams = (req) => {
       throw new Error('Invalid date format. YYYY-MM-DD format expected.');
     }
     const upToDate = parseDateString(upTo);
-    upToDate.setHours(23, 59, 59, 999);
-    filter.date = { ...(filter.date || {}), $lte: upToDate.toISOString() };
+    upToDate.setUTCHours(23, 59, 59, 999);
+    filter.date = { ...(filter.date || {}), $lte: upToDate };
   }
 
   return filter;
