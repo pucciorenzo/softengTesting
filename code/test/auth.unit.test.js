@@ -39,7 +39,7 @@ describe("register", () => {
     await register(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(200);
-    expect(mockRes.json).toHaveBeenCalledWith('user added succesfully');
+    expect(mockRes.json).toHaveBeenCalledWith({ data: 'user added succesfully' });
     expect(mockHash).toHaveBeenCalledWith('password123', 12);
   });
 
@@ -59,7 +59,7 @@ describe("register", () => {
     await register(mockReq, mockRes);
   
     expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ message: 'Invalid email format' });
+    expect(mockRes.json).toHaveBeenCalledWith({ error: "invalid email format" });
   });
 
   test('should return 400 if user with the same email already exists', async () => {
@@ -81,7 +81,7 @@ describe("register", () => {
     await register(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ message: 'you are already registered' });
+    expect(mockRes.json).toHaveBeenCalledWith({ error: "you are already registered" });
   });
 
   test('should return 400 if user with the same username already exists', async () => {
@@ -103,7 +103,7 @@ describe("register", () => {
     await register(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ message: 'username already taken' });
+    expect(mockRes.json).toHaveBeenCalledWith({ error: "username already taken" });
   });
 
 });
