@@ -32,37 +32,36 @@ export const handleDateFilterParams = (req) => {
   };
 
   if (date && (from || upTo)) {
-    return res.status(400).json({ message: 'Cannot include date parameter with from or upTo parameters.' });
+    throw new Error('Cannot include date parameter with from or upTo parameters.');
   }
 
   if (date) {
-    if (!validateParams(date, "handleDateFilterParams")) {
-      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    if(!validateParams(date, "handleDateFilterParams")) {
+      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
     }
     const parsedDate = parseDateString(date);
     const fromDate = new Date(parsedDate);
     const upToDate = new Date(parsedDate);
-    upToDate.setHours(23, 59, 59, 999);
-    //console.log(fromDate+','+upToDate)
+    upToDate.setUTCHours(23, 59, 59, 999);
     return { date: { $gte: fromDate, $lte: upToDate } };
   }
 
   const filter = {};
 
   if (from) {
-    if (!validateParams(from, "handleDateFilterParams")) {
-      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    if(!validateParams(from, "handleDateFilterParams")) {
+      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
     }
     const fromDate = parseDateString(from);
     filter.date = { ...(filter.date || {}), $gte: fromDate };
   }
 
   if (upTo) {
-    if (!validateParams(upTo, "handleDateFilterParams")) {
-      return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
+    if(!validateParams(upTo, "handleDateFilterParams")) {
+      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
     }
     const upToDate = parseDateString(upTo);
-    upToDate.setHours(23, 59, 59, 999);
+    upToDate.setUTCHours(23, 59, 59, 999);
     filter.date = { ...(filter.date || {}), $lte: upToDate };
   }
 
@@ -223,10 +222,10 @@ export const handleAmountFilterParams = (req) => {
   const { min, max } = req.query;
 
   if (min && max) {
-    if (!validateParams(min, "handleAmountFilterParams"))
-      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
-    if (!validateParams(max, "handleAmountFilterParams"))
-      return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
+    if(!validateParams(min, "handleAmountFilterParams"))
+      throw new Error("Invalid min. Expected a numerical value.");
+    if(!validateParams(max, "handleAmountFilterParams"))
+      throw new Error("Invalid max. Expected a numerical value.");
     return {
       amount: {
         $gte: parseInt(min),
@@ -236,12 +235,14 @@ export const handleAmountFilterParams = (req) => {
   }
 
   if (min) {
-    validateNumber(min);
+    if(!validateParams(min, "handleAmountFilterParams"))
+      throw new Error("Invalid min. Expected a numerical value.");
     return { amount: { $gte: parseInt(min) } };
   }
 
   if (max) {
-    validateNumber(max);
+    if(!validateParams(max, "handleAmountFilterParams"))
+      throw new Error("Invalid max. Expected a numerical value.");
     return { amount: { $lte: parseInt(max) } };
   }
 
