@@ -394,7 +394,8 @@ export const getTransactionsByUser = async (req, res) => {
     try {
 
         const username = req.params.username;
-        let dateFilter = { date: { $gte: "2023-04-30T00:00:00.000Z" } };
+        //let dateFilter = { date: { $gte: new Date("2023-04-30T00:00:00.000Z") } };
+        let dateFilter = {};
         let amountFilter = {};
 
         //admin route

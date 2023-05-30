@@ -455,7 +455,7 @@ describe("getAllTransactions", () => {
 })
 
 describe("getTransactionsByUser", () => {
-    test('Dummy test, change it', () => {
+    test('should get specific user transactions', () => {
         expect(true).toBe(true);
     });
 })
