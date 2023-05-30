@@ -1,9 +1,9 @@
 import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
-import { User } from '../models/User';
+import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -20,24 +20,29 @@ beforeEach(() => {
     categories.findOne.mockClear();
     transactions.findOne.mockClear();
     User.findOne.mockClear();
+    Group.findOne.mockClear();
 
     categories.updateMany.mockClear();
     transactions.updateMany.mockClear();
     User.updateMany.mockClear();
+    Group.updateMany.mockClear();
 
     categories.deleteMany.mockClear();
     transactions.deleteMany.mockClear();
     User.deleteMany.mockClear();
+    Group.deleteMany.mockClear();
 
     categories.deleteOne.mockClear();
     transactions.deleteOne.mockClear();
     User.deleteOne.mockClear();
+    Group.deleteOne.mockClear();
 
     transactions.aggregate.mockClear();
 
     categories.prototype.save.mockClear();
     transactions.prototype.save.mockClear();
     User.prototype.save.mockClear();
+    Group.prototype.save.mockClear();
 
 
 });
@@ -66,7 +71,7 @@ describe("createCategory", () => {
                 }
             }
 
-            verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } })
+            verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
             jest.spyOn(categories, 'findOne').mockResolvedValue(null);
             jest.spyOn(categories.prototype, 'save').mockResolvedValue({ _id: "0", type: "testType", color: "testColor" });
 
@@ -223,7 +228,7 @@ describe("deleteCategory", () => {
             }
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         categories.find.mockResolvedValue(mockCategories);
         categories.deleteMany.mockResolvedValue();
         transactions.updateMany.mockResolvedValue({ modifiedCount: mockModifiedCount });
@@ -269,7 +274,7 @@ describe("deleteCategory", () => {
             }
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         categories.find.mockResolvedValue(mockCategories);
         categories.deleteMany.mockResolvedValue();
         transactions.updateMany.mockResolvedValue({ modifiedCount: mockModifiedCount });
@@ -317,7 +322,7 @@ describe("getCategories", () => {
             ]
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         categories.find.mockResolvedValue(mockCategories);
 
         await getCategories(mockReq, mockRes);
@@ -347,7 +352,7 @@ describe("getCategories", () => {
             data: []
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         categories.find.mockResolvedValue(mockCategories);
 
         await getCategories(mockReq, mockRes);
@@ -396,7 +401,7 @@ describe("createTransaction", () => {
             }
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         User.findOne.mockResolvedValue(true);
         categories.findOne.mockResolvedValue(true);
         transactions.prototype.save.mockResolvedValue(mockTransaction);
@@ -453,7 +458,7 @@ describe("getAllTransactions", () => {
             ]
         }
 
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
 
         await getAllTransactions(mockReq, mockRes);
@@ -530,7 +535,7 @@ describe("getTransactionsByUser", () => {
                 { username: "user1", amount: 500.00, type: "type5", date: mockDate, color: "color5" },
             ]
         }
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         handleDateFilterParams.mockImplementation(() => mockDateFilter);
         handleAmountFilterParams.mockImplementation(() => mockAmountFilter);
         User.findOne.mockResolvedValue(true);
@@ -549,7 +554,7 @@ describe("getTransactionsByUser", () => {
 })
 
 describe("getTransactionsByUserByCategory", () => {
-    test('should return all users transactions of  given category (user route)', async () => {
+    test('should show all user transactions of  given category (user route)', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -605,7 +610,7 @@ describe("getTransactionsByUserByCategory", () => {
                 { username: "user1", amount: 500.00, type: "type1", date: mockDate, color: "color1" },
             ]
         }
-        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         User.findOne.mockResolvedValue(true);
         categories.findOne.mockResolvedValue(true);
         transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
@@ -622,8 +627,97 @@ describe("getTransactionsByUserByCategory", () => {
 })
 
 describe("getTransactionsByGroup", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should show all transactions of member of a group (user route)', async () => {
+        const mockGroupName = "group1";
+        const mockPopulatedGroup = {
+            _id: 1,
+            name: mockGroupName,
+            members: [
+                { email: "user1@ezwallet.com", user: { _id: "1", username: "user1" } },
+                { email: "user2@ezwallet.com", user: { _id: "2", username: "user2" } },
+                { email: "user3@ezwallet.com", user: { _id: "3", username: "user3" } },
+                { email: "user4@ezwallet.com", user: { _id: "4", username: "user4" } },
+                { email: "user5@ezwallet.com", user: { _id: "5", username: "user5" } },
+            ]
+        }
+        const mockGroup = {
+            _id: 1,
+            name: mockGroupName,
+            members: [
+                { email: "user1@ezwallet.com", user: "1" },
+                { email: "user2@ezwallet.com", user: "2" },
+                { email: "user3@ezwallet.com", user: "3" },
+                { email: "user4@ezwallet.com", user: "4" },
+                { email: "user5@ezwallet.com", user: "5" },
+            ],
+            populate: jest.fn().mockResolvedValue(mockPopulatedGroup)
+        }
+        const mockReq = {
+            url: "/api/groups/" + mockGroupName + "/transactions",
+            query: {
+            }
+            ,
+            params: {
+                name: mockGroupName
+            },
+            body: {
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockTransactionAggregateFilter = [
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                }
+            }
+            , {
+                $match: {
+                    username: {
+                        $in: mockPopulatedGroup.members.map(m => m.user.username)
+                    }
+                },
+            },
+            { $unwind: "$categories_info" }
+        ]
+        const mockDate = Date.now();
+        const mockTransactionAggregate = [
+            { _id: 1, username: "user1", amount: 100.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 2, username: "user2", amount: 200.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 3, username: "user3", amount: 300.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 4, username: "user4", amount: 400.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 5, username: "user5", amount: 500.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+        ]
+        const mockResStatus = 200
+        const mockResData = {
+            data: [
+                { username: "user1", amount: 100.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user2", amount: 200.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user3", amount: 300.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user4", amount: 400.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user5", amount: 500.00, type: "type1", date: mockDate, color: "color1" },
+            ]
+        }
+
+        Group.findOne.mockResolvedValue(mockGroup);
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+        transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
+
+        await getTransactionsByGroup(mockReq, mockRes);
+
+        expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
+        //expect(mockGroup.populate).toHaveBeenCalled();
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 

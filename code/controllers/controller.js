@@ -554,20 +554,20 @@ export const getTransactionsByGroup = async (req, res) => {
 
         if (!req.params.name) return resError(res, 400, "no group name");
 
-        const group = await Group.findOne({ name: req.params.name }).populate('members.user');
+        const group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
         if (!group) return res.status(400).json("group does not exist");
         //console.log(group);
 
         //authenticate//
         //admin route
-        if (req.url.includes("/transactions/groups/") >= 0) {
+        if (req.url.includes("/transactions/groups/")) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
             if (!auth.flag) {
                 return resError(res, 401, adminAuth.cause)
             }
         }
         //user route
-        else if (req.url.endsWith("/transactions") >= 0) {
+        else if (/groups\/.+\/transactions/.test(req.url)) {
             const auth = verifyAuth(req, res,
                 {
                     authType: "Group",
@@ -604,7 +604,7 @@ export const getTransactionsByGroup = async (req, res) => {
         ).then((result) => {
             //console.log(result);
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
-            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+            resData(res, data);
         });
     } catch (error) {
         console.log(error);
