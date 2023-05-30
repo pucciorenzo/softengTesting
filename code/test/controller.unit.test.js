@@ -3,7 +3,7 @@ import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByGroupByCategory, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, deleteTransaction, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByGroupByCategory, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -820,8 +820,42 @@ describe("getTransactionsByGroupByCategory", () => {
 })
 
 describe("deleteTransaction", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should delete a transaction', async () => {
+        const mockUsername = "user1";
+        const mockTransaction_id = "id1";
+        const mockReq = {
+            params: {
+                username: mockUsername
+            },
+            body: {
+                _id: mockTransaction_id
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockResStatus = 200
+        const mockResData = {
+            data: {
+                message: "Transaction deleted"
+            }
+        }
+        verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+        User.findOne.mockResolvedValue(true);
+        transactions.findOne.mockResolvedValue(true);
+        transactions.deleteOne.mockResolvedValue(true);
+
+        await deleteTransaction(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockUsername });
+        expect(User.findOne).toHaveBeenCalledWith({ username: mockUsername });
+        expect(transactions.findOne).toHaveBeenCalledWith({ _id: mockTransaction_id });
+        expect(transactions.deleteOne).toHaveBeenCalledWith({ _id: mockTransaction_id });
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 

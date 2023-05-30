@@ -709,7 +709,10 @@ export const deleteTransaction = async (req, res) => {
         const username = req.params.username;
         const transaction_id = req.body._id;
 
-        if (!username || !transaction_id) return resError(res, 400, "incomplete attributes");
+        if (!username) return resError(res, 400, "no username parameter");
+
+        const validation = validateAttribute(createAttribute(transaction_id, 'string'));
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate user
         const auth = verifyAuth(req, res, { authType: "User", username: username });
@@ -722,7 +725,7 @@ export const deleteTransaction = async (req, res) => {
 
         await transactions.deleteOne({ _id: transaction_id });
 
-        return res.status(200).json({ data: { message: "Transaction deleted" }, refreshedTokenMessage: res.locals.refreshedTokenMessage })
+        return resData(res, { message: "Transaction deleted" });
 
     } catch (error) {
         console.log(error);
