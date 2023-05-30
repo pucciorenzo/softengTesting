@@ -32,7 +32,6 @@ describe(
                     status: jest.fn().mockReturnThis(),
                     json: jest.fn(),
                     locals: {
-                        error: ""
                     }
                 }
 
@@ -68,6 +67,9 @@ describe("updateCategory", () => {
             const mockRes = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
+                locals: {
+
+                }
             }
             const mockCurrentCategory =
             {

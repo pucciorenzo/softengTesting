@@ -64,6 +64,10 @@ const validateAttributes = (attributes) => {
     return { valid: true, cause: "valid" };
 }
 
+
+const resError = (res, code, msg) => res.status(code).json({ error: msg });
+const resData = (res, data) => res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
 export const createCategory = async (req, res) => {
     try {
 
@@ -75,26 +79,23 @@ export const createCategory = async (req, res) => {
             attribute(type, 'string'),
             attribute(color, 'string')
         ]);
-        if (!validation.valid) return res.status(400).json({ error: validation.cause });
-
+        if (!validation.valid) return resError(res, 400, validation.cause);
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) {
-            return res.status(401).json({ error: adminAuth.cause })
-        }
+        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause);
 
         //check if category exists
         const existingCategory = await categories.findOne({ type: type });
-        if (existingCategory) return res.status(400).json({ error: "category already exists" });
+        if (existingCategory) return resError(res, 400, "category already exists");
 
         //create and save category
         const new_categories = new categories({ type, color });
         await new_categories.save() //auto throws duplicate type error
-            .then(data => res.status(200).json({ data: { type: data.type, color: data.color }, refreshedTokenMessage: res.locals.refreshedTokenMessage }));
+            .then(data => resData(res, { type: data.type, color: data.color }));
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -127,23 +128,18 @@ export const updateCategory = async (req, res) => {
             attribute(currentType, "string"),
             attribute(newColor, 'string'),
         ]);
-        if (!validation.valid) return res.status(400).json({ error: validation.cause });
+        if (!validation.valid) return resError(res, 400, validation.cause);
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) {
-            return res.status(401).json({ error: adminAuth.cause }) // unauthorized
-        }
+        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
 
         //confirm category to be updated exists
         const currentCategory = await categories.findOne({ type: currentType });
-        if (!currentCategory) return res.status(400).json({ error: "category does not exist" });
+        if (!currentCategory) return resError(res, 400, "category does not exist");
 
         //confirm new category type does not exist
-        if (
-            (newType != currentType) &&
-            (await categories.findOne({ type: newType }))
-        ) return res.status(401).json({ error: "new category exists" });
+        if (newType != currentType && await categories.findOne({ type: newType })) return resError(res, 401, "new category exists");
 
         //update category
         currentCategory.type = newType;
@@ -154,10 +150,10 @@ export const updateCategory = async (req, res) => {
         const count = (await transactions.updateMany({ type: currentType }, { type: newType })).modifiedCount;
 
         //return successful and transactions update count
-        return res.status(200).json({ data: { message: "Category edited successfully", count: count } });
+        return resData(res, { message: "Category edited successfully", count: count });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        resError(res, 500, error.message);
     }
 }
 
@@ -183,15 +179,13 @@ export const deleteCategory = async (req, res) => {
         //get attributes
         const typesToDelete = req.body.types;
         //validate attributes
-        if (!types || !Array.isArray(types)) return res.status(400).json({ error: "incomplete attribute" });
-        if (types.length === 0) return res.status(400).json({ error: "no categories to delete" });
-        const typeArray = types.map(String);
-        if (typeArray.includes("")) return res.status(400).json({ error: "empty strings" });
+        const validation = validateAttributes(typesToDelete);
+        if (!validation.flag) return errorRes()
 
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.flag) {
-            return res.status(401).json({ error: adminAuth.cause }) // unauthorized
+            return resError(res, 401, adminAuth.cause); // unauthorized
         }
 
         if (await categories.countDocuments({}) <= 1) return res.status(400).json({ error: "only zero or one category exists" });
@@ -221,7 +215,7 @@ export const deleteCategory = async (req, res) => {
         return res.status(200).json({ data: { message: "Categories deleted", count: count }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        resError(res, 500, error.message);
     }
 }
 
@@ -247,7 +241,7 @@ export const getCategories = async (req, res) => {
         return res.status(200).json({ data: filter, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -295,8 +289,8 @@ export const createTransaction = async (req, res) => {
         await new_transactions.save()
             .then(data => res.status(200).json({ data: { username: data.username, amount: data.amount, type: data.type, date: data.date }, refreshedTokenMessage: res.locals.refreshedTokenMessage }));
 
-    } catch (err) {
-        res.status(500).json({ error: err.message })
+    } catch (error) {
+        resError(res, 500, error.message);
     }
 }
 
@@ -314,7 +308,7 @@ export const getAllTransactions = async (req, res) => {
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.flag) {
-            return res.status(401).json({ error: adminAuth.cause }) // unauthorized
+            return resError(res, 401, adminAuth.cause); // unauthorized
         }
         /**
          * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -342,7 +336,7 @@ export const getAllTransactions = async (req, res) => {
         );
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -415,7 +409,7 @@ export const getTransactionsByUser = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -486,7 +480,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -562,7 +556,7 @@ export const getTransactionsByGroup = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -645,7 +639,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -687,7 +681,7 @@ export const deleteTransaction = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
 
@@ -728,6 +722,6 @@ export const deleteTransactions = async (req, res) => {
         return res.status(200).json({ data: { message: "Transactions deleted" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        resError(res, 500, error.message);
     }
 }
