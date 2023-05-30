@@ -72,13 +72,21 @@ const validateAttribute = (attribute) => {
                 if (typeof value != 'number') return validationFail("cannot parse as floating value")
             }
                 break;
+            case 'email': {
+                if (!validator.isEmail(value)) return validationFail("not an email");
+            }
+                break;
+            case 'date': {
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(toCheck)) validationFail("invalid date format");
+            }
             default:
                 return validationFail("unknown type");
 
         }
         return validationPass();
     } catch (error) {
-        throw error;
+        return { flag: false, cause: error.message };
     }
 
 }
@@ -410,6 +418,8 @@ export const getTransactionsByUser = async (req, res) => {
         else if (req.url.endsWith("/transactions") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.flag) return resError(res, 401, userAuth.cause);
+            const { from, upTo, date } = req.query;
+
             dateFilter = handleDateFilterParams(req);
             amountFilter = handleAmountFilterParams(req);
         }
