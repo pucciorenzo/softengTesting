@@ -82,7 +82,6 @@ const validateAttribute = (attribute) => {
             }
             default:
                 return validationFail("unknown type");
-
         }
         return validationPass();
     } catch (error) {
@@ -403,23 +402,34 @@ export const getTransactionsByUser = async (req, res) => {
 
         const username = req.params.username;
         //let dateFilter = { date: { $gte: new Date("2023-04-30T00:00:00.000Z") } };
-        let dateFilter = {};
-        let amountFilter = {};
+        let dateFilter;
+        let amountFilter;
 
         //admin route
-        if (req.url.includes("transactions/users") >= 0) {
+        if (/transactions\/users/.test(req.url)) {
             const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
             if (!adminAuth.flag) {
                 return resError(res, 401, adminAuth.cause)
             }
         }
-
         //user route
-        else if (req.url.endsWith("/transactions") >= 0) {
+        else if (/\/users\/.+\/transactions.*/.test(req.url)) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.flag) return resError(res, 401, userAuth.cause);
             const { from, upTo, date } = req.query;
-
+            /*let validation;
+            if (from) {
+                validation = validateAttribute(createAttribute(from, 'date'));
+                if (!validation.flag) return resError(res, 400, validation.cause);
+            }
+            if (upTo) {
+                validation = validateAttribute(createAttribute(upTo, 'date'));
+                if (!validation.flag) return resError(res, 400, validation.cause);
+            }
+            if (date) {
+                validation = validateAttribute(createAttribute(date, 'date'));
+                if (!validation.flag) return resError(res, 400, validation.cause);
+            }*/
             dateFilter = handleDateFilterParams(req);
             amountFilter = handleAmountFilterParams(req);
         }
@@ -432,6 +442,7 @@ export const getTransactionsByUser = async (req, res) => {
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
+        //console.log(JSON.stringify(dateFilter) + JSON.stringify(amountFilter));
         await transactions.aggregate([
             {
                 $lookup: {

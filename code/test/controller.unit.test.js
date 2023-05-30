@@ -2,8 +2,8 @@ import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { User } from '../models/User';
-import { verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, updateCategory } from '../controllers/controller';
+import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
+import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByUser, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -11,6 +11,8 @@ jest.mock('../models/User');
 
 beforeEach(() => {
     verifyAuth.mockClear();
+    handleDateFilterParams.mockClear();
+    handleAmountFilterParams.mockClear();
 
     categories.find.mockClear();
     transactions.find.mockClear();
@@ -40,46 +42,44 @@ beforeEach(() => {
 
 });
 
-describe(
-    "createCategory",
-    () => {
-        test('should create new category',
-            async () => {
+describe("createCategory", () => {
+    test('should create new category',
+        async () => {
 
-                const mockReq = {
-                    body: {
-                        type: "testType",
-                        color: "testColor"
-                    }
+            const mockReq = {
+                body: {
+                    type: "testType",
+                    color: "testColor"
                 }
-                const mockRes = {
-                    status: jest.fn().mockReturnThis(),
-                    json: jest.fn(),
-                    locals: {
-                    }
-                }
-                const mockResStatus = 200
-                const mockResData = {
-                    data: {
-                        type: "testType",
-                        color: "testColor"
-                    }
-                }
-
-                verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } })
-                jest.spyOn(categories, 'findOne').mockResolvedValue(null);
-                jest.spyOn(categories.prototype, 'save').mockResolvedValue({ _id: "0", type: "testType", color: "testColor" });
-
-                await createCategory(mockReq, mockRes);
-
-                expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
-                expect(categories.prototype.save).toHaveBeenCalledWith();
-                //expect(categories.find).toHaveBeenCalledWith({ type: "testType" });
-                expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
-                expect(mockRes.json).toHaveBeenCalledWith(mockResData);
             }
-        );
-    })
+            const mockRes = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                locals: {
+                }
+            }
+            const mockResStatus = 200
+            const mockResData = {
+                data: {
+                    type: "testType",
+                    color: "testColor"
+                }
+            }
+
+            verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } })
+            jest.spyOn(categories, 'findOne').mockResolvedValue(null);
+            jest.spyOn(categories.prototype, 'save').mockResolvedValue({ _id: "0", type: "testType", color: "testColor" });
+
+            await createCategory(mockReq, mockRes);
+
+            expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
+            expect(categories.prototype.save).toHaveBeenCalledWith();
+            //expect(categories.find).toHaveBeenCalledWith({ type: "testType" });
+            expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+            expect(mockRes.json).toHaveBeenCalledWith(mockResData);
+        }
+    );
+})
 
 describe("updateCategory", () => {
     test(
@@ -424,6 +424,17 @@ describe("getAllTransactions", () => {
             }
         }
         const mockDate = Date.now();
+        const mockTransactionAggregateFilter = [
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]
         const mockTransactionAggregate = [
             { _id: 1, username: "user1", amount: 100.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
             { _id: 2, username: "user2", amount: 200.00, type: "type2", date: mockDate, categories_info: { _id: 2, type: "type2", color: "color2" } },
@@ -448,15 +459,92 @@ describe("getAllTransactions", () => {
         await getAllTransactions(mockReq, mockRes);
 
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
-        expect(transactions.aggregate).toHaveBeenCalled();
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 
 describe("getTransactionsByUser", () => {
-    test('should get specific user transactions', () => {
-        expect(true).toBe(true);
+    test('should return all users transactions (user route with date)', async () => {
+        const mockDate = "2023-04-01";
+        const mockUsername = "user1";
+        const mockReq = {
+            url: "/api/users/user1/transactions?date=" + mockDate,
+            query: {
+                date: mockDate
+            }
+            ,
+            params: {
+                username: mockUsername
+            },
+            body: {
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockDateFilter = {
+            date:
+            {
+                $gte: new Date("2023-04-01T00:00:00.000Z"),
+                $lte: new Date("2023-04-01T23:59:59.999Z")
+            },
+        }
+        const mockAmountFilter = {}
+        const mockTransactionAggregateFilter = [
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                }
+            },
+            {
+                $match: {
+                    username: mockUsername,
+                    ...mockDateFilter,
+                    ...mockAmountFilter
+                }
+            },
+            { $unwind: "$categories_info" }
+        ]
+        const mockTransactionAggregate = [
+            { _id: 1, username: "user1", amount: 100.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 2, username: "user1", amount: 200.00, type: "type2", date: mockDate, categories_info: { _id: 2, type: "type2", color: "color2" } },
+            { _id: 3, username: "user1", amount: 300.00, type: "type3", date: mockDate, categories_info: { _id: 3, type: "type3", color: "color3" } },
+            { _id: 4, username: "user1", amount: 400.00, type: "type4", date: mockDate, categories_info: { _id: 4, type: "type4", color: "color4" } },
+            { _id: 5, username: "user1", amount: 500.00, type: "type5", date: mockDate, categories_info: { _id: 5, type: "type5", color: "color5" } },
+        ]
+        const mockResStatus = 200
+        const mockResData = {
+            data: [
+                { username: "user1", amount: 100.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user1", amount: 200.00, type: "type2", date: mockDate, color: "color2" },
+                { username: "user1", amount: 300.00, type: "type3", date: mockDate, color: "color3" },
+                { username: "user1", amount: 400.00, type: "type4", date: mockDate, color: "color4" },
+                { username: "user1", amount: 500.00, type: "type5", date: mockDate, color: "color5" },
+            ]
+        }
+        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        handleDateFilterParams.mockImplementation(() => mockDateFilter);
+        handleAmountFilterParams.mockImplementation(() => mockAmountFilter);
+        User.findOne.mockResolvedValue(true);
+        transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
+
+        await getTransactionsByUser(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockUsername });
+        expect(handleDateFilterParams).toHaveBeenCalledWith(mockReq);
+        expect(handleAmountFilterParams).toHaveBeenCalledWith(mockReq);
+        expect(User.findOne).toHaveBeenCalledWith({ username: mockUsername });
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 

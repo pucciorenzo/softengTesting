@@ -26,7 +26,7 @@ Throws an error if the value of any of the three query parameters is not a strin
  */
 export const handleDateFilterParams = (req) => {
   const { from, upTo, date } = req.query;
-
+  console.log(`from : ${from}, upto : ${upTo}, date : ${date}`);
   const parseDateString = (str) => {
     return new Date(`${str}T00:00:00.000Z`);
   };
@@ -36,20 +36,21 @@ export const handleDateFilterParams = (req) => {
   }
 
   if (date) {
-    if(!validateParams(date, "handleDateFilterParams")) {
+    if (!validateParams(date, "handleDateFilterParams")) {
       return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
     }
     const parsedDate = parseDateString(date);
     const fromDate = new Date(parsedDate);
     const upToDate = new Date(parsedDate);
     upToDate.setHours(23, 59, 59, 999);
+    //console.log(fromDate+','+upToDate)
     return { date: { $gte: fromDate, $lte: upToDate } };
   }
 
   const filter = {};
 
   if (from) {
-    if(!validateParams(from, "handleDateFilterParams")) {
+    if (!validateParams(from, "handleDateFilterParams")) {
       return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
     }
     const fromDate = parseDateString(from);
@@ -57,17 +58,17 @@ export const handleDateFilterParams = (req) => {
   }
 
   if (upTo) {
-    if(!validateParams(upTo, "handleDateFilterParams")) {
+    if (!validateParams(upTo, "handleDateFilterParams")) {
       return res.status(400).json({ message: 'Invalid date format. YYYY-MM-DD format expected.' });
     }
     const upToDate = parseDateString(upTo);
     upToDate.setHours(23, 59, 59, 999);
-    filter.date = { ...(filter.date || {}), $lte: upToDate.toISOString() };
+    filter.date = { ...(filter.date || {}), $lte: upToDate };
   }
 
   return filter;
 };
-  
+
 
 /**
  * Handle possible authentication modes depending on `authType`
@@ -104,93 +105,93 @@ Refreshes the accessToken if it has expired and the refreshToken allows authenti
  */
 
 export const verifyAuth = (req, res, info) => {
-    const cookie = req.cookies
-    if (!cookie.accessToken || !cookie.refreshToken) {
-        return { flag: false, cause: "Unauthorized" };
+  const cookie = req.cookies
+  if (!cookie.accessToken || !cookie.refreshToken) {
+    return { flag: false, cause: "Unauthorized" };
+  }
+
+  //if (!(await User.findOne({ refreshToken: refreshToken }))) return { flag: false, cause: "refresh token revoked. Did you log out?" };
+
+  //start decoding tokens and refresh if needed
+  let decodedAccessToken, decodedRefreshToken;
+  try {
+    //decode refresh token
+    decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return { flag: false, cause: "Perform login again" };
+    } else {
+      return { flag: false, cause: err.name }
     }
+  }
 
-    //if (!(await User.findOne({ refreshToken: refreshToken }))) return { flag: false, cause: "refresh token revoked. Did you log out?" };
-
-    //start decoding tokens and refresh if needed
-    let decodedAccessToken, decodedRefreshToken;
-    try {
-        //decode refresh token
-        decodedRefreshToken = jwt.verify(cookie.refreshToken, process.env.ACCESS_KEY);
-    } catch (err) {
-        if (err.name === "TokenExpiredError") {
-            return { flag: false, cause: "Perform login again" };
-        } else {
-            return { flag: false, cause: err.name }
-        }
+  try {
+    //decode access token
+    decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      const newAccessToken = jwt.sign({
+        username: decodedRefreshToken.username,
+        email: decodedRefreshToken.email,
+        id: decodedRefreshToken.id,
+        role: decodedRefreshToken.role
+      }, process.env.ACCESS_KEY, { expiresIn: '1h' })
+      res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
+      res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
+      try {
+        decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);
+      }
+      catch (err) {
+        return { flag: false, cause: err.name }
+      }
     }
-
-    try {
-        //decode access token
-        decodedAccessToken = jwt.verify(cookie.accessToken, process.env.ACCESS_KEY);
-    } catch (err) {
-        if (err.name === "TokenExpiredError") {
-            const newAccessToken = jwt.sign({
-                username: decodedRefreshToken.username,
-                email: decodedRefreshToken.email,
-                id: decodedRefreshToken.id,
-                role: decodedRefreshToken.role
-            }, process.env.ACCESS_KEY, { expiresIn: '1h' })
-            res.cookie('accessToken', newAccessToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true })
-            res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
-            try {
-                decodedAccessToken = jwt.verify(newAccessToken, process.env.ACCESS_KEY);
-            }
-            catch (err) {
-                return { flag: false, cause: err.name }
-            }
-        }
-    };
+  };
 
 
-    if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
-        return { flag: false, cause: "Token is missing information" }
+  if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) {
+    return { flag: false, cause: "Token is missing information" }
+  }
+  if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
+    return { flag: false, cause: "Token is missing information" }
+  }
+  if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
+    return { flag: false, cause: "Mismatched token users" };
+  }
+
+
+  if (info.authType === 'Simple') {
+    return { flag: true, cause: "Authorized" };
+  }
+
+  if (info.authType === 'User') {
+    if (decodedAccessToken.username === req.params.username) {
+      return { flag: true, cause: "Authorized" };
     }
-    if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) {
-        return { flag: false, cause: "Token is missing information" }
+    else {
+      return { flag: false, cause: "Mismatched username" };
     }
-    if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role) {
-        return { flag: false, cause: "Mismatched token users" };
+  }
+
+  if (info.authType === 'Admin') {
+    if (decodedAccessToken.role === 'Admin') {
+      return { flag: true, cause: "Authorized" };
     }
-
-
-    if (info.authType === 'Simple') {
-        return { flag: true, cause: "Authorized" };
+    else {
+      return { flag: false, cause: "Not admin" };
     }
+  }
 
-    if (info.authType === 'User') {
-        if (decodedAccessToken.username === req.params.username) {
-            return { flag: true, cause: "Authorized" };
-        }
-        else {
-            return { flag: false, cause: "Mismatched username" };
-        }
+  //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
+  if (info.authType === 'Group') {
+    if (info.emails.includes(decodedAccessToken.email)) {
+      return { flag: true, cause: "Authorized" };
     }
-
-    if (info.authType === 'Admin') {
-        if (decodedAccessToken.role === 'Admin') {
-            return { flag: true, cause: "Authorized" };
-        }
-        else {
-            return { flag: false, cause: "Not admin" };
-        }
+    else {
+      return { flag: false, cause: "User not in group" };
     }
+  }
 
-    //const groupAuth = verifyAuth(req, res, {authType: "Group", emails: <array of emails>})
-    if (info.authType === 'Group') {
-        if (info.emails.includes(decodedAccessToken.email)) {
-            return { flag: true, cause: "Authorized" };
-        }
-        else {
-            return { flag: false, cause: "User not in group" };
-        }
-    }
-
-    return { flag: false, cause: "unknown. Try again" };
+  return { flag: false, cause: "unknown. Try again" };
 }
 
 
@@ -222,9 +223,9 @@ export const handleAmountFilterParams = (req) => {
   const { min, max } = req.query;
 
   if (min && max) {
-    if(!validateParams(min, "handleAmountFilterParams"))
+    if (!validateParams(min, "handleAmountFilterParams"))
       return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
-    if(!validateParams(max, "handleAmountFilterParams"))
+    if (!validateParams(max, "handleAmountFilterParams"))
       return res.status(400).json({ message: 'Invalid input. Expected a numerical value.' });
     return {
       amount: {
@@ -252,13 +253,13 @@ export const validateParams = (toCheck, functionName) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
-  switch(functionName){
+  switch (functionName) {
     case "register":
     case "registerAdmin":
       return validateEmail(toCheck.query.email);
     case "createGroup":
       toCheck.query.memberEmails.forEach(email => {
-        if(!validateEmail(email)) return false;
+        if (!validateEmail(email)) return false;
       });
       break;
     case "handleDateFilterParams":
