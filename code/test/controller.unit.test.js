@@ -3,7 +3,7 @@ import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByGroupByCategory, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -713,7 +713,7 @@ describe("getTransactionsByGroup", () => {
         await getTransactionsByGroup(mockReq, mockRes);
 
         expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
-        //expect(mockGroup.populate).toHaveBeenCalled();
+        expect(mockGroup.populate).toHaveBeenCalled();
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
         expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
@@ -722,8 +722,100 @@ describe("getTransactionsByGroup", () => {
 })
 
 describe("getTransactionsByGroupByCategory", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should show all transactions of member of a group (user route)', async () => {
+        const mockGroupName = "group1";
+        const mockCategory = "type1";
+        const mockPopulatedGroup = {
+            _id: 1,
+            name: mockGroupName,
+            members: [
+                { email: "user1@ezwallet.com", user: { _id: "1", username: "user1" } },
+                { email: "user2@ezwallet.com", user: { _id: "2", username: "user2" } },
+                { email: "user3@ezwallet.com", user: { _id: "3", username: "user3" } },
+                { email: "user4@ezwallet.com", user: { _id: "4", username: "user4" } },
+                { email: "user5@ezwallet.com", user: { _id: "5", username: "user5" } },
+            ]
+        }
+        const mockGroup = {
+            _id: 1,
+            name: mockGroupName,
+            members: [
+                { email: "user1@ezwallet.com", user: "1" },
+                { email: "user2@ezwallet.com", user: "2" },
+                { email: "user3@ezwallet.com", user: "3" },
+                { email: "user4@ezwallet.com", user: "4" },
+                { email: "user5@ezwallet.com", user: "5" },
+            ],
+            populate: jest.fn().mockResolvedValue(mockPopulatedGroup)
+        }
+        const mockReq = {
+            url: "/api/groups/" + mockGroupName + "/transactions/category/" + mockCategory,
+            query: {
+            }
+            ,
+            params: {
+                name: mockGroupName,
+                category: mockCategory
+            },
+            body: {
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockTransactionAggregateFilter = [
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "type",
+                    foreignField: "type",
+                    as: "categories_info"
+                }
+            }
+            , {
+                $match: {
+                    username: {
+                        $in: mockPopulatedGroup.members.map(m => m.user.username)
+                    },
+                    type: mockCategory
+                },
+            },
+            { $unwind: "$categories_info" }
+        ]
+        const mockDate = Date.now();
+        const mockTransactionAggregate = [
+            { _id: 1, username: "user1", amount: 100.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 2, username: "user2", amount: 200.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 3, username: "user3", amount: 300.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 4, username: "user4", amount: 400.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 5, username: "user5", amount: 500.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+        ]
+        const mockResStatus = 200
+        const mockResData = {
+            data: [
+                { username: "user1", amount: 100.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user2", amount: 200.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user3", amount: 300.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user4", amount: 400.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user5", amount: 500.00, type: "type1", date: mockDate, color: "color1" },
+            ]
+        }
+
+        Group.findOne.mockResolvedValue(mockGroup);
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+        transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
+
+        await getTransactionsByGroupByCategory(mockReq, mockRes);
+
+        expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
+        expect(mockGroup.populate).toHaveBeenCalled();
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 

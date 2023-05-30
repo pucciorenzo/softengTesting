@@ -480,6 +480,9 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         const username = req.params.username;
         const category = req.params.category;
 
+        if (!username) return resError(res, 400, "no username parameter");
+        if (!category) return resError(res, 400, "no catgory parameter");
+
         /* 
         const validation = validateAttributes([
              createAttribute(username, 'string'),
@@ -574,13 +577,10 @@ export const getTransactionsByGroup = async (req, res) => {
                     emails: group.members.map(member => member.email)
                 }
             );
-            if (!auth.flag) {
-                return resError(res, 401, userAuth.cause)
-            }
+            if (!auth.flag) return resError(res, 401, userAuth.cause)
         }
-        else {
-            throw new Error('unknown route');
-        }
+        else throw new Error('unknown route');
+
 
         await transactions.aggregate(
             [
@@ -628,41 +628,34 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
+        const name = req.params.name;
+        const category = req.params.category;
 
-        if (!req.params.name) return resError(res, 400, "no group paramter");
-        if (!req.params.category) return resError(res, 400, "no category parameter");
+        if (!name) return resError(res, 400, "no group paramter");
+        if (!category) return resError(res, 400, "no category parameter");
 
+        const group = await (await Group.findOne({ name: name })).populate('members.user');
+        if (!group) return resError(res, 400, "group does not exist");
 
-        const group = await Group.findOne({ name: req.params.name }).populate('members.user');
-        if (!group) return res.status(400).json("group does not exist");
-        //console.log(group);
-
-        const category = await categories.findOne({ type: req.params.category });
-        if (!category) return res.status(400).json("category does not exist");
+        if (!(await categories.findOne({ type: category }))) return resError(res, 400, "category does not exist");
 
         //authenticate//
         //admin route
-        if (req.url.includes("/transactions/groups/") >= 0) {
+        if (req.url.includes("/transactions/groups/")) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.flag) {
-                return resError(res, 401, adminAuth.cause)
-            }
+            if (!auth.flag) return resError(res, 401, adminAuth.cause);
         }
         //user route
-        else if (req.url.includes("/transactions/category/") >= 0) {
+        else if (req.url.includes("/transactions/category/")) {
             const auth = verifyAuth(req, res,
                 {
                     authType: "Group",
                     emails: group.members.map(member => member.email)
                 }
             );
-            if (!auth.flag) {
-                return resError(res, 401, userAuth.cause)
-            }
+            if (!auth.flag) return resError(res, 401, userAuth.cause);
         }
-        else {
-            throw new Error('unknown route');
-        }
+        else throw new Error('unknown route');
 
         await transactions.aggregate(
             [
@@ -679,7 +672,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                         username: {
                             $in: group.members.map(m => m.user.username)
                         },
-                        type: category.type
+                        type: category
                     },
                 },
                 { $unwind: "$categories_info" }
