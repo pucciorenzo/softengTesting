@@ -69,7 +69,7 @@ const validateAttribute = (attribute) => {
                 break;
             case 'number':
             case 'float': {
-                if (typeof (value) != 'number') return validationFail("cannot parse as floating value")
+                if (typeof value != 'number') return validationFail("cannot parse as floating value")
             }
                 break;
             default:
@@ -345,9 +345,8 @@ export const getAllTransactions = async (req, res) => {
 
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) {
-            return resError(res, 401, adminAuth.cause); // unauthorized
-        }
+        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
+
         /**
          * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
          */
@@ -369,7 +368,7 @@ export const getAllTransactions = async (req, res) => {
                             { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }
                         )
                 );
-                res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+                resData(res, data);
             }
         );
 

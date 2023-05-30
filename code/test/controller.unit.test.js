@@ -3,7 +3,7 @@ import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { User } from '../models/User';
 import { verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, getCategories, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, getAllTransactions, getCategories, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -377,7 +377,6 @@ describe("createTransaction", () => {
             locals: {
             }
         }
-
         const mockDate = Date.now();
         const mockTransaction = {
             _id: 0,
@@ -411,8 +410,47 @@ describe("createTransaction", () => {
 })
 
 describe("getAllTransactions", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should retreive all transactions', async () => {
+        const mockReq = {
+            params: {
+            },
+            body: {
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockDate = Date.now();
+        const mockTransactionAggregate = [
+            { _id: 1, username: "user1", amount: 100.00, type: "type1", date: mockDate, categories_info: { _id: 1, type: "type1", color: "color1" } },
+            { _id: 2, username: "user2", amount: 200.00, type: "type2", date: mockDate, categories_info: { _id: 2, type: "type2", color: "color2" } },
+            { _id: 3, username: "user3", amount: 300.00, type: "type3", date: mockDate, categories_info: { _id: 3, type: "type3", color: "color3" } },
+            { _id: 4, username: "user4", amount: 400.00, type: "type4", date: mockDate, categories_info: { _id: 4, type: "type4", color: "color4" } },
+            { _id: 5, username: "user5", amount: 500.00, type: "type5", date: mockDate, categories_info: { _id: 5, type: "type5", color: "color5" } },
+        ]
+        const mockResStatus = 200
+        const mockResData = {
+            data: [
+                { username: "user1", amount: 100.00, type: "type1", date: mockDate, color: "color1" },
+                { username: "user2", amount: 200.00, type: "type2", date: mockDate, color: "color2" },
+                { username: "user3", amount: 300.00, type: "type3", date: mockDate, color: "color3" },
+                { username: "user4", amount: 400.00, type: "type4", date: mockDate, color: "color4" },
+                { username: "user5", amount: 500.00, type: "type5", date: mockDate, color: "color5" },
+            ]
+        }
+
+        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
+
+        await getAllTransactions(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+        expect(transactions.aggregate).toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 
