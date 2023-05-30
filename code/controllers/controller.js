@@ -217,7 +217,7 @@ export const deleteCategory = async (req, res) => {
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
 
-        const currentTypes = (await categories.find()).map(c => c.type);
+        let currentTypes = (await categories.find()).map(c => c.type);
         if (currentTypes.length <= 1) return resError(res, 401, "only zero or one category exists");
 
         //check all categories to be deleted exist
@@ -231,7 +231,7 @@ export const deleteCategory = async (req, res) => {
         if (currentTypes.length == typesToDelete.length) typesToDelete = typesToDelete.filter(t => t != currentTypes[0]); //N==T, keep oldest(first) category
 
         for (const type of typesToDelete) {
-            currentTypes.filter(ct => ct != type)
+            currentTypes = currentTypes.filter(ct => ct != type)
         };
 
         //get first category in database
@@ -249,8 +249,7 @@ export const deleteCategory = async (req, res) => {
 
     } catch (error) {
         resError(res, 500, error.message);
-        console.log(error);
-
+        //console.log(error);
     }
 }
 

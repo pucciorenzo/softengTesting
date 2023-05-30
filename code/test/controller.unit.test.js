@@ -2,15 +2,21 @@ import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { verifyAuth } from '../controllers/utils';
-import { createCategory, updateCategory } from '../controllers/controller';
+import { createCategory, deleteCategory, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
 
 beforeEach(() => {
+    verifyAuth.mockClear();
+
     categories.find.mockClear();
+    categories.findOne.mockClear();
     categories.prototype.save.mockClear();
+    categories.deleteMany.mockClear();
     transactions.find.mockClear();
+    transactions.findOne.mockClear();
+    transactions.updateMany.mockClear();
     transactions.deleteOne.mockClear();
     transactions.aggregate.mockClear();
     transactions.prototype.save.mockClear();
@@ -68,7 +74,6 @@ describe("updateCategory", () => {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 locals: {
-
                 }
             }
             const mockCurrentCategory =
@@ -124,7 +129,6 @@ describe("updateCategory", () => {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 locals: {
-                    message: "category updated successfully."
                 }
             }
             const mockCurrentCategory =
@@ -160,8 +164,90 @@ describe("updateCategory", () => {
 })
 
 describe("deleteCategory", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should delete all categories except oldest and set transactions to oldest', async () => {
+        const mockReq = {
+            params: {
+            },
+            body: {
+                types: ["C", "B", "A", "D", "E"]
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockCategories = [
+            { _id: 0, type: "A" },
+            { _id: 1, type: "B" },
+            { _id: 2, type: "C" },
+            { _id: 3, type: "D" },
+            { _id: 4, type: "E" },
+        ]
+        const mockTypesToDelete = ["C", "B", "D", "E"];
+        const mockModifiedCount = 15;
+        const mockResData = {
+            message: "Categories deleted",
+            count: mockModifiedCount
+        }
+
+        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        categories.find.mockResolvedValue(mockCategories);
+        categories.deleteMany.mockResolvedValue();
+        transactions.updateMany.mockResolvedValue({ modifiedCount: mockModifiedCount });
+
+        await deleteCategory(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
+        expect(categories.deleteMany).toHaveBeenCalledWith({ type: { $in: mockTypesToDelete } });
+        expect(transactions.updateMany).toHaveBeenCalledWith({ type: { $in: mockTypesToDelete } }, { type: mockCategories[0].type });
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith({ data: mockResData });
+
+    });
+
+    test('should delete all categories and set transactions to oldest', async () => {
+        const mockReq = {
+            params: {
+            },
+            body: {
+                types: ["C", "B", "A", "D"]
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockCategories = [
+            { _id: 0, type: "A" },
+            { _id: 1, type: "B" },
+            { _id: 2, type: "C" },
+            { _id: 3, type: "D" },
+            { _id: 4, type: "E" },
+        ]
+        const mockTypesToDelete = ["C", "B", "A", "D"];
+        const mockModifiedCount = 15;
+        const mockResData = {
+            message: "Categories deleted",
+            count: mockModifiedCount
+        }
+
+        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        categories.find.mockResolvedValue(mockCategories);
+        categories.deleteMany.mockResolvedValue();
+        transactions.updateMany.mockResolvedValue({ modifiedCount: mockModifiedCount });
+
+        await deleteCategory(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Admin' });
+        expect(categories.deleteMany).toHaveBeenCalledWith({ type: { $in: mockTypesToDelete } });
+        expect(transactions.updateMany).toHaveBeenCalledWith({ type: { $in: mockTypesToDelete } }, { type: "E" });
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith({ data: mockResData });
+
     });
 })
 
