@@ -24,44 +24,73 @@ Returns a 400 error if the type of category passed in the request body represent
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 
-const attribute = (v, t) => { return { value: v, type: t } }
+const createAttribute = (v, t) => { return { value: v, type: t } }
+const validationFail = (c) => { return { flag: false, cause: c } }
+const validationPass = () => { return { flag: true, cause: 'valid' } }
+const validateAttribute = (attribute) => {
+    try {
 
-const validateAttributes = (attributes) => {
-
-    const result = (f, c) => { return { flag: f, cause: c } }
-
-    for (const { value, type } of attributes) {
+        const { value, type } = attribute;
 
         //incomlete/missing attribute
-        if (typeof value == undefined || value == null) return { valid: false, cause: "incomplete attribute" };
+        if (typeof value == undefined || value == null) return validationFail("incomplete attribute");
 
         switch (type) {
+
             case 'string':
                 {
                     //not a string
-                    if (typeof value != 'string') return { valid: false, cause: "not string" };
+                    if (typeof value != 'string') return validationFail("not string");
                     //emty string or all whitespace
-                    if (validator.isEmpty(value, { ignore_whitespace: true })) return { valid: false, cause: "empty string" };
+                    if (validator.isEmpty(value, { ignore_whitespace: true })) return validationFail("empty string");
                 }
                 break;
+
             case 'stringArray':
                 {
                     const array = value;
                     //not an array
-                    if (!Array.isArray(array)) return { valid: false, cause: "not array" };
-                    //emty string or all whitespace
-                    if (array.length == 0) return { valid: false, cause: "empty array" };
+                    if (!Array.isArray(array)) return validationFail("not array");
+                    //no element
+                    if (array.length == 0) return validationFail("empty array");
+                    const exists = {};
                     for (const value of array) {
-                        let validation = validateAttributes(attribute(value, 'string'));
-                        if (!validation.valid) return result(false, "at least one empty string");
+
+                        //not valid string element
+                        let validation = validateAttribute(createAttribute(value, 'string'));
+                        if (!validation.flag) return validationFail("at least one empty string");
+
+                        //repeating element
+                        //console.log(JSON.stringify(exists));
+                        if (exists[value]) return validationFail("at least one repeating element");
+                        exists[value] = true;
                     }
                 }
                 break;
+
             default:
-                return { valid: false, cause: "unknown type" };
+                return validationFail("unknown type");
+
         }
+        return validationPass();
+    } catch (error) {
+        throw error;
     }
-    return { valid: true, cause: "valid" };
+
+}
+
+const validateAttributes = (attributes) => {
+    try {
+        for (const a of attributes) {
+            let validation = validateAttribute(a);
+            if (!validation.flag) return validation;
+        }
+        return validationPass();
+
+    } catch (error) {
+        console.log(error);
+        return { flag: false, cause: error.message };
+    }
 }
 
 
@@ -76,10 +105,10 @@ export const createCategory = async (req, res) => {
 
         //validate attributes
         const validation = validateAttributes([
-            attribute(type, 'string'),
-            attribute(color, 'string')
+            createAttribute(type, 'string'),
+            createAttribute(color, 'string')
         ]);
-        if (!validation.valid) return resError(res, 400, validation.cause);
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
@@ -95,6 +124,7 @@ export const createCategory = async (req, res) => {
             .then(data => resData(res, { type: data.type, color: data.color }));
 
     } catch (error) {
+        console.log(error)
         resError(res, 500, error.message);
     }
 }
@@ -124,11 +154,11 @@ export const updateCategory = async (req, res) => {
 
         //validate attributes
         const validation = validateAttributes([
-            attribute(currentType, 'string'),
-            attribute(currentType, "string"),
-            attribute(newColor, 'string'),
+            createAttribute(currentType, 'string'),
+            createAttribute(currentType, "string"),
+            createAttribute(newColor, 'string'),
         ]);
-        if (!validation.valid) return resError(res, 400, validation.cause);
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
@@ -177,45 +207,50 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteCategory = async (req, res) => {
     try {
         //get attributes
-        const typesToDelete = req.body.types;
+        let typesToDelete = req.body.types;
         //validate attributes
-        const validation = validateAttributes(typesToDelete);
-        if (!validation.flag) return errorRes()
+        const validation = validateAttribute(createAttribute(typesToDelete, 'stringArray'),
+        );
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
         //verify admin
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) {
-            return resError(res, 401, adminAuth.cause); // unauthorized
-        }
+        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
 
-        if (await categories.countDocuments({}) <= 1) return res.status(400).json({ error: "only zero or one category exists" });
+        const currentTypes = (await categories.find()).map(c => c.type);
+        if (currentTypes.length <= 1) return resError(res, 401, "only zero or one category exists");
 
         //check all categories to be deleted exist
-        for (const type of typeArray) {
-            if (! await categories.countDocuments({ type: type })) {
-                return res.status(400).json({ error: "at least one type does not exist" });
+        for (const typeTodelete of typesToDelete) {
+            if (!currentTypes.includes(typeTodelete)) {
+                return resError(res, 400, "at least one type does not exist");
             }
         }
 
         //delete categories, keep atleast one, generate list of deleted types
-        let deletedTypeArray = [];
-        for (const type of typeArray) {
-            if (await categories.countDocuments({}) > 1) {
-                await categories.deleteOne({ type: type });
-                deletedTypeArray.push(type);
-            }
+        if (currentTypes.length == typesToDelete.length) typesToDelete = typesToDelete.filter(t => t != currentTypes[0]); //N==T, keep oldest(first) category
+
+        for (const type of typesToDelete) {
+            currentTypes.filter(ct => ct != type)
         };
 
         //get first category in database
-        const firstCategoryType = (await categories.findOne({})).type;
+        const oldestType = currentTypes[0];
+        await categories.deleteMany(
+            {
+                type: { $in: typesToDelete }
+            }
+        );
 
         //replace all deleted types in transaction with first type and get count modified
-        const count = (await transactions.updateMany({ type: { $in: deletedTypeArray } }, { type: firstCategoryType })).modifiedCount;
+        const count = (await transactions.updateMany({ type: { $in: typesToDelete } }, { type: oldestType })).modifiedCount;
 
-        return res.status(200).json({ data: { message: "Categories deleted", count: count }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        return resData(res, { message: "Categories deleted", count: count });
 
     } catch (error) {
         resError(res, 500, error.message);
+        console.log(error);
+
     }
 }
 
