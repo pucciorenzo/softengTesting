@@ -577,7 +577,7 @@ export const getTransactionsByGroup = async (req, res) => {
                     emails: group.members.map(member => member.email)
                 }
             );
-            if (!auth.flag) return resError(res, 401, userAuth.cause)
+            if (!auth.flag) return resError(res, 401, auth.cause)
         }
         else throw new Error('unknown route');
 
