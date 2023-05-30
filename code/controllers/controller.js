@@ -680,7 +680,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         ).then((result) => {
             //console.log(result);
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
-            res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+            resData(res, data);
         });
     } catch (error) {
         console.log(error);
@@ -765,7 +765,7 @@ export const deleteTransactions = async (req, res) => {
 
         await transactions.deleteMany({ _id: { $in: _ids } })
 
-        return res.status(200).json({ data: { message: "Transactions deleted" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        return resData(res, { message: "Transactions deleted" });
 
     } catch (error) {
         resError(res, 500, error.message);
