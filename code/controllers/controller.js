@@ -67,7 +67,11 @@ const validateAttribute = (attribute) => {
                     }
                 }
                 break;
-
+            case 'number':
+            case 'float': {
+                if (typeof (value) != 'number') return validationFail("cannot parse as floating value")
+            }
+                break;
             default:
                 return validationFail("unknown type");
 
@@ -267,12 +271,12 @@ export const getCategories = async (req, res) => {
         //authenticate
         const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
         if (!simpleAuth.flag) {
-            return res.status(401).json({ error: simpleAuth.cause }) // unauthorized
+            return resError(res, 401, simpleAuth.cause); // unauthorized
         }
 
         let data = await categories.find({})
         let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-        return res.status(200).json({ data: filter, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+        return resData(res, filter);
 
     } catch (error) {
         resError(res, 500, error.message);
@@ -300,28 +304,28 @@ export const createTransaction = async (req, res) => {
     try {
         //get attributes
         const { username, amount, type } = req.body;
-
         //validate attributes
-        if (!username || !amount || !type) return res.status(400).json({ error: "incomplete attribute" });
-        if (username == "" || amount == "" || type == "") return res.status(400).json({ error: "empty strings" });
-        if (!validator.isFloat(amount)) return res.status(400).json({ error: "amount cannot be parsed as floating value" });
-        if (username != req.params.username) return res.status(400).json({ error: "cannot add other user's transaction" });
+        const validation = validateAttributes([
+            createAttribute(username, 'string'),
+            createAttribute(amount, 'float'),
+            createAttribute(type, 'string'),
+        ])
+        console.log(validation);
+        if (!validation.flag) return resError(res, 400, validation.cause);
+
+        if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");
 
         //authenticate
         const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-        if (!userAuth.flag) {
-            return res.status(401).json({ error: userAuth.cause })
-        }
+        if (!userAuth.flag) return resError(res, 401, userAuth.cause);
 
-        if (!(await User.findOne({ username: username }))) return res.status(401).json({ error: "user with the username not found" });
+        if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
 
-        if (!(await categories.findOne({ type: type }))) {
-            return res.status(401).json({ error: "category does not exist" });
-        }
+        if (!(await categories.findOne({ type: type }))) return resError(res, 400, "category does not exist");
 
         const new_transactions = new transactions({ username, amount, type });
         await new_transactions.save()
-            .then(data => res.status(200).json({ data: { username: data.username, amount: data.amount, type: data.type, date: data.date }, refreshedTokenMessage: res.locals.refreshedTokenMessage }));
+            .then(data => resData(res, { username: data.username, amount: data.amount, type: data.type, date: data.date }));
 
     } catch (error) {
         resError(res, 500, error.message);
@@ -398,16 +402,14 @@ export const getTransactionsByUser = async (req, res) => {
         if (req.url.includes("transactions/users") >= 0) {
             const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
             if (!adminAuth.flag) {
-                return res.status(401).json({ error: adminAuth.cause })
+                return resError(res, 401, adminAuth.cause)
             }
         }
 
         //user route
         else if (req.url.endsWith("/transactions") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.flag) {
-                return res.status(401).json({ error: userAuth.cause })
-            }
+            if (!userAuth.flag) return resError(res, 401, userAuth.cause);
             dateFilter = handleDateFilterParams(req);
             amountFilter = handleAmountFilterParams(req);
         }
@@ -471,7 +473,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         if (req.url.includes("/transactions/users/") >= 0) {
             const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
             if (!adminAuth.flag) {
-                return res.status(401).json({ error: adminAuth.cause })
+                return resError(res, 401, adminAuth.cause)
             }
         }
 
@@ -479,7 +481,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         else if (req.url.includes("/transactions/category/") >= 0) {
             const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!userAuth.flag) {
-                return res.status(401).json({ error: userAuth.cause })
+                return resError(res, 401, userAuth.cause)
             }
         }
         else {
@@ -545,7 +547,7 @@ export const getTransactionsByGroup = async (req, res) => {
         if (req.url.includes("/transactions/groups/") >= 0) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
             if (!auth.flag) {
-                return res.status(401).json({ error: adminAuth.cause })
+                return resError(res, 401, adminAuth.cause)
             }
         }
         //user route
@@ -557,7 +559,7 @@ export const getTransactionsByGroup = async (req, res) => {
                 }
             );
             if (!auth.flag) {
-                return res.status(401).json({ error: userAuth.cause })
+                return resError(res, 401, userAuth.cause)
             }
         }
         else {
@@ -627,7 +629,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         if (req.url.includes("/transactions/groups/") >= 0) {
             const auth = verifyAuth(req, res, { authType: 'Admin' });
             if (!auth.flag) {
-                return res.status(401).json({ error: adminAuth.cause })
+                return resError(res, 401, adminAuth.cause)
             }
         }
         //user route
@@ -639,7 +641,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                 }
             );
             if (!auth.flag) {
-                return res.status(401).json({ error: userAuth.cause })
+                return resError(res, 401, userAuth.cause)
             }
         }
         else {
@@ -703,7 +705,7 @@ export const deleteTransaction = async (req, res) => {
         //authenticate user
         const auth = verifyAuth(req, res, { authType: "User", username: username });
         if (!auth.flag) {
-            return res.status(401).json({ error: auth.cause })
+            return resError(res, 401, auth.cause)
         }
 
         if (! await User.findOne({ username: username })) return res.status(400).json({ error: "user does not exist" });
@@ -742,7 +744,7 @@ export const deleteTransactions = async (req, res) => {
 
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
         if (!adminAuth.flag) {
-            return res.status(401).json({ error: adminAuth.cause }) //unauthorized
+            return resError(res, 401, adminAuth.cause) //unauthorized
         }
 
         for (const _id of _ids) {

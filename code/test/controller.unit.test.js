@@ -1,25 +1,43 @@
 import request from 'supertest';
 import { app } from '../app';
 import { categories, transactions } from '../models/model';
+import { User } from '../models/User';
 import { verifyAuth } from '../controllers/utils';
-import { createCategory, deleteCategory, getCategories, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, getCategories, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
+jest.mock('../models/User');
 
 beforeEach(() => {
     verifyAuth.mockClear();
 
     categories.find.mockClear();
-    categories.findOne.mockClear();
-    categories.prototype.save.mockClear();
-    categories.deleteMany.mockClear();
     transactions.find.mockClear();
+
+    categories.findOne.mockClear();
     transactions.findOne.mockClear();
+    User.findOne.mockClear();
+
+    categories.updateMany.mockClear();
     transactions.updateMany.mockClear();
+    User.updateMany.mockClear();
+
+    categories.deleteMany.mockClear();
+    transactions.deleteMany.mockClear();
+    User.deleteMany.mockClear();
+
+    categories.deleteOne.mockClear();
     transactions.deleteOne.mockClear();
+    User.deleteOne.mockClear();
+
     transactions.aggregate.mockClear();
+
+    categories.prototype.save.mockClear();
     transactions.prototype.save.mockClear();
+    User.prototype.save.mockClear();
+
+
 });
 
 describe(
@@ -304,6 +322,7 @@ describe("getCategories", () => {
 
         await getCategories(mockReq, mockRes);
 
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Simple' });
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
 
@@ -333,6 +352,7 @@ describe("getCategories", () => {
 
         await getCategories(mockReq, mockRes);
 
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'Simple' });
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
 
@@ -340,8 +360,53 @@ describe("getCategories", () => {
 })
 
 describe("createTransaction", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+    test('should create transaction', async () => {
+        const mockReq = {
+            params: {
+                username: "user1",
+            },
+            body: {
+                username: "user1",
+                amount: 100,
+                type: "A"
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+
+        const mockDate = Date.now();
+        const mockTransaction = {
+            _id: 0,
+            username: mockReq.body.username,
+            amount: mockReq.body.amount,
+            type: mockReq.body.type,
+            date: mockDate
+        }
+
+        const mockResStatus = 200
+        const mockResData = {
+            data: {
+                username: mockReq.body.username,
+                amount: mockReq.body.amount,
+                type: mockReq.body.type,
+                date: mockDate
+            }
+        }
+
+        verifyAuth.mockImplementation(() => { return { flag: true, cause: 'Authorized' } });
+        User.findOne.mockResolvedValue(true);
+        categories.findOne.mockResolvedValue(true);
+        transactions.prototype.save.mockResolvedValue(mockTransaction);
+
+        await createTransaction(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockReq.params.username });
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 })
 
