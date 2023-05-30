@@ -750,14 +750,12 @@ export const deleteTransactions = async (req, res) => {
     try {
 
         const _ids = req.body._ids;
-        if (!_ids || !Array.isArray(_ids) || _ids.length == 0) return resError(res, 400, "incomplete attributes");
 
-        if (_ids.includes("")) return resError(res, 400, "at least one empty string id");
+        const validation = validateAttribute(createAttribute(_ids, 'stringArray'));
+        if (!validation.flag) resError(res, 400, validation.cause);
 
         const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) {
-            return resError(res, 401, adminAuth.cause) //unauthorized
-        }
+        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause) //unauthorized
 
         for (const _id of _ids) {
             if (! await transactions.countDocuments({ _id: _id })) {

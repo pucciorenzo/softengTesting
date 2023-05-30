@@ -3,7 +3,7 @@ import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
-import { createCategory, createTransaction, deleteCategory, deleteTransaction, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByGroupByCategory, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
+import { createCategory, createTransaction, deleteCategory, deleteTransaction, deleteTransactions, getAllTransactions, getCategories, getTransactionsByGroup, getTransactionsByGroupByCategory, getTransactionsByUser, getTransactionsByUserByCategory, updateCategory } from '../controllers/controller';
 
 jest.mock('../models/model');
 jest.mock('../controllers/utils');
@@ -860,7 +860,47 @@ describe("deleteTransaction", () => {
 })
 
 describe("deleteTransactions", () => {
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
+    test('should delete all transactions in an array', async () => {
+        const mockTransaction_ids = [
+            "id1",
+            "id2",
+            "id3",
+            "id4",
+            "id5",
+        ];
+        const mockReq = {
+            params: {
+            },
+            body: {
+                _ids: mockTransaction_ids
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockResStatus = 200
+        const mockResData = {
+            data: {
+                message: "Transactions deleted"
+            }
+        }
+        verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+        transactions.countDocuments.mockResolvedValue(true);
+        transactions.deleteMany.mockResolvedValue(true);
+
+        await deleteTransactions(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id1" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id2" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id3" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id4" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id5" });
+        expect(transactions.deleteMany).toHaveBeenCalledWith({ _id: { $in: mockTransaction_ids } });
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
+    })
 })
