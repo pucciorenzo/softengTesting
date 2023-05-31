@@ -825,8 +825,10 @@ export const deleteTransactions = async (req, res) => {
 
         }
 
+        //delete transactions
         await transactions.deleteMany({ _id: { $in: _ids } })
 
+        //send data
         return resData(res, { message: "Transactions deleted" });
 
     } catch (error) {
