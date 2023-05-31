@@ -10,20 +10,6 @@ import validator from 'validator';
  * res.status(errorCode).json({ error: "Error message" });
  */
 
-
-/**
- * createCategory
-Request Parameters: None
-Request Body Content: An object having attributes type and color
-Example: {type: "food", color: "red"}
-Response data Content: An object having attributes type and color
-Example: res.status(200).json({data: {type: "food", color: "red"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
-Returns a 400 error if the request body does not contain all the necessary attributes
-Returns a 400 error if at least one of the parameters in the request body is an empty string
-Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
-Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
-*/
-
 const createAttribute = (v, t) => { return { value: v, type: t } }
 const validationFail = (c) => { return { flag: false, cause: c } }
 const validationPass = () => { return { flag: true, cause: 'valid' } }
@@ -109,6 +95,18 @@ const validateAttributes = (attributes) => {
 const resError = (res, code, msg) => res.status(code).json({ error: msg });
 const resData = (res, data) => res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
+/**
+* createCategory
+Request Parameters: None
+Request Body Content: An object having attributes type and color
+Example: {type: "food", color: "red"}
+Response data Content: An object having attributes type and color
+Example: res.status(200).json({data: {type: "food", color: "red"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the parameters in the request body is an empty string
+Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
+*/
 export const createCategory = async (req, res) => {
     try {
 
@@ -127,8 +125,7 @@ export const createCategory = async (req, res) => {
         if (!adminAuth.flag) return resError(res, 401, adminAuth.cause);
 
         //check if category exists
-        const existingCategory = await categories.findOne({ type: type });
-        if (existingCategory) return resError(res, 400, "category already exists");
+        if (await categories.findOne({ type: type })) return resError(res, 400, "category already exists");
 
         //create and save category
         const new_categories = new categories({ type, color });
