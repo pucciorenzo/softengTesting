@@ -11,6 +11,10 @@ res.status(errorCode).json({ error: "Error message" });
 The actual value of the `error`, `message`, and `refreshedTokenMessage` attributes, where required, does not matter as long as the attributes are included in the return object (any string is accepted).
 Route parameters (where needed) cannot be empty, as not having them would define a new route, leading to a 404 error in Postman.
 
+The functions that require Simple, User, and Admin authentication must have the necessary checks performed before any other check, the functions that require Group authentication must first check if the requested group, then check for authentication, and then perform any other additional check.
+
+The `registerAdmin` function does not require any check on whether the user calling it is an authenticated Admin: if such checks were needed, an Admin would have to be created before calling the function, but the only way to create an Admin would be with the function itself, leading to a deadlock. The requirement on Admins being allowed to call the function is a logical one.
+
 ## API List
 
 ### auth.js
@@ -89,7 +93,7 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Returns a 400 error if the request body does not contain all the necessary attributes
 - Returns a 400 error if at least one of the parameters in the request body is an empty string
 - Returns a 400 error if the type of category passed as a route parameter does not represent a category in the database
-- Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database
+- Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one
 - Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
 
 #### `deleteCategory`
@@ -106,6 +110,7 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Returns a 400 error if the request body does not contain all the necessary attributes
 - Returns a 400 error if called when there is only one category in the database
 - Returns a 400 error if at least one of the types in the array is an empty string
+- Returns a 400 error if the array passed in the request body is empty
 - Returns a 400 error if at least one of the types in the array does not represent a category in the database
 - Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
 
@@ -203,8 +208,10 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Response `data` Content: A string indicating successful deletion of the transaction
   - Example: `res.status(200).json({data: {message: "Transaction deleted"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})`
 - Returns a 400 error if the request body does not contain all the necessary attributes
+- Returns a 400 error if the `_id` in the request body is an empty string
 - Returns a 400 error if the username passed as a route parameter does not represent a user in the database
 - Returns a 400 error if the `_id` in the request body does not represent a transaction in the database
+- Returns a 400 error if the `_id` in the request body represents a transaction made by a different user than the one in the route
 - Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User)
 
 #### `deleteTransactions`
@@ -227,7 +234,7 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Request Parameters: None
 - Request Body Content: None
 - Response `data` Content: An array of objects, each one having attributes `username`, `email` and `role`
-  - Example: `res.status(200).json({data: [{username: "Mario", email: "mario.red@email.com"}, {username: "Luigi", email: "luigi.red@email.com"}, {username: "admin", email: "admin@email.com"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})`
+  - Example: `res.status(200).json({data: [{username: "Mario", email: "mario.red@email.com", role: "Regular"}, {username: "Luigi", email: "luigi.red@email.com", role: "Regular"}, {username: "admin", email: "admin@email.com", role: "Regular"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})`
 - Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
 
 #### `getUser`
@@ -251,7 +258,7 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Returns a 400 error if the request body does not contain all the necessary attributes
 - Returns a 400 error if the group name passed in the request body is an empty string
 - Returns a 400 error if the group name passed in the request body represents an already existing group in the database
-- Returns a 400 error if all the provided emails represent users that are already in a group or do not exist in the database
+- Returns a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database
 - Returns a 400 error if the user who calls the API is already in a group
 - Returns a 400 error if at least one of the member emails is not in a valid email format
 - Returns a 400 error if at least one of the member emails is an empty string
@@ -318,12 +325,13 @@ Route parameters (where needed) cannot be empty, as not having them would define
 - Request Body Content: A string equal to the `email` of the user to be deleted
   - Example: `{email: "luigi.red@email.com"}`
 - Response `data` Content: An object having an attribute that lists the number of `deletedTransactions` and an attribute that specifies whether the user was also `deletedFromGroup` or not
-  - Example: `res.status(200).json({data: {deletedTransaction: 1, deletedFromGroup: true}, refreshedTokenMessage: res.locals.refreshedTokenMessage})`
+  - Example: `res.status(200).json({data: {deletedTransactions: 1, deletedFromGroup: true}, refreshedTokenMessage: res.locals.refreshedTokenMessage})`
 - If the user is the last user of a group then the group is deleted as well
 - Returns a 400 error if the request body does not contain all the necessary attributes
 - Returns a 400 error if the email passed in the request body is an empty string
 - Returns a 400 error if the email passed in the request body is not in correct email format
 - Returns a 400 error if the email passed in the request body does not represent a user in the database
+- Returns a 400 error if the email passed in the request body represents an admin
 - Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
 
 #### `deleteGroup`
@@ -360,7 +368,7 @@ Route parameters (where needed) cannot be empty, as not having them would define
 
 - Verifies that the tokens present in the request's cookies allow access depending on the different criteria.
 - Returns an object with a boolean `flag` that specifies whether access is granted or not and a `cause` that describes the reason behind failed authentication
-  - Example: `{flag: false, cause: "Unauthorized"}`
+  - Example: `{authorized: false, cause: "Unauthorized"}`
 - Refreshes the `accessToken` if it has expired and the `refreshToken` allows authentication; sets the `refreshedTokenMessage` to inform users that the `accessToken` must be changed
 
 #### `handleAmountFilterParams`
