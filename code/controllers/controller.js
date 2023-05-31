@@ -22,7 +22,7 @@ Returns a 400 error if the request body does not contain all the necessary attri
 Returns a 400 error if at least one of the parameters in the request body is an empty string
 Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
- */
+*/
 
 const createAttribute = (v, t) => { return { value: v, type: t } }
 const validationFail = (c) => { return { flag: false, cause: c } }
@@ -67,9 +67,10 @@ const validateAttribute = (attribute) => {
                     }
                 }
                 break;
+            case 'amount':
             case 'number':
             case 'float': {
-                if (typeof value != 'number') return validationFail("cannot parse as floating value")
+                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value")
             }
                 break;
             case 'email': {
@@ -310,15 +311,16 @@ Returns a 401 error if called by an authenticated user who is not the same user 
 export const createTransaction = async (req, res) => {
     try {
         //get attributes
-        const { username, amount, type } = req.body;
+        let { username, amount, type } = req.body;
         //validate attributes
         const validation = validateAttributes([
             createAttribute(username, 'string'),
-            createAttribute(amount, 'float'),
+            createAttribute(amount, 'amount'),
             createAttribute(type, 'string'),
         ])
         //console.log(validation);
         if (!validation.flag) return resError(res, 400, validation.cause);
+        amount = parseFloat(amount);
 
         if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");
 
