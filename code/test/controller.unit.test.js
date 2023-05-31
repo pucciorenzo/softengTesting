@@ -837,6 +837,9 @@ describe("deleteTransaction", () => {
             locals: {
             }
         }
+        const mockTransaction = {
+            _id: "id1", username: "user1", type: "type1", date: Date.now()
+        }
         const mockResStatus = 200
         const mockResData = {
             data: {
@@ -845,7 +848,7 @@ describe("deleteTransaction", () => {
         }
         verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
         User.findOne.mockResolvedValue(true);
-        transactions.findOne.mockResolvedValue(true);
+        transactions.findOne.mockResolvedValue(mockTransaction);
         transactions.deleteOne.mockResolvedValue(true);
 
         await deleteTransaction(mockReq, mockRes);
