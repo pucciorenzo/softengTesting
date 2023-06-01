@@ -1,6 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { resData, resError } from "./extraUtils.js";
+import { createAttribute, resData, resError, validateAttributes } from "./extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
@@ -64,92 +64,86 @@ export const getUser = async (req, res) => {
 }
 
 /**
- * createGroup
+createGroup
 Request Parameters: None
 Request request body Content: An object having a string attribute for the name of the group and an array that lists all the memberEmails
 Example: {name: "Family", memberEmails: ["mario.red@email.com", "luigi.red@email.com"]}
 Response data Content: An object having an attribute group (this object must have a string attribute for the name of the created group and an array for the members of the group), an array that lists the alreadyInGroup members (members whose email is already present in a group) and an array that lists the membersNotFound (members whose email does not appear in the system)
 Example: res.status(200).json({data: {group: {name: "Family", members: [{email: "mario.red@email.com"}, {email: "luigi.red@email.com"}]}, membersNotFound: [], alreadyInGroup: []} refreshedTokenMessage: res.locals.refreshedTokenMessage})
 If the user who calls the API does not have their email in the list of emails then their email is added to the list of members
-Returns a 400 error if the request body does not contain all the necessary attributes *
-Returns a 400 error if the group name passed in the request body is an empty string * 
-Returns a 400 error if the group name passed in the request body represents an already existing group in the database *
-Returns a 400 error if all the provided emails represent users that are already in a group or do not exist in the database *
-Returns a 400 error if the user who calls the API is already in a group 
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if the group name passed in the request body is an empty string
+Returns a 400 error if the group name passed in the request body represents an already existing group in the database
+Returns a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database
+Returns a 400 error if the user who calls the API is already in a group
 Returns a 400 error if at least one of the member emails is not in a valid email format
-Returns a 400 error if at least one of the member emails is an empty string *
-Returns a 401 error if called by a user who is not authenticated (authType = Simple) *
+Returns a 400 error if at least one of the member emails is an empty string
+Returns a 401 error if called by a user who is not authenticated (authType = Simple)
  */
 
 export const createGroup = async (req, res) => {
   try {
 
-    const name = req.body.name; //group name
-    const memberEmails = req.body.memberEmails.map(String); //member emails
+    //get attributes
+    const name = req.body.name;
+    let memberEmails = req.body.memberEmails;
 
-    if (!name || !memberEmails) return res.status(400).json({ error: "incomplete attributes" });
-
-    if (name === "") return res.status(400).json({ error: "empty group name" });
-
-    //Returns a 400 error if at least one of the member emails is not in a valid email format
-
-    //Returns a 400 error if at least one of the member emails is an empty string
-    if (memberEmails.includes("")) return res.status(400).json({ error: "at least one empty email string" }); //why different than validate?
+    const validation = validateAttributes([
+      createAttribute(name, 'string'),
+      createAttribute(memberEmails, 'emailArray')
+    ]);
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     //authenticate
-    const simpleAuth = verifyAuth(req, res, { authType: "Simple" });
-    if (!simpleAuth.flag) {
-      return res.status(401).json({ error: simpleAuth.cause });
-    }
+    const auth = verifyAuth(req, res, { authType: "Simple" });
+    if (!auth.flag) return resError(res, 400, auth.cause);
 
     // check if group exists
-    if (await Group.findOne({ name: name })) {
-      return res.status(400).json({ error: "group already exists" });
-    }
+    if (await Group.findOne({ name: name })) return resError(res, 400, "group already exists");
 
-    //start creating groups//
     //categorize emails
     let alreadyInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeAddedMembersArray = [];
     for (const email of memberEmails) {
+
+      //check user exists
       let user = await User.findOne({ email: email });
       if (!user) {
-        notFoundMembersArray.push(email);
+        notFoundMembersArray.push({ email: email });
         continue;
       }
-      if ((await Group.findOne({ members: { $elemMatch: { email: email } } }))) {
-        alreadyInGroupMembersArray.push(email);
+      //check user not in group
+      else if (await Group.findOne({ members: { $elemMatch: { email: email } } })) {
+        alreadyInGroupMembersArray.push({ email: email });
         continue;
       }
-      canBeAddedMembersArray.push({ email: email, user: user._id });
+      //prepare to add
+      else canBeAddedMembersArray.push({ email: email, user: user._id });
     }
 
-    //check if at least one member can be added
-    if (!canBeAddedMembersArray.length) {
-      return res.status(400).json({ error: "no members available to add" });
-    }
+    //check if at least one member other than caller can be added
+    const existingUser = await User.findOne({ refreshToken: req.cookies.refreshToken });
+    if (canBeAddedMembersArray.filter(m => m.user != existingUser._id).length == 0)
+      return resError(res, 400, "no members available to add");
 
     //create and save
-    const newGroup = await Group.create({
+    const newGroup = new Group({
       name: name,
       members: canBeAddedMembersArray
     });
     await newGroup.save()
       .then(data =>
-        res.status(200).json(
-          {
-            data: {
-              group: {
-                name: data.name,
-                members: data.members.map(m => { return m.email })
-              },
-              alreadyInGroup: alreadyInGroupMembersArray,
-              membersNotFound: notFoundMembersArray
-            },
-            refreshedTokenMessage: res.locals.refreshedTokenMessage
-          }
-        ));
+        //prepare and send data
+        resData(res, {
+          group: {
+            name: data.name,
+            members: data.members.map(m => { return { email: m.email } })
+          },
+          alreadyInGroup: alreadyInGroupMembersArray,
+          membersNotFound: notFoundMembersArray
+        }));
+
   } catch (error) {
     resError(res, 500, error.message);
   }
