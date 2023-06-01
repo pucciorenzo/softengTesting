@@ -121,7 +121,7 @@ export const registerAdmin = async (req, res) => {
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
-        
+
         if (username == undefined || email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
 
         if (username.trim() == "" || email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
@@ -172,17 +172,17 @@ export const login = async (req, res) => {
     try {
 
         /**optional ? */
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.flag) {
-            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
-        }
+//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+//        if (simpleAuth.flag) {
+//            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
+//        }
 
         const email = req.body.email;
         const password = req.body.password;
 
-        if (!email || !password) return res.status(400).json({ error: "incomplete attributes" });
+        if (email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
 
-        if (email == "" || password == "") return res.status(400).json({ error: "empty strings" });
+        if (email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 
