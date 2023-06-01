@@ -1,14 +1,14 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { resData } from "./extraUtils.js";
+import { resData, resError } from "./extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
- getUsers
+getUsers
 Request Parameters: None
 Request Body Content: None
 Response data Content: An array of objects, each one having attributes username, email and role
-Example: res.status(200).json({data: [{username: "Mario", email: "mario.red@email.com"}, {username: "Luigi", email: "luigi.red@email.com"}, {username: "admin", email: "admin@email.com"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Example: res.status(200).json({data: [{username: "Mario", email: "mario.red@email.com", role: "Regular"}, {username: "Luigi", email: "luigi.red@email.com", role: "Regular"}, {username: "admin", email: "admin@email.com", role: "Regular"} ], refreshedTokenMessage: res.locals.refreshedTokenMessage})
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const getUsers = async (req, res) => {
@@ -28,12 +28,12 @@ export const getUsers = async (req, res) => {
     resData(res, data);
 
   } catch (error) {
-    res.status(500).json(error.message);
+    resError(res, 500, error.message);
   }
 }
 
 /**
- * getUser
+getUser
 Request Parameters: A string equal to the username of the involved user
 Example: /api/users/Mario
 Request Body Content: None
@@ -48,20 +48,18 @@ export const getUser = async (req, res) => {
     //authenticate
     const auth = verifyAuth(req, res, { authType: 'Admin' });
     if (!auth.flag) {
-      const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-      if (!userAuth.flag) {
-        return res.status(401).json({ error: userAuth.cause })
-      }
+      const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+      if (!auth.flag) return res.status(401).json({ error: auth.cause })
     }
 
     //retreive user
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(400).json({ error: "user not found" });
 
-    return res.status(200).json({ data: { username: user.username, email: user.email, role: user.role }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+    return resData(res, { username: user.username, email: user.email, role: user.role });
 
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    resError(res, 500, error.message);
   }
 }
 
@@ -152,8 +150,8 @@ export const createGroup = async (req, res) => {
             refreshedTokenMessage: res.locals.refreshedTokenMessage
           }
         ));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    resError(res, 500, error.message);
   }
 }
 
@@ -221,7 +219,7 @@ export const getGroup = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    resError(res, 500, error.message);
   }
 }
 
@@ -324,8 +322,8 @@ export const addToGroup = async (req, res) => {
           }
         ));
 
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+  } catch (error) {
+    resError(res, 500, error.message);
   }
 }
 
@@ -447,8 +445,8 @@ export const removeFromGroup = async (req, res) => {
           }
         ));
 
-  } catch (err) {
-    res.status(500).json({ error: err.message })
+  } catch (error) {
+    resError(res, 500, error.message);
   }
 }
 
@@ -515,8 +513,8 @@ export const deleteUser = async (req, res) => {
         }
       );
 
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    resError(res, 500, error.message);
   }
 }
 
@@ -549,8 +547,8 @@ export const deleteGroup = async (req, res) => {
 
     return res.status(200).json({ data: { message: "Group deleted successfully" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
-  } catch (err) {
-    res.status(500).json(err.message)
+  } catch (error) {
+    res.status(500).json(error.message);
   }
 
 }

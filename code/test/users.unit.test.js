@@ -1,5 +1,5 @@
 import { User } from '../models/User.js';
-import { getUsers } from '../controllers/users.js';
+import { getUser, getUsers } from '../controllers/users.js';
 import { verifyAuth } from '../controllers/utils.js';
 
 /**
@@ -17,12 +17,17 @@ jest.mock("../controllers/utils.js");
  * Not doing this `mockClear()` means that test cases may use a mock implementation intended for other test cases.
  */
 beforeEach(() => {
-  User.find.mockClear()
-  //additional `mockClear()` must be placed here
+  verifyAuth.mockClear();
+
+  User.find.mockClear();
+  User.findOne.mockClear();
 });
 
 describe("getUsers", () => {
+
   test("should retreive all users", async () => {
+
+    //mock variables
     const mockReq = {
     }
     const mockRes = {
@@ -41,6 +46,8 @@ describe("getUsers", () => {
         { username: "user5", email: "user5@ezwallet.com", role: "Regular" },
       ]
     }
+
+    //mock implementations
     verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
     User.find.mockResolvedValue([
       { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
@@ -50,18 +57,60 @@ describe("getUsers", () => {
       { _id: "id5", username: "user5", email: "user5@ezwallet.com", password: "hashedPassword5", role: "Regular" },
     ])
 
+    //call function
     await getUsers(mockReq, mockRes);
 
+    //tests
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(User.find).toHaveBeenCalledWith({});
-
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
   })
 
 })
 
-describe("getUser", () => { })
+describe("getUser", () => {
+
+  test("should retreive user (user auth)", async () => {
+
+    //mock variables
+    const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
+    const mockReq = {
+      params: {
+        username: mockUser.username
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = { username: mockUser.username, email: mockUser.email, role: mockUser.role };
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "unauthorized" });
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValue(mockUser);
+
+    //call function
+    await getUser(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockReq.params.username });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.params.username });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+})
 
 describe("createGroup", () => { })
 
