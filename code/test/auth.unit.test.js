@@ -112,7 +112,9 @@ describe("register", () => {
 
   test('should return 400 if user with the same username already exists', async () => {
     const mockFindOne = jest.spyOn(User, 'findOne');
-    mockFindOne.mockResolvedValueOnce({ username: 'testuser' });
+    mockFindOne
+    .mockResolvedValueOnce(null) //email check first
+    .mockResolvedValueOnce({ username: 'testuser' });
 
     const requestBody = {
       username: 'testuser',
@@ -204,7 +206,9 @@ describe("registerAdmin", () => {
       json: jest.fn()
     };
 
-    jest.spyOn(User, 'findOne').mockResolvedValueOnce({ username: 'admin' });
+    jest.spyOn(User, 'findOne')
+    .mockResolvedValueOnce(null) //email check first
+    .mockResolvedValueOnce({ username: 'admin' });
 
     await registerAdmin(req, res);
 
