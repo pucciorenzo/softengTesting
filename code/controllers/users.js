@@ -1,6 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { createAttribute, resData, resError, validateAttributes } from "./extraUtils.js";
+import { createAttribute, resData, resError, validateAttribute, validateAttributes } from "./extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
@@ -16,7 +16,7 @@ export const getUsers = async (req, res) => {
 
     //authenticate admin
     const auth = verifyAuth(req, res, { authType: 'Admin' });
-    if (!auth.flag) return res.status(401).json({ error: auth.cause }) // unauthorized
+    if (!auth.flag) return resError(res, 401, auth.cause) // unauthorized
 
     //retreive users list
     const data = (await User.find({})).map(user => {
@@ -28,7 +28,7 @@ export const getUsers = async (req, res) => {
     resData(res, data);
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -49,7 +49,7 @@ export const getUser = async (req, res) => {
     const auth = verifyAuth(req, res, { authType: 'Admin' });
     if (!auth.flag) {
       const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-      if (!auth.flag) return res.status(401).json({ error: auth.cause })
+      if (!auth.flag) return resError(res, 401, auth.cause)
     }
 
     //retreive user
@@ -59,7 +59,7 @@ export const getUser = async (req, res) => {
     return resData(res, { username: user.username, email: user.email, role: user.role });
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -96,7 +96,7 @@ export const createGroup = async (req, res) => {
 
     //authenticate
     const auth = verifyAuth(req, res, { authType: "Simple" });
-    if (!auth.flag) return resError(res, 400, auth.cause);
+    if (!auth.flag) return resError(res, 401, auth.cause);
 
     // check if group exists
     if (await Group.findOne({ name: name })) return resError(res, 400, "group already exists");
@@ -119,7 +119,10 @@ export const createGroup = async (req, res) => {
         continue;
       }
       //prepare to add
-      else canBeAddedMembersArray.push({ email: email, user: user._id });
+      else if (!canBeAddedMembersArray.includes({ email: email, user: user._id })) {
+        canBeAddedMembersArray.push({ email: email, user: user._id });
+      }
+      else;
     }
 
     //check if at least one member other than caller can be added
@@ -145,7 +148,7 @@ export const createGroup = async (req, res) => {
         }));
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -161,7 +164,7 @@ export const getGroups = async (req, res) => {
   try {
     //check if authorized as admin
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) resError(res, 401, auth.cause);
+    if (!auth.flag) return resError(res, 401, auth.cause);
 
     //retreive groups
     let data = await Group.find({});
@@ -205,12 +208,13 @@ export const getGroup = async (req, res) => {
     return resData(res, { group: { name: group.name, members: memberEmails.map(mE => { return { email: mE } }) } });
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
 
 /**
+addToGroup
 Request Parameters: A string equal to the name of the group
 Example: api/groups/Family/add (user route)
 Example: api/groups/Family/insert (admin route)
@@ -231,38 +235,34 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const addToGroup = async (req, res) => {
   try {
 
-    //all attributes check 400
+    //get attributes
+    const emailArray = req.body.emails;
 
+    //validate attributes
+    const validation = validateAttribute(createAttribute(emailArray, 'emailArray'));
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
     if (!group) return res.status(400).json({ error: "group does not exist" });
 
-    //authorize
-    if (req.url.endsWith("/add")) {
+    //authenticate//
+    if (req.url.includes("/add")) {
+
       //user route
-      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
-      if (!groupAuth.flag) {
-        return res.status(401).json({ error: groupAuth.cause });
-      }
-    } else if (req.url.endsWith("/insert")) {
-      //admin exclusive
+      const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
+      if (!auth.flag) return resError(res, 401, auth.cause);
+
+      //admin route
+    } else if (req.url.includes("/insert")) {
       const auth = verifyAuth(req, res, { authType: "Admin" });
-      if (!auth.flag) {
-        return res.status(401).json({ error: auth.cause });
-      }
+      if (!auth.flag) return resError(res, 401, auth.cause);
+
     }
+    //unknown error
     else {
       throw new Error('unknown route');
     }
-
-    //retreive member emails
-    const emailArray = req.body.emails.map(String);
-    if (emailArray.length === 0) {
-      return res.status(400).json({ error: "no members to add" });
-    }
-    //400 atleast one invalid email format ->includes empty?
-
 
     //categorize emails
     let alreadyInGroupMembersArray = [];
@@ -272,44 +272,38 @@ export const addToGroup = async (req, res) => {
       let user = await User.findOne({ email: email });
       if (!user) {
         notFoundMembersArray.push(email);
-        //console.log(email+"notfound");
         continue;
       }
       if ((await Group.findOne({ 'members.email': email }))) {
         alreadyInGroupMembersArray.push(email);
-        //console.log(email+"ingroup");
         continue;
       }
-      if (!canBeAddedMembersArray.includes(email)) {
+      if (!canBeAddedMembersArray.includes({ email: email, user: user._id })) {
         canBeAddedMembersArray.push({ email: email, user: user._id });
       }
-      //console.log(email+"canadd");
     }
 
     //check if at least one member can be added
-    if (!canBeAddedMembersArray.length) {
-      return res.status(401).json({ error: "no members available to add" });
-    }
+    if (canBeAddedMembersArray.length == 0) return resError(res, 400, "no members available to add");
 
+    //add to group and send
     group.members.push(...canBeAddedMembersArray);
     await group.save()
       .then(data =>
-        res.status(200).json(
+        //prepare data
+        resData(res,
           {
-            data: {
-              group: {
-                name: data.name,
-                members: data.members.map(m => { return m.email })
-              },
-              alreadyInGroup: alreadyInGroupMembersArray,
-              membersNotFound: notFoundMembersArray
+            group: {
+              name: data.name,
+              members: data.members.map(m => { return { email: m.email } })
             },
-            refreshedTokenMessage: res.locals.refreshedTokenMessage
+            alreadyInGroup: alreadyInGroupMembersArray.map(email => { return { email: email } }),
+            membersNotFound: notFoundMembersArray.map(email => { return { email: email } })
           }
         ));
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -351,15 +345,15 @@ export const removeFromGroup = async (req, res) => {
     //authorize
     if (req.url.endsWith("/remove")) {
       //user route
-      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
-      if (!groupAuth.flag) {
-        return res.status(401).json({ error: groupAuth.cause });
+      const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
+      if (auth.flag) {
+        return resError(res, 401, auth.cause);
       }
     } else if (req.url.endsWith("/pull")) {
       //admin exclusive
       const auth = verifyAuth(req, res, { authType: "Admin" });
       if (!auth.flag) {
-        return res.status(401).json({ error: auth.cause });
+        return resError(res, 401, auth.cause);
       }
     }
     else {
@@ -432,7 +426,7 @@ export const removeFromGroup = async (req, res) => {
         ));
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -467,10 +461,10 @@ export const deleteUser = async (req, res) => {
     */
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) return res.status(401).json({ error: auth.cause });
+    if (!auth.flag) return resError(res, 401, auth.cause);
 
     const user = await User.findOne({ email: email });
-    if (!user) return res.status(401).json({ error: "user not found" });
+    if (!user) return resError(res, 401, "user not found");
 
     await User.deleteOne(user);
     const deletedTransaction = (await transactions.deleteMany({ username: user.username })).deletedCount;
@@ -500,7 +494,7 @@ export const deleteUser = async (req, res) => {
       );
 
   } catch (error) {
-    resError(res, 500, error.message);
+    return resError(res, 500, error.message);
   }
 }
 
@@ -525,10 +519,10 @@ export const deleteGroup = async (req, res) => {
     if (name === "") return res.status(400).json({ error: "empty string" });
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) return res.status(401).json({ error: auth.cause });
+    if (!auth.flag) return resError(res, 401, auth.cause);
 
     const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
-    if (!deletedCount) return res.status(401).json({ error: "group not found" });
+    if (!deletedCount) return resError(res, 401, "group not found");
     if (deletedCount > 1) throw new Error('multiple groups deleted!');
 
     return res.status(200).json({ data: { message: "Group deleted successfully" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
