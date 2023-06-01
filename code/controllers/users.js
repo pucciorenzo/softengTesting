@@ -54,7 +54,7 @@ export const getUser = async (req, res) => {
 
     //retreive user
     const user = await User.findOne({ username: req.params.username });
-    if (!user) return res.status(400).json({ error: "user not found" });
+    if (!user) return resError(res, 400, "user not found");
 
     return resData(res, { username: user.username, email: user.email, role: user.role });
 
@@ -101,10 +101,18 @@ export const createGroup = async (req, res) => {
     // check if group exists
     if (await Group.findOne({ name: name })) return resError(res, 400, "group already exists");
 
-    //categorize emails
+    //check if calling user exists
+    const existingUser = await User.findOne({ refreshToken: req.cookies.refreshToken });
+    if (!existingUser) return resError(res, 400, "calling user does not exist");
+
+    //check if calling user already in a group
+    if (await Group.findOne({ members: { $elemMatch: { email: existingUser.email } } })) return resError(res, 400, "calling user already in group");
+
+    //categorize other emails except calling user
+    let canBeAddedMembersArray = [];
     let alreadyInGroupMembersArray = [];
     let notFoundMembersArray = [];
-    let canBeAddedMembersArray = [];
+    memberEmails = memberEmails.filter(mE => mE != existingUser.email); //exclude calling user
     for (const email of memberEmails) {
 
       //check user exists
@@ -126,9 +134,8 @@ export const createGroup = async (req, res) => {
     }
 
     //check if at least one member other than caller can be added
-    const existingUser = await User.findOne({ refreshToken: req.cookies.refreshToken });
-    if (canBeAddedMembersArray.filter(m => m.user != existingUser._id).length == 0)
-      return resError(res, 400, "no members available to add");
+    if (canBeAddedMembersArray.length == 0) return resError(res, 400, "no members available to add");
+    canBeAddedMembersArray.unshift(existingUser.email);
 
     //create and save
     const newGroup = new Group({
@@ -244,7 +251,7 @@ export const addToGroup = async (req, res) => {
 
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
-    if (!group) return res.status(400).json({ error: "group does not exist" });
+    if (!group) return resError(res, 400, "group does not exist");
 
     //authenticate//
     if (req.url.includes("/add")) {
@@ -308,7 +315,7 @@ export const addToGroup = async (req, res) => {
 }
 
 /**
- removeFromGroup
+removeFromGroup
 Request Parameters: A string equal to the name of the group
 Example: api/groups/Family/remove (user route)
 Example: api/groups/Family/pull (admin route)
@@ -324,106 +331,90 @@ Returns a 400 error if at least one of the emails is not in a valid email format
 Returns a 400 error if at least one of the emails is an empty string
 Returns a 400 error if the group contains only one member before deleting any user
 Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove
-Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull */
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull
+ 
+//don't delete the first member of the group.
+*/
 export const removeFromGroup = async (req, res) => {
   try {
 
-    //all attributes check 400
+    //get attributes
+    let emailArray = req.body.emails;
+
+    //validate attributes
+    const validation = validateAttribute(createAttribute(emailArray, 'emailArray'));
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
-    if (!group) return res.status(400).json({ error: "group does not exist" });
+    if (!group) return resError(res, 400, "group does not exist");
 
-    if (group.members.length === 0) {
-      throw new Error('group has no member');
-    }
+    //get current member emails
+    let memberEmails = group.members.map(m => m.email);
 
-    if (group.members.length === 1) {
-      return res.status(400).json({ error: "only one member in the group" });
-    }
+    //authenticate//
+    if (req.url.includes("/remove")) {
 
-    //authorize
-    if (req.url.endsWith("/remove")) {
       //user route
-      const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
-      if (auth.flag) {
-        return resError(res, 401, auth.cause);
-      }
-    } else if (req.url.endsWith("/pull")) {
-      //admin exclusive
+      const auth = verifyAuth(req, res, { authType: "Group", emails: memberEmails });
+      if (!auth.flag) return resError(res, 401, auth.cause);
+
+      //admin route
+    } else if (req.url.includes("/pull")) {
       const auth = verifyAuth(req, res, { authType: "Admin" });
-      if (!auth.flag) {
-        return resError(res, 401, auth.cause);
-      }
-    }
-    else {
-      throw new Error('unknown route');
-    }
+      if (!auth.flag) return resError(res, 401, auth.cause);
 
-    //retreive member emails
-    const emailArray = req.body.emails.map(String);
-    if (emailArray.length === 0) {
-      return res.status(400).json({ error: "no members to remove" });
     }
-    //400 atleast one invalid email format ->includes empty?
+    //unknown route
+    else throw new Error('unknown route');
 
-
-    //categorize emails
+    //categorize emails excluding first member//
     let notInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeRemovedMembersArray = [];
-    let memberEmails = group.members.map(m => m.email);
+    emailArray = emailArray.filter(e => e != memberEmails[0]); //exclude first member
     for (const email of emailArray) {
-      let user = await User.findOne({ email: email });
-      if (!user) {
+
+      //user exists
+      if (!await User.findOne({ email: email })) {
         notFoundMembersArray.push(email);
-        console.log(email + "notfound");
         continue;
       }
+
+      //user is in group
       if (!memberEmails.includes(email)) {
         notInGroupMembersArray.push(email);
-        console.log(email + "ingroup");
         continue;
       }
+
+      //not already added for deletion
       if (!canBeRemovedMembersArray.includes(email)) {
         canBeRemovedMembersArray.push(email);
-        console.log(email + "canremove");
         continue;
       }
-      console.log(email + "ignored");
+
     }
 
     //check if at least one member can be removed
-    if (!canBeRemovedMembersArray.length) {
-      return res.status(400).json({ error: "no members to remove" });
+    if (canBeRemovedMembersArray.length == 0) {
+      return resError(res, 400, "no members to remove");
     }
 
-    //if removing all members
-    if (canBeRemovedMembersArray.length === group.members.length) {
-      const firstMemberEmail = group.members[0].email;
-      canBeRemovedMembersArray = canBeRemovedMembersArray.filter(email => email !== firstMemberEmail);
-    }
-    console.log(canBeRemovedMembersArray);
-
-    //get member ids to rememove
+    //get member ids to remove
     let memberIdsToRemove = group.members.filter(m => canBeRemovedMembersArray.includes(m.email)).map(m => m._id);
 
     group.members.pull(...memberIdsToRemove);
     await group.save()
       .then(data =>
-        res.status(200).json(
-          {
-            data: {
-              group: {
-                name: data.name,
-                members: data.members.map(m => { return m.email })
-              },
-              alreadyInGroup: notInGroupMembersArray,
-              membersNotFound: notFoundMembersArray
-            },
-            refreshedTokenMessage: res.locals.refreshedTokenMessage
-          }
-        ));
+        resData(res, {
+          group: {
+            name: data.name,
+            members: data.members.map(m => { return { email: m.email } })
+          },
+          notInGroup: notInGroupMembersArray.map(email => { return { email: email } }),
+          membersNotFound: notFoundMembersArray.map(email => { return { email: email } })
+        })
+      );
 
   } catch (error) {
     return resError(res, 500, error.message);
@@ -516,7 +507,7 @@ export const deleteGroup = async (req, res) => {
     //Returns a 400 error if the request body does not contain all the necessary attributes
 
     const name = req.body.name;
-    if (name === "") return res.status(400).json({ error: "empty string" });
+    if (name === "") return resError(res, 400, "empty string");
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
     if (!auth.flag) return resError(res, 401, auth.cause);
