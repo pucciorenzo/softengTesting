@@ -8,7 +8,7 @@ jest.mock('../controllers/utils');
 jest.mock('../models/User');
 
 beforeEach(() => {
-    verifyAuth.mockClear();
+    /*verifyAuth.mockClear();
     handleDateFilterParams.mockClear();
     handleAmountFilterParams.mockClear();
 
@@ -41,7 +41,8 @@ beforeEach(() => {
     transactions.prototype.save.mockClear();
     User.prototype.save.mockClear();
     Group.prototype.save.mockClear();
-
+*/
+    jest.resetAllMocks();
 
 });
 

@@ -43,7 +43,32 @@ export const validateAttribute = (attribute) => {
 
                         //not valid string element
                         let validation = validateAttribute(createAttribute(value, 'string'));
-                        if (!validation.flag) return validationFail("at least one empty string");
+                        if (!validation.flag) return validationFail("at least one: " + validation.cause);
+
+                        //repeating element
+                        if (exists[value]) return validationFail("at least one repeating element");
+                        exists[value] = true;
+                    }
+                }
+                break;
+
+            case 'emailArray':
+                {
+                    const array = value;
+
+                    //not an array
+                    if (!Array.isArray(array)) return validationFail("not array");
+
+                    //no element
+                    if (array.length == 0) return validationFail("empty array");
+
+                    //repeating elements or invalid elements//
+                    const exists = {};
+                    for (const value of array) {
+
+                        //not valid string element
+                        let validation = validateAttribute(createAttribute(value, 'email'));
+                        if (!validation.flag) return validationFail("at least one: " + validation.cause);
 
                         //repeating element
                         if (exists[value]) return validationFail("at least one repeating element");
