@@ -1,5 +1,3 @@
-import request from 'supertest';
-import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
@@ -837,6 +835,9 @@ describe("deleteTransaction", () => {
             locals: {
             }
         }
+        const mockTransaction = {
+            _id: "id1", username: "user1", type: "type1", date: Date.now()
+        }
         const mockResStatus = 200
         const mockResData = {
             data: {
@@ -845,7 +846,7 @@ describe("deleteTransaction", () => {
         }
         verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
         User.findOne.mockResolvedValue(true);
-        transactions.findOne.mockResolvedValue(true);
+        transactions.findOne.mockResolvedValue(mockTransaction);
         transactions.deleteOne.mockResolvedValue(true);
 
         await deleteTransaction(mockReq, mockRes);
