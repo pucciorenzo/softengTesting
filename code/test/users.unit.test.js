@@ -1,6 +1,7 @@
 import { Group, User } from '../models/User.js';
-import { addToGroup, createGroup, getGroup, getGroups, getUser, getUsers, removeFromGroup } from '../controllers/users.js';
+import { addToGroup, createGroup, deleteUser, getGroup, getGroups, getUser, getUsers, removeFromGroup } from '../controllers/users.js';
 import { verifyAuth } from '../controllers/utils.js';
+import { transactions } from '../models/model.js';
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -10,6 +11,7 @@ import { verifyAuth } from '../controllers/utils.js';
  */
 jest.mock("../models/User.js");
 jest.mock("../controllers/utils.js");
+jest.mock("../models/model.js");
 
 /**
  * Defines code to be executed before each test case is launched
@@ -574,7 +576,59 @@ describe("removeFromGroup", () => {
 })
 
 describe("deleteUser", () => {
-  
- })
+  test("should delete user and member in a group", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mocKResStatus = 200;
+    const mockResJSON = {
+      data:
+      {
+        deletedTransactions: mockDeletedTransactions,
+        deletedFromGroup: mockDeletedFromGroup
+      },
+    }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(mockUser);
+    User.deleteOne.mockResolvedValueOnce(true);
+    transactions.deleteMany.mockResolvedValueOnce({ deletedCount: mockDeletedTransactions });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
+    mockGroup.members.pull.mockReturnValueOnce(true);
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+    expect(User.deleteOne).toHaveBeenCalledWith(mockUser);
+    expect(transactions.deleteMany).toHaveBeenCalledWith({ username: mockUser.username });
+    expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
+    expect(mockGroup.members.pull).toHaveBeenCalledWith("id0");
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJSON);
+
+  })
+});
 
 describe("deleteGroup", () => { })
