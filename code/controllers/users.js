@@ -1,5 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
+import { resData } from "./extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
@@ -14,22 +15,17 @@ export const getUsers = async (req, res) => {
   try {
 
     //authenticate admin
-    const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-    if (!adminAuth.flag) {
-      return res.status(401).json({ error: adminAuth.cause }) // unauthorized
-    }
+    const auth = verifyAuth(req, res, { authType: 'Admin' });
+    if (!auth.flag) return res.status(401).json({ error: auth.cause }) // unauthorized
 
-    const users = await User.find();
-    res.status(200).json(
-      {
-        data: users.map(
-          user => {
-            return { username: user.username, email: user.email, role: user.role }
-          }
-        ),
-        refreshedTokenMessage: res.locals.refreshedTokenMessage
-      }
-    )
+    //retreive users list
+    const data = (await User.find({})).map(user => {
+      //prepare data
+      return { username: user.username, email: user.email, role: user.role }
+    });
+
+    //send data
+    resData(res, data);
 
   } catch (error) {
     res.status(500).json(error.message);
@@ -50,8 +46,8 @@ export const getUser = async (req, res) => {
   try {
 
     //authenticate
-    const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-    if (!adminAuth.flag) {
+    const auth = verifyAuth(req, res, { authType: 'Admin' });
+    if (!auth.flag) {
       const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
       if (!userAuth.flag) {
         return res.status(401).json({ error: userAuth.cause })
@@ -172,9 +168,9 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const getGroups = async (req, res) => {
   try {
     //check if authorized as admin
-    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-    if (!adminAuth.flag) {
-      return res.status(401).json({ error: adminAuth.cause });
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.flag) {
+      return res.status(401).json({ error: auth.cause });
     }
 
     //retreive groups
@@ -208,8 +204,8 @@ export const getGroup = async (req, res) => {
     const members = group.members.map(m => m.email);
 
     //authorize
-    const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-    if (!adminAuth.flag) {
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.flag) {
       const groupAuth = verifyAuth(req, res, { authType: "Group", emails: members });
       if (!groupAuth.flag) {
         return res.status(401).json({ error: groupAuth.cause });
@@ -267,9 +263,9 @@ export const addToGroup = async (req, res) => {
       }
     } else if (req.url.endsWith("/insert")) {
       //admin exclusive
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      if (!adminAuth.flag) {
-        return res.status(401).json({ error: adminAuth.cause });
+      const auth = verifyAuth(req, res, { authType: "Admin" });
+      if (!auth.flag) {
+        return res.status(401).json({ error: auth.cause });
       }
     }
     else {
@@ -377,9 +373,9 @@ export const removeFromGroup = async (req, res) => {
       }
     } else if (req.url.endsWith("/pull")) {
       //admin exclusive
-      const adminAuth = verifyAuth(req, res, { authType: "Admin" });
-      if (!adminAuth.flag) {
-        return res.status(401).json({ error: adminAuth.cause });
+      const auth = verifyAuth(req, res, { authType: "Admin" });
+      if (!auth.flag) {
+        return res.status(401).json({ error: auth.cause });
       }
     }
     else {

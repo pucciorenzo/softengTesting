@@ -1,7 +1,6 @@
-import request from 'supertest';
-import { app } from '../app';
 import { User } from '../models/User.js';
 import { getUsers } from '../controllers/users.js';
+import { verifyAuth } from '../controllers/utils.js';
 
 /**
  * In order to correctly mock the calls to external modules it is necessary to mock them using the following line.
@@ -9,7 +8,8 @@ import { getUsers } from '../controllers/users.js';
  * needed for the test cases.
  * `jest.mock()` must be called for every external module that is called in the functions under test.
  */
-jest.mock("../models/User.js")
+jest.mock("../models/User.js");
+jest.mock("../controllers/utils.js");
 
 /**
  * Defines code to be executed before each test case is launched
@@ -21,62 +21,44 @@ beforeEach(() => {
   //additional `mockClear()` must be placed here
 });
 
-/** old 
 describe("getUsers", () => {
-  test("should return empty list if there are no users", async () => {
-    //any time the `User.find()` method is called jest will replace its actual implementation with the one defined below
-    jest.spyOn(User, "find").mockImplementation(() => [])
-    const response = await request(app)
-      .get("/api/users")
-
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual([])
-  })
-
-  test("should retrieve list of all users", async () => {
-    const retrievedUsers = [{ username: 'test1', email: 'test1@example.com', password: 'hashedPassword1' }, { username: 'test2', email: 'test2@example.com', password: 'hashedPassword2' }]
-    jest.spyOn(User, "find").mockImplementation(() => retrievedUsers)
-    const response = await request(app)
-      .get("/api/users")
-
-    expect(response.status).toBe(200)
-    expect(response.body).toEqual(retrievedUsers)
-  })
-})
-*/
-
-/** new */
-describe("getUsers", () => {
-  test("should return empty list if there are no users", async () => {
+  test("should retreive all users", async () => {
     const mockReq = {
     }
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
       locals: {
-        refreshedTokenMessage: "expired token"
       }
     }
-    jest.spyOn(User, "find").mockResolvedValue([])
-    await getUsers(mockReq, mockRes)
-    expect(User.find).toHaveBeenCalled()
-    expect(mockRes.status).toHaveBeenCalledWith(200)
-    expect(mockRes.json).toHaveBeenCalledWith({ data: [], message: mockRes.locals.refreshedTokenMessage })
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: [
+        { username: "user1", email: "user1@ezwallet.com", role: "Regular" },
+        { username: "user2", email: "user2@ezwallet.com", role: "Regular" },
+        { username: "user3", email: "user3@ezwallet.com", role: "Regular" },
+        { username: "user4", email: "user4@ezwallet.com", role: "Regular" },
+        { username: "user5", email: "user5@ezwallet.com", role: "Regular" },
+      ]
+    }
+    verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+    User.find.mockResolvedValue([
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
+      { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular" },
+      { _id: "id5", username: "user5", email: "user5@ezwallet.com", password: "hashedPassword5", role: "Regular" },
+    ])
+
+    await getUsers(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.find).toHaveBeenCalledWith({});
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should retrieve list of all users", async () => {
-    const mockReq = {}
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    }
-    const retrievedUsers = [{ username: 'test1', email: 'test1@example.com', password: 'hashedPassword1' }, { username: 'test2', email: 'test2@example.com', password: 'hashedPassword2' }]
-    jest.spyOn(User, "find").mockResolvedValue(retrievedUsers)
-    await getUsers(mockReq, mockRes)
-    expect(User.find).toHaveBeenCalled()
-    expect(mockRes.status).toHaveBeenCalledWith(200)
-    expect(mockRes.json).toHaveBeenCalledWith(retrievedUsers)
-  })
 })
 
 describe("getUser", () => { })
