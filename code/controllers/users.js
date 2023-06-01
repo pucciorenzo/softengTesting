@@ -475,7 +475,7 @@ export const deleteUser = async (req, res) => {
 
         group.members.pull(group.members.find(m => m.email == email)._id);
         await group.save();
-        
+
       }
       deletedFromGroup = true;
 
@@ -491,7 +491,7 @@ export const deleteUser = async (req, res) => {
 }
 
 /**
- * deleteGroup
+deleteGroup
 Request Parameters: None
 Request Body Content: A string equal to the name of the group to be deleted
 Example: {name: "Family"}
@@ -505,19 +505,21 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteGroup = async (req, res) => {
   try {
 
-    //Returns a 400 error if the request body does not contain all the necessary attributes
-
+    //get attribute
     const name = req.body.name;
-    if (name === "") return resError(res, 400, "empty string");
+
+    //validate attribute
+    const validation = validateAttribute(createAttribute(name, "string"));
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     const auth = verifyAuth(req, res, { authType: "Admin" });
     if (!auth.flag) return resError(res, 401, auth.cause);
 
     const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
-    if (!deletedCount) return resError(res, 401, "group not found");
+    if (!deletedCount) return resError(res, 401, "group does not exist");
     if (deletedCount > 1) throw new Error('multiple groups deleted!');
 
-    return res.status(200).json({ data: { message: "Group deleted successfully" }, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+    return resData(res, { message: "Group deleted successfully" });
 
   } catch (error) {
     res.status(500).json(error.message);

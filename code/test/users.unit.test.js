@@ -1,5 +1,5 @@
 import { Group, User } from '../models/User.js';
-import { addToGroup, createGroup, deleteUser, getGroup, getGroups, getUser, getUsers, removeFromGroup } from '../controllers/users.js';
+import { addToGroup, createGroup, deleteGroup, deleteUser, getGroup, getGroups, getUser, getUsers, removeFromGroup } from '../controllers/users.js';
 import { verifyAuth } from '../controllers/utils.js';
 import { transactions } from '../models/model.js';
 
@@ -603,7 +603,7 @@ describe("deleteUser", () => {
     const mockDeletedTransactions = 5;
     const mockDeletedFromGroup = true;
     const mocKResStatus = 200;
-    const mockResJSON = {
+    const mockResJson = {
       data:
       {
         deletedTransactions: mockDeletedTransactions,
@@ -626,9 +626,45 @@ describe("deleteUser", () => {
     expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
     expect(mockGroup.members.pull).toHaveBeenCalledWith("id0");
     expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
-    expect(mockRes.json).toHaveBeenCalledWith(mockResJSON);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
 });
 
-describe("deleteGroup", () => { })
+describe("deleteGroup", () => {
+  test("should delete user and member in a group", async () => {
+    //mock variables
+    const mockName = "group1";
+    const mockReq = {
+      body: {
+        name: mockName
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockMessage = "Group deleted successfully";
+    const mocKResStatus = 200;
+    const mockResJson = {
+      data:
+      {
+        message: mockMessage
+      },
+    }
+
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.deleteMany.mockResolvedValueOnce({ deletedCount: 1 });
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.deleteMany).toHaveBeenCalledWith({ name: mockName });
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+})
