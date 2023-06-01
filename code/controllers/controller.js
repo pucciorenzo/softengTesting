@@ -19,7 +19,7 @@ const validateAttribute = (attribute) => {
         const { value, type } = attribute;
 
         //incomlete/missing attribute
-        if (typeof value == undefined || value == null) return validationFail("incomplete attribute");
+        if (typeof value == "undefined" || value == null) return validationFail("incomplete attribute");
 
         switch (type) {
 
@@ -29,7 +29,7 @@ const validateAttribute = (attribute) => {
                     if (typeof value != 'string') return validationFail("not string");
 
                     //emty string or all whitespace
-                    if (validator.isEmpty(value, { ignore_whitespace: true })) return validationFail("empty string");
+                    if (value.trim().length == 0) return validationFail("empty string");
                 }
                 break;
 
@@ -77,7 +77,7 @@ const validateAttribute = (attribute) => {
                 {
                     //not YYYY-MM-DD
                     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-                    if (!dateRegex.test(toCheck)) validationFail("invalid date format");
+                    if (!dateRegex.test(value)) validationFail("invalid date format");
                 }
                 break;
 
