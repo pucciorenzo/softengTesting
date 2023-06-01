@@ -10,20 +10,6 @@ import validator from 'validator';
  * res.status(errorCode).json({ error: "Error message" });
  */
 
-
-/**
- * createCategory
-Request Parameters: None
-Request Body Content: An object having attributes type and color
-Example: {type: "food", color: "red"}
-Response data Content: An object having attributes type and color
-Example: res.status(200).json({data: {type: "food", color: "red"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
-Returns a 400 error if the request body does not contain all the necessary attributes
-Returns a 400 error if at least one of the parameters in the request body is an empty string
-Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
-Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
-*/
-
 const createAttribute = (v, t) => { return { value: v, type: t } }
 const validationFail = (c) => { return { flag: false, cause: c } }
 const validationPass = () => { return { flag: true, cause: 'valid' } }
@@ -41,6 +27,7 @@ const validateAttribute = (attribute) => {
                 {
                     //not a string
                     if (typeof value != 'string') return validationFail("not string");
+
                     //emty string or all whitespace
                     if (validator.isEmpty(value, { ignore_whitespace: true })) return validationFail("empty string");
                 }
@@ -49,10 +36,14 @@ const validateAttribute = (attribute) => {
             case 'stringArray':
                 {
                     const array = value;
+
                     //not an array
                     if (!Array.isArray(array)) return validationFail("not array");
+
                     //no element
                     if (array.length == 0) return validationFail("empty array");
+
+                    //repeating elements or invalid elements//
                     const exists = {};
                     for (const value of array) {
 
@@ -61,32 +52,45 @@ const validateAttribute = (attribute) => {
                         if (!validation.flag) return validationFail("at least one empty string");
 
                         //repeating element
-                        //console.log(JSON.stringify(exists));
                         if (exists[value]) return validationFail("at least one repeating element");
                         exists[value] = true;
                     }
                 }
                 break;
+
             case 'amount':
             case 'number':
             case 'float': {
-                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value")
+                //not a number after parsing
+                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
             }
                 break;
-            case 'email': {
-                if (!validator.isEmail(value)) return validationFail("not an email");
-            }
+
+            case 'email':
+                {
+                    //incorrect format or invalid characters
+                    if (!validator.isEmail(value)) return validationFail("not an email");
+                }
                 break;
-            case 'date': {
-                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-                if (!dateRegex.test(toCheck)) validationFail("invalid date format");
-            }
+
+            case 'date':
+                {
+                    //not YYYY-MM-DD
+                    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                    if (!dateRegex.test(toCheck)) validationFail("invalid date format");
+                }
+                break;
+
             default:
+                //not known type
                 return validationFail("unknown type");
         }
+
+        //all check passed
         return validationPass();
+
     } catch (error) {
-        return { flag: false, cause: error.message };
+        return validationFail(error.message);
     }
 
 }
@@ -109,6 +113,18 @@ const validateAttributes = (attributes) => {
 const resError = (res, code, msg) => res.status(code).json({ error: msg });
 const resData = (res, data) => res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
 
+/**
+* createCategory
+Request Parameters: None
+Request Body Content: An object having attributes type and color
+Example: {type: "food", color: "red"}
+Response data Content: An object having attributes type and color
+Example: res.status(200).json({data: {type: "food", color: "red"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
+Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if at least one of the parameters in the request body is an empty string
+Returns a 400 error if the type of category passed in the request body represents an already existing category in the database
+Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
+*/
 export const createCategory = async (req, res) => {
     try {
 
@@ -123,12 +139,11 @@ export const createCategory = async (req, res) => {
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause);
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause);
 
         //check if category exists
-        const existingCategory = await categories.findOne({ type: type });
-        if (existingCategory) return resError(res, 400, "category already exists");
+        if (await categories.findOne({ type: type })) return resError(res, 400, "category already exists");
 
         //create and save category
         const new_categories = new categories({ type, color });
@@ -142,7 +157,7 @@ export const createCategory = async (req, res) => {
 }
 
 /**
- * updateCategory
+updateCategory
 Request Parameters: A string equal to the type of the category that must be edited
 Example: api/categories/food
 Request Body Content: An object having attributes type and color equal to the new values to assign to the category
@@ -153,28 +168,28 @@ In case any of the following errors apply then the category is not updated, and 
 Returns a 400 error if the request body does not contain all the necessary attributes
 Returns a 400 error if at least one of the parameters in the request body is an empty string
 Returns a 400 error if the type of category passed as a route parameter does not represent a category in the database
-Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database
+Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
 export const updateCategory = async (req, res) => {
     try {
-        // get attributes
+        //get parameters
         const currentType = req.params.type;
+
+        // get attributes
         const newType = req.body.type;
         const newColor = req.body.color;
 
-
         //validate attributes
         const validation = validateAttributes([
-            createAttribute(currentType, 'string'),
-            createAttribute(currentType, "string"),
+            createAttribute(newType, 'string'),
             createAttribute(newColor, 'string'),
         ]);
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
         //confirm category to be updated exists
         const currentCategory = await categories.findOne({ type: currentType });
@@ -191,7 +206,7 @@ export const updateCategory = async (req, res) => {
         //update transactions
         const count = (await transactions.updateMany({ type: currentType }, { type: newType })).modifiedCount;
 
-        //return successful and transactions update count
+        //return successful and updated transactions count
         return resData(res, { message: "Category edited successfully", count: count });
 
     } catch (error) {
@@ -200,7 +215,7 @@ export const updateCategory = async (req, res) => {
 }
 
 /**
- * deleteCategory
+deleteCategory
 Request Parameters: None
 Request Body Content: An array of strings that lists the types of the categories to be deleted
 Example: {types: ["health"]}
@@ -213,6 +228,7 @@ In case any of the following errors apply then no category is deleted
 Returns a 400 error if the request body does not contain all the necessary attributes
 Returns a 400 error if called when there is only one category in the database
 Returns a 400 error if at least one of the types in the array is an empty string
+Returns a 400 error if the array passed in the request body is empty
 Returns a 400 error if at least one of the types in the array does not represent a category in the database
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)
  */
@@ -220,48 +236,53 @@ export const deleteCategory = async (req, res) => {
     try {
         //get attributes
         let typesToDelete = req.body.types;
+
         //validate attributes
-        const validation = validateAttribute(createAttribute(typesToDelete, 'stringArray'),
-        );
+        const validation = validateAttribute(createAttribute(typesToDelete, 'stringArray'));
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //verify admin
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
-        let currentTypes = (await categories.find()).map(c => c.type);
+        //get current categories types in database
+        let currentTypes = (await categories.find({})).map(c => c.type);
+
+        //check more than one category exists
         if (currentTypes.length <= 1) return resError(res, 401, "only zero or one category exists");
 
         //check all categories to be deleted exist
-        for (const typeTodelete of typesToDelete) {
-            if (!currentTypes.includes(typeTodelete)) {
+        for (const typeToDelete of typesToDelete) {
+            if (!currentTypes.includes(typeToDelete)) {
                 return resError(res, 400, "at least one type does not exist");
             }
         }
 
-        //delete categories, keep atleast one, generate list of deleted types
-        if (currentTypes.length == typesToDelete.length) typesToDelete = typesToDelete.filter(t => t != currentTypes[0]); //N==T, keep oldest(first) category
+        //N==T, if deleting all categories, don't delete oldest
+        let oldestType = currentTypes[0];
+        if (currentTypes.length == typesToDelete.length) typesToDelete = typesToDelete.filter(t => t != oldestType);
 
+        //N>T, find the oldest among remaining categories after deletion
         for (const type of typesToDelete) {
             currentTypes = currentTypes.filter(ct => ct != type)
-        };
+        }
+        oldestType = currentTypes[0];
 
-        //get first category in database
-        const oldestType = currentTypes[0];
+        //delete categories
         await categories.deleteMany(
             {
                 type: { $in: typesToDelete }
             }
         );
 
-        //replace all deleted types in transaction with first type and get count modified
+        //replace all deleted types in transaction with oldest type and get count modified
         const count = (await transactions.updateMany({ type: { $in: typesToDelete } }, { type: oldestType })).modifiedCount;
 
+        //send data
         return resData(res, { message: "Categories deleted", count: count });
 
     } catch (error) {
         resError(res, 500, error.message);
-        //console.log(error);
     }
 }
 
@@ -277,14 +298,14 @@ export const getCategories = async (req, res) => {
     try {
 
         //authenticate
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!simpleAuth.flag) {
-            return resError(res, 401, simpleAuth.cause); // unauthorized
-        }
+        const auth = verifyAuth(req, res, { authType: 'Simple' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
-        let data = await categories.find({})
-        let filter = data.map(v => Object.assign({}, { type: v.type, color: v.color }))
-        return resData(res, filter);
+        //retreive all categories and format
+        let data = (await categories.find({})).map(v => Object.assign({}, { type: v.type, color: v.color }));
+
+        //send data
+        return resData(res, data);
 
     } catch (error) {
         resError(res, 500, error.message);
@@ -292,7 +313,7 @@ export const getCategories = async (req, res) => {
 }
 
 /**
- createTransaction
+createTransaction
 Request Parameters: A string equal to the username of the involved user
 Example: /api/users/Mario/transactions
 Request Body Content: An object having attributes username, type and amount
@@ -312,28 +333,35 @@ export const createTransaction = async (req, res) => {
     try {
         //get attributes
         let { username, amount, type } = req.body;
+
         //validate attributes
         const validation = validateAttributes([
             createAttribute(username, 'string'),
             createAttribute(amount, 'amount'),
             createAttribute(type, 'string'),
         ])
-        //console.log(validation);
         if (!validation.flag) return resError(res, 400, validation.cause);
+
+        //convert amount to number if string
         amount = parseFloat(amount);
 
+        //check if calling user adds his own transaction
         if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");
 
         //authenticate
-        const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-        if (!userAuth.flag) return resError(res, 401, userAuth.cause);
+        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+        if (!auth.flag) return resError(res, 401, auth.cause);
 
+        //check user exists
         if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
 
+        //check category exists
         if (!(await categories.findOne({ type: type }))) return resError(res, 400, "category does not exist");
 
+        //create and save new transaction
         const new_transactions = new transactions({ username, amount, type });
         await new_transactions.save()
+            //send saved transaction as response data
             .then(data => resData(res, { username: data.username, amount: data.amount, type: data.type, date: data.date }));
 
     } catch (error) {
@@ -342,7 +370,7 @@ export const createTransaction = async (req, res) => {
 }
 
 /**
- * getAllTransactions
+getAllTransactions
 Request Parameters: None
 Request Body Content: None
 Response data Content: An array of objects, each one having attributes username, type, amount, date and color
@@ -353,30 +381,32 @@ export const getAllTransactions = async (req, res) => {
     try {
 
         //verify admin
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause); // unauthorized
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
-        /**
-         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
-         */
-        await transactions.aggregate([
-            {
-                $lookup: {
-                    from: "categories",
-                    localField: "type",
-                    foreignField: "type",
-                    as: "categories_info"
-                }
-            },
-            { $unwind: "$categories_info" }
-        ]).then(
+        //join transactions and categories table using type field
+        await transactions.aggregate(
+            [
+                {
+                    $lookup: {
+                        from: "categories",
+                        localField: "type",
+                        foreignField: "type",
+                        as: "categories_info"
+                    }
+                },
+                { $unwind: "$categories_info" }
+            ]
+        ).then(
             (result) => {
-                let data = result.map(
-                    v =>
-                        Object.assign({},
-                            { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }
-                        )
+                //format data
+                let data = result.map(v =>
+                    Object.assign(
+                        {},
+                        { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }
+                    )
                 );
+                //send
                 resData(res, data);
             }
         );
@@ -387,7 +417,7 @@ export const getAllTransactions = async (req, res) => {
 }
 
 /**
- * getTransactionsByUser
+getTransactionsByUser
 Request Parameters: A string equal to the username of the involved user
 Example: /api/users/Mario/transactions (user route)
 Example: /api/transactions/users/Mario (admin route)
@@ -397,48 +427,57 @@ Example: res.status(200).json({data: [{username: "Mario", amount: 100, type: "fo
 Returns a 400 error if the username passed as a route parameter does not represent a user in the database
 Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions
 Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username
-Can be filtered by date and amount if the necessary query parameters are present and if the route is /api/users/:username/transactions ****
+Can be filtered by date and amount if the necessary query parameters are present and if the route is /api/users/:username/transactions
  */
 export const getTransactionsByUser = async (req, res) => {
     try {
 
-        const username = req.params.username;
-
-        /*
-        const validation = validateAttribute(createAttribute(username, 'string'));
-        //console.log(validation);
-        if (!validation.flag) return resError(res, 400, validation.cause);
-        */
         //let dateFilter = { date: { $gte: new Date("2023-04-30T00:00:00.000Z") } };
-        let dateFilter;
-        let amountFilter;
+        let dateFilter = {};
+        let amountFilter = {};
 
+        //authenticate//
         //admin route
-        if (/transactions\/users/.test(req.url)) {
-            const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!adminAuth.flag) {
-                return resError(res, 401, adminAuth.cause)
-            }
+        if ((/transactions\/users/).test(req.url)) {
+
+            //authenticate as admin
+            const auth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
+            //don't use date amount filters
+            //dateFilter = amountFilter = {};
+
         }
+
         //user route
-        else if (/\/users\/.+\/transactions.*/.test(req.url)) {
-            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.flag) return resError(res, 401, userAuth.cause);
+        else if ((/\/users\/.+\/transactions.*/).test(req.url)) {
+
+            //authenticate as user
+            const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
+            //also use filters if specified in parameter
             dateFilter = handleDateFilterParams(req);
             amountFilter = handleAmountFilterParams(req);
         }
+
+        //unrecognized route
         else {
             throw new Error('unknown route');
         }
 
+        //get parameter
+        const username = req.params.username;
+
+        //check if user exists
         if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
         */
-        //console.log(JSON.stringify(dateFilter) + JSON.stringify(amountFilter));
         await transactions.aggregate([
             {
+                //join transactions and categories using type field
                 $lookup: {
                     from: "categories",
                     localField: "type",
@@ -447,6 +486,7 @@ export const getTransactionsByUser = async (req, res) => {
                 }
             },
             {
+                //filter the transactions
                 $match: {
                     username: username,
                     ...dateFilter,
@@ -455,7 +495,9 @@ export const getTransactionsByUser = async (req, res) => {
             },
             { $unwind: "$categories_info" }
         ]).then((result) => {
+            //format data
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            //send
             resData(res, data);
         });
     } catch (error) {
@@ -464,7 +506,8 @@ export const getTransactionsByUser = async (req, res) => {
 }
 
 /**
- * The behavior defined below applies only for the specified route
+getTransactionsByUserByCategory
+The behavior defined below applies only for the specified route
 Request Parameters: A string equal to the username of the involved user, a string equal to the requested category
 Example: /api/users/Mario/transactions/category/food (user route)
 Example: /api/transactions/users/Mario/category/food (admin route)
@@ -479,37 +522,34 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const getTransactionsByUserByCategory = async (req, res) => {
     try {
 
-        const username = req.params.username;
-        const category = req.params.category;
-
-        if (!username) return resError(res, 400, "no username parameter");
-        if (!category) return resError(res, 400, "no catgory parameter");
-
-        /* 
-        const validation = validateAttributes([
-             createAttribute(username, 'string'),
-             createAttribute(category, 'string'),
-         ])
-         if (!validation.flag) return resError(res, 400, validation.cause);
-         */
-
+        //authenticate//
         //admin route
         if (req.url.includes("/transactions/users/")) {
-            const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!adminAuth.flag) return resError(res, 401, adminAuth.cause)
+
+            const auth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
         //user route
         else if (req.url.includes("/transactions/category/")) {
-            const userAuth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-            if (!userAuth.flag) {
-                return resError(res, 401, userAuth.cause)
-            }
+
+            const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
+        //unknown route
         else {
             throw new Error('unknown route');
         }
 
+        //get parameters
+        const username = req.params.username;
+        const category = req.params.category;
+
+        //check user exists
         if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
+
+        //check category exists
         if (! await categories.findOne({ type: category })) return resError(res, 400, "category does not exist");
 
         /**
@@ -517,6 +557,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         */
         await transactions.aggregate([
             {
+                //join transactions and categories
                 $lookup: {
                     from: "categories",
                     localField: "type",
@@ -525,6 +566,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
                 }
             },
             {
+                //filter
                 $match: {
                     username: username,
                     type: category
@@ -532,7 +574,9 @@ export const getTransactionsByUserByCategory = async (req, res) => {
             },
             { $unwind: "$categories_info" }
         ]).then((result) => {
+            //prepare data
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+            //send data
             resData(res, data);
         });
 
@@ -543,7 +587,7 @@ export const getTransactionsByUserByCategory = async (req, res) => {
 
 
 /**
- * getTransactionsByGroup
+getTransactionsByGroup
 Request Parameters: A string equal to the name of the requested group
 Example: /api/groups/Family/transactions (user route)
 Example: /api/transactions/groups/Family (admin route)
@@ -557,36 +601,33 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const getTransactionsByGroup = async (req, res) => {
     try {
 
-        if (!req.params.name) return resError(res, 400, "no group name");
-
+        //check group exists, retreive group and populate with the reference user member's data
         const group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
         if (!group) return res.status(400).json("group does not exist");
-        //console.log(group);
 
         //authenticate//
         //admin route
-        if (req.url.includes("/transactions/groups/")) {
+        if (req.url.includes("/transactions/groups")) {
+
             const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.flag) {
-                return resError(res, 401, adminAuth.cause)
-            }
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
         //user route
-        else if (/groups\/.+\/transactions/.test(req.url)) {
-            const auth = verifyAuth(req, res,
-                {
-                    authType: "Group",
-                    emails: group.members.map(member => member.email)
-                }
-            );
-            if (!auth.flag) return resError(res, 401, auth.cause)
+        else if ((/groups\/.+\/transactions/).test(req.url)) {
+
+            const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
+        //unknown route
         else throw new Error('unknown route');
 
-
+        //retreive and send data
         await transactions.aggregate(
             [
                 {
+                    //join transactions and categories table
                     $lookup: {
                         from: "categories",
                         localField: "type",
@@ -595,6 +636,7 @@ export const getTransactionsByGroup = async (req, res) => {
                     }
                 }
                 , {
+                    //filter
                     $match: {
                         username: {
                             $in: group.members.map(m => m.user.username)
@@ -604,19 +646,20 @@ export const getTransactionsByGroup = async (req, res) => {
                 { $unwind: "$categories_info" }
             ]
         ).then((result) => {
-            //console.log(result);
+            //prepare data
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+
+            //send data
             resData(res, data);
         });
     } catch (error) {
-        console.log(error);
         resError(res, 500, error.message);
     }
 }
 
 
 /**
- * getTransactionsByGroupByCategory
+getTransactionsByGroupByCategory
 Request Parameters: A string equal to the name of the requested group, a string equal to the requested category
 Example: /api/groups/Family/transactions/category/food (user route)
 Example: /api/transactions/groups/Family/category/food (admin route)
@@ -630,38 +673,37 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
-        const name = req.params.name;
-        const category = req.params.category;
 
-        if (!name) return resError(res, 400, "no group paramter");
-        if (!category) return resError(res, 400, "no category parameter");
-
-        const group = await (await Group.findOne({ name: name })).populate('members.user');
+        //check group exists, retreive group and populate with the reference user member's data
+        const group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
         if (!group) return resError(res, 400, "group does not exist");
-
-        if (!(await categories.findOne({ type: category }))) return resError(res, 400, "category does not exist");
 
         //authenticate//
         //admin route
         if (req.url.includes("/transactions/groups/")) {
+
             const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.flag) return resError(res, 401, adminAuth.cause);
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
         //user route
-        else if (req.url.includes("/transactions/category/")) {
-            const auth = verifyAuth(req, res,
-                {
-                    authType: "Group",
-                    emails: group.members.map(member => member.email)
-                }
-            );
-            if (!auth.flag) return resError(res, 401, userAuth.cause);
+        else if (req.url.includes("/transactions/category")) {
+
+            const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+
         }
+        //unknown route
         else throw new Error('unknown route');
+
+        //check category exists
+        const category = req.params.category;
+        if (!(await categories.findOne({ type: category }))) return resError(res, 400, "category does not exist");
 
         await transactions.aggregate(
             [
                 {
+                    //join categories and transactions table
                     $lookup: {
                         from: "categories",
                         localField: "type",
@@ -670,6 +712,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                     }
                 }
                 , {
+                    //filter
                     $match: {
                         username: {
                             $in: group.members.map(m => m.user.username)
@@ -680,12 +723,14 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
                 { $unwind: "$categories_info" }
             ]
         ).then((result) => {
-            //console.log(result);
+
+            //prepare data
             let data = result.map(v => Object.assign({}, { username: v.username, amount: v.amount, type: v.type, date: v.date, color: v.categories_info.color }))
+
+            //send data
             resData(res, data);
         });
     } catch (error) {
-        console.log(error);
         resError(res, 500, error.message);
     }
 }
@@ -693,7 +738,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
 
 
 /**
- * deleteTransaction
+deleteTransaction
 Request Parameters: A string equal to the username of the involved user
 Example: /api/users/Mario/transactions
 Request Body Content: The _id of the transaction to be deleted
@@ -701,32 +746,43 @@ Example: {_id: "6hjkohgfc8nvu786"}
 Response data Content: A string indicating successful deletion of the transaction
 Example: res.status(200).json({data: {message: "Transaction deleted"}, refreshedTokenMessage: res.locals.refreshedTokenMessage})
 Returns a 400 error if the request body does not contain all the necessary attributes
+Returns a 400 error if the _id in the request body is an empty string
 Returns a 400 error if the username passed as a route parameter does not represent a user in the database
 Returns a 400 error if the _id in the request body does not represent a transaction in the database
+Returns a 400 error if the _id in the request body represents a transaction made by a different user than the one in the route
 Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User)
  */
 export const deleteTransaction = async (req, res) => {
     try {
 
-        const username = req.params.username;
+        //get attribute
         const transaction_id = req.body._id;
 
-        if (!username) return resError(res, 400, "no username parameter");
-
+        //validate attribute
         const validation = validateAttribute(createAttribute(transaction_id, 'string'));
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate user
-        const auth = verifyAuth(req, res, { authType: "User", username: username });
-        if (!auth.flag) {
-            return resError(res, 401, auth.cause)
-        }
+        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+        if (!auth.flag) return resError(res, 401, auth.cause)
 
+        //get parameter
+        const username = req.params.username;
+
+        //check user exists
         if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
-        if (! await transactions.findOne({ _id: transaction_id })) return resError(res, 400, "transaction does not exist");
 
+        //check transaction exists
+        const transaction = await transactions.findOne({ _id: transaction_id });
+        if (!transaction) return resError(res, 400, "transaction does not exist");
+
+        //check calling user made the transaction
+        if (transaction.username != username) return resError(res, 400, "transaction made by different user");
+
+        //delete the transaction
         await transactions.deleteOne({ _id: transaction_id });
 
+        //send success
         return resData(res, { message: "Transaction deleted" });
 
     } catch (error) {
@@ -736,7 +792,7 @@ export const deleteTransaction = async (req, res) => {
 }
 
 /**
- * deleteTransactions
+deleteTransactions
 Request Parameters: None
 Request Body Content: An array of strings that lists the _ids of the transactions to be deleted
 Example: {_ids: ["6hjkohgfc8nvu786"]}
@@ -751,22 +807,28 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteTransactions = async (req, res) => {
     try {
 
+        //get attribute
         const _ids = req.body._ids;
 
+        //validate attribute
         const validation = validateAttribute(createAttribute(_ids, 'stringArray'));
         if (!validation.flag) resError(res, 400, validation.cause);
 
-        const adminAuth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!adminAuth.flag) return resError(res, 401, adminAuth.cause) //unauthorized
+        //authenticate
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause) //unauthorized
 
+        //check if all transactions exist
         for (const _id of _ids) {
-            if (! await transactions.countDocuments({ _id: _id })) {
-                return resError(res, 400, "at least one transaction does not exist");
-            }
+
+            if (! await transactions.countDocuments({ _id: _id })) return resError(res, 400, "at least one transaction does not exist");
+
         }
 
+        //delete transactions
         await transactions.deleteMany({ _id: { $in: _ids } })
 
+        //send data
         return resData(res, { message: "Transactions deleted" });
 
     } catch (error) {
