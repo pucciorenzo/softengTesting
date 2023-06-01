@@ -1,5 +1,5 @@
 import { Group, User } from '../models/User.js';
-import { createGroup, getGroups, getUser, getUsers } from '../controllers/users.js';
+import { createGroup, getGroup, getGroups, getUser, getUsers } from '../controllers/users.js';
 import { verifyAuth } from '../controllers/utils.js';
 
 /**
@@ -228,6 +228,8 @@ describe("createGroup", () => {
 describe("getGroups", () => {
 
   test("should retreive all groups", async () => {
+
+    //mock variables
     const mockGroups = [
       { _id: "id1", name: "group1", members: [{ _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }, { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" }] },
       { _id: "id2", name: "group2", members: [{ _id: "id3", email: "user3@ezwallet.com", user: "user_id3" }, { _id: "id4", email: "user4@ezwallet.com", user: "user_id4" }] },
@@ -274,7 +276,58 @@ describe("getGroups", () => {
 
 });
 
-describe("getGroup", () => { })
+describe("getGroup", () => {
+  test("should retreive the group", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [{ _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }, { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" }]
+    }
+    const mockMemberEmails = [
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+    ]
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = {
+      group: { name: "group1", members: [{ email: "user1@ezwallet.com" }, { email: "user2@ezwallet.com" }] }
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    Group.findOne.mockResolvedValue(mockGroup);
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+})
 
 describe("addToGroup", () => { })
 

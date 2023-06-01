@@ -161,7 +161,7 @@ export const getGroups = async (req, res) => {
   try {
     //check if authorized as admin
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) return res.status(401).json({ error: auth.cause });
+    if (!auth.flag) resError(res, 401, auth.cause);
 
     //retreive groups
     let data = await Group.find({});
@@ -175,7 +175,7 @@ export const getGroups = async (req, res) => {
 
 
 /**
- * getGroup
+getGroup
 Request Parameters: A string equal to the name of the requested group
 Example: /api/groups/Family
 Request Body Content: None
@@ -189,26 +189,20 @@ export const getGroup = async (req, res) => {
 
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
-    if (!group) return res.status(400).json({ error: "group does not exist" });
+    if (!group) return resError(res, 400, "group does not exist");
 
-    const members = group.members.map(m => m.email);
+    //get member emails
+    const memberEmails = group.members.map(m => m.email);
 
     //authorize
     const auth = verifyAuth(req, res, { authType: "Admin" });
     if (!auth.flag) {
-      const groupAuth = verifyAuth(req, res, { authType: "Group", emails: members });
-      if (!groupAuth.flag) {
-        return res.status(401).json({ error: groupAuth.cause });
-      }
+      const auth = verifyAuth(req, res, { authType: "Group", emails: memberEmails });
+      if (!auth.flag) return resError(res, 401, auth.cause);
     }
 
-    return res.status(200).json({
-      data: {
-        name: group.name,
-        members: members
-      },
-      refreshedTokenMessage: res.locals.refreshedTokenMessage
-    });
+    //prepare and send data
+    return resData(res, { group: { name: group.name, members: memberEmails.map(mE => { return { email: mE } }) } });
 
   } catch (error) {
     resError(res, 500, error.message);
