@@ -1,5 +1,3 @@
-import request from 'supertest';
-import { app } from '../app';
 import { categories, transactions } from '../models/model';
 import { Group, User } from '../models/User';
 import { handleAmountFilterParams, handleDateFilterParams, verifyAuth } from '../controllers/utils';
