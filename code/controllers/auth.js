@@ -29,12 +29,12 @@ export const register = async (req, res) => {
         if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
-
+/*
         //**optional? check if logged out */
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.flag) {
-            return res.status(400).json({ error: "please logout first" });
-        }
+//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+//        if (simpleAuth.flag) {
+//            return res.status(400).json({ error: "please logout first" });
+//        }
 
         if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
         if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
@@ -52,8 +52,7 @@ export const register = async (req, res) => {
         return res.status(200).json({ data: { message: "User added successfully" } });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
-        res.status(500).json({ error: err.message });
+        res.status(500);
     }
 }
 
@@ -131,10 +130,10 @@ export const registerAdmin = async (req, res) => {
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 
         //**optional? check if logged out */
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.flag) {
-            return res.status(400).json({ error: "please logout first" });
-        }
+//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+//        if (simpleAuth.flag) {
+//            return res.status(400).json({ error: "please logout first" });
+//        }
 
         if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
         if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
@@ -152,8 +151,7 @@ export const registerAdmin = async (req, res) => {
         return res.status(200).json({ data: { message: "User added successfully" } });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
-        res.status(500).json({ error: err.message });
+        res.status(500);
     }
 }
 
@@ -221,8 +219,7 @@ export const login = async (req, res) => {
         return res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } });
 
     } catch (error) {
-        res.status(500).json({ error: err.message });
-        res.status(500).json({ error: err.message });
+        res.status(500);
     }
 }
 
@@ -239,10 +236,10 @@ export const logout = async (req, res) => {
     try {
 
         /**optional */
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (!simpleAuth.flag) {
-            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
-        }
+//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+//        if (!simpleAuth.flag) {
+//            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
+//        }
 
         const refreshToken = req.cookies.refreshToken;
         //console.log(refreshToken)
@@ -261,7 +258,6 @@ export const logout = async (req, res) => {
         return res.status(200).json({ data: { message: "User logged out" } });
 
     } catch (error) {
-        res.status(500).json({ error: err.message });
-        res.status(500).json({ error: err.message });
+        res.status(500);
     }
 }
