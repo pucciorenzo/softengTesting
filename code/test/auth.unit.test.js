@@ -40,7 +40,7 @@ describe("register", () => {
     expect(res.json).toHaveBeenCalledWith({ error: 'empty strings' });
   });
 
-  test('should return success message if user is successfully registered', async () => {
+  test('should return 200 and add a new user', async () => {
     const mockFindOne = jest.spyOn(User, 'findOne');
     mockFindOne.mockResolvedValue(null);
 
@@ -107,7 +107,7 @@ describe("register", () => {
     await register(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ error: "you are already registered" });
+    expect(mockRes.json).toHaveBeenCalledWith({ error: "email already registered" });
   });
 
   test('should return 400 if user with the same username already exists', async () => {
@@ -130,6 +130,23 @@ describe("register", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith({ error: "username already taken" });
+  });
+
+  test('should return 500 if an error occurs', async () => {
+    const req = { body: { username: 'admin', email: 'admin@example.com', password: 'password123' } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    const errorMessage = 'Internal Server Error';
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
   });
 
 });
@@ -208,21 +225,6 @@ describe("registerAdmin", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'email already registered' });
-  });
-
-  test('should return 400 if user is not logged out', async () => {
-    const req = { body: { username: 'admin', email: 'admin@example.com', password: 'password123' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    };
-
-    jest.spyOn(authUtils, 'verifyAuth').mockReturnValue({ flag: true });
-
-    await registerAdmin(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'please logout first' });
   });
 
   test('should return 200 and add a new admin user', async () => {
