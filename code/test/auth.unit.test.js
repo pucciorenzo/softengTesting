@@ -21,10 +21,23 @@ describe("register", () => {
       json: jest.fn()
     };
 
-    await registerAdmin(req, res);
+    await register(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ error: 'incomplete attributes' });
+  });
+
+  test('should return 400 if at least one of the parameters in the request body is an empty string', async () => {
+    const req = { body: { username: 'user', email: '', password: 'password123' } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: 'empty strings' });
   });
 
   test('should return success message if user is successfully registered', async () => {

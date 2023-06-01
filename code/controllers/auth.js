@@ -19,14 +19,13 @@ Returns a 400 error if the email in the request body identifies an already exist
  */
 export const register = async (req, res) => {
     try {
-
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
 
-        if (!username || !email || !password) return res.status(400).json({ error: "incomplete attributes" });
+        if (username == undefined || email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
 
-        if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
+        if (username.trim() == "" || email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 /*
@@ -122,10 +121,10 @@ export const registerAdmin = async (req, res) => {
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
+        
+        if (username == undefined || email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
 
-        if (!username || !email || !password) return res.status(400).json({ error: "incomplete attributes" });
-
-        if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
+        if (username.trim() == "" || email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
 
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 
