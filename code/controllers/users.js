@@ -150,7 +150,7 @@ export const createGroup = async (req, res) => {
 }
 
 /**
- * getGroups
+getGroups
 Request Parameters: None
 Request Body Content: None
 Response data Content: An array of objects, each one having a string attribute for the name of the group and an array for the members of the group
@@ -161,17 +161,15 @@ export const getGroups = async (req, res) => {
   try {
     //check if authorized as admin
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) {
-      return res.status(401).json({ error: auth.cause });
-    }
+    if (!auth.flag) return res.status(401).json({ error: auth.cause });
 
     //retreive groups
-    let data = await Group.find({})
-    let filter = data.map(v => Object.assign({}, { name: v.name, members: v.members.map(m => m.email) }))
-    return res.status(200).json({ data: filter, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+    let data = await Group.find({});
+    let filter = data.map(v => Object.assign({}, { name: v.name, members: v.members.map(m => { return { email: m.email } }) }));
+    return resData(res, filter);
 
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    resError(res, error.message);
   }
 }
 

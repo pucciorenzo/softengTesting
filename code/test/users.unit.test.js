@@ -1,5 +1,5 @@
 import { Group, User } from '../models/User.js';
-import { createGroup, getUser, getUsers } from '../controllers/users.js';
+import { createGroup, getGroups, getUser, getUsers } from '../controllers/users.js';
 import { verifyAuth } from '../controllers/utils.js';
 
 /**
@@ -225,7 +225,54 @@ describe("createGroup", () => {
 
 })
 
-describe("getGroups", () => { })
+describe("getGroups", () => {
+
+  test("should retreive all groups", async () => {
+    const mockGroups = [
+      { _id: "id1", name: "group1", members: [{ _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }, { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" }] },
+      { _id: "id2", name: "group2", members: [{ _id: "id3", email: "user3@ezwallet.com", user: "user_id3" }, { _id: "id4", email: "user4@ezwallet.com", user: "user_id4" }] },
+      { _id: "id4", name: "group3", members: [{ _id: "id5", email: "user5@ezwallet.com", user: "user_id5" }, { _id: "id5", email: "user6@ezwallet.com", user: "user_id5" }] },
+    ]
+    const mockReq = {
+      params: {
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = [
+      { name: "group1", members: [{ email: "user1@ezwallet.com" }, { email: "user2@ezwallet.com" }] },
+      { name: "group2", members: [{ email: "user3@ezwallet.com" }, { email: "user4@ezwallet.com" }] },
+      { name: "group3", members: [{ email: "user5@ezwallet.com" }, { email: "user6@ezwallet.com" }] },
+    ]
+
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.find.mockResolvedValue(mockGroups);
+
+    //call function
+    await getGroups(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.find).toHaveBeenCalledWith({});
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+});
 
 describe("getGroup", () => { })
 
