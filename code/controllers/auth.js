@@ -45,8 +45,8 @@ export const register = async (req, res) => {
 
         //save new user in database
         await User.create({
-            username : username,
-            email : email,
+            username: username,
+            email: email,
             password: hashedPassword,
             //default role Regular
         });
@@ -74,84 +74,40 @@ Returns a 400 error if the username in the request body identifies an already ex
 Returns a 400 error if the email in the request body identifies an already existing user
  */
 export const registerAdmin = async (req, res) => {
-    /**
-     try {
-
-        const { username, email, password } = req.body;
-
-        if (!username || !email || !password) return res.status(400).json({ error: "incomplete attributes" });
-
-        if (username == "" || email == "" || password == "") return res.status(400).json({ error: "empty strings" });
-
-        const hasAdminRights = 1; //await Admin.findOne({ email: email });
-        if (!hasAdminRights) return res.status(400).json({ error: "you cannot register as admin" });
-
-        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        if (simpleAuth.flag) {
-            return res.status(400).json({ error: "please logout first" }); // unauthorized
-        }
-
-        let existingUser = await User.findOne({ email: email });
-        if (existingUser) {
-            if (existingUser.role == "Admin") return res.status(400).json({ error: "email already registered as admin" });
-            else {
-                existingUser.role = "Admin";
-                await existingUser.save();
-                return res.status(200).json({ data: 'you are now admin. Username unchanged' });
-                return res.status(200).json({ data: 'you are now admin. Username unchanged' });
-            }
-        }
-
-        existingUser = await User.findOne({ username: username });
-        if (existingUser) return res.status(400).json({ error: "username already taken" });
-
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const newUser = await User.create({
-            username,
-            email,
-            password: hashedPassword,
-            role: "Admin"
-        });
-        await newUser.save();
-        return res.status(200).json({ data: { message: "User added successfully" } });
-
-    } catch (error) {
-        res.status(500).json({ error: err.message });
-    }
-}
-*/
     try {
 
+        //get attributes
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
 
-        if (username == undefined || email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
+        //validate attributes
+        const validation = validateAttributes([
+            createAttribute(username, 'string'),
+            createAttribute(email, 'email'),
+            createAttribute(password, 'string'),
+        ])
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
-        if (username.trim() == "" || email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
-
-        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
-
-        //**optional? check if logged out */
-        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        //        if (simpleAuth.flag) {
-        //            return res.status(400).json({ error: "please logout first" });
-        //        }
-
+        //check user not registered
         if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+
+        //check username does not exist
         if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
 
+        //hash the password
         const hashedPassword = await bcrypt.hash(password, 12);
-        const newUser = await User.create({
-            username,
-            email,
+
+        //save new user in database
+        await User.create({
+            username: username,
+            email: email,
             password: hashedPassword,
-            role: 'Admin'
+            role: "Admin"
         });
 
-        await newUser.save();
-
-        return res.status(200).json({ data: { message: "User added successfully" } });
+        //send successful message
+        return resData(res, { message: "Admin added successfully" });
 
     } catch (error) {
         resError(res, 500, error.message);

@@ -18,7 +18,6 @@ describe("register", () => {
   test('should register user', async () => {
 
     //mock variables
-
     const mockReq = {
       body: {
         username: "user1",
@@ -203,11 +202,56 @@ describe("register", () => {
 });
 
 
-
 describe("registerAdmin", () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
+  test('should register admin', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "admin1",
+        email: "admin1@ezwallet.com",
+        password: "password1",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockHashedPassword = "hashedPassword1"
+    const mockUserToSave = {
+      username: mockReq.body.username,
+      email: mockReq.body.email,
+      password: mockHashedPassword,
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: {
+        message: "Admin added successfully"
+      }
+    }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(false);
+    User.findOne.mockResolvedValueOnce(false);
+    bcrypt.hash.mockResolvedValueOnce(mockHashedPassword);
+    User.create.mockResolvedValueOnce(true);
+
+    //call 
+    await register(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.body.username });
+    expect(User.create).toHaveBeenCalledWith(mockUserToSave);
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
 
   test('should return 400 if request body does not contain all necessary attributes', async () => {
     const req = { body: { username: 'admin', password: 'password123' } };
