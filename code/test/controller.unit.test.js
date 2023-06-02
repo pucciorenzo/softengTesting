@@ -8,7 +8,7 @@ jest.mock('../controllers/utils');
 jest.mock('../models/User');
 
 beforeEach(() => {
-    verifyAuth.mockClear();
+    /*verifyAuth.mockClear();
     handleDateFilterParams.mockClear();
     handleAmountFilterParams.mockClear();
 
@@ -41,7 +41,8 @@ beforeEach(() => {
     transactions.prototype.save.mockClear();
     User.prototype.save.mockClear();
     Group.prototype.save.mockClear();
-
+*/
+    jest.resetAllMocks();
 
 });
 
@@ -804,6 +805,7 @@ describe("getTransactionsByGroupByCategory", () => {
 
         Group.findOne.mockResolvedValue(mockGroup);
         verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+        categories.findOne.mockResolvedValue(true);
         transactions.aggregate.mockResolvedValue(mockTransactionAggregate);
 
         await getTransactionsByGroupByCategory(mockReq, mockRes);
@@ -811,6 +813,7 @@ describe("getTransactionsByGroupByCategory", () => {
         expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
         expect(mockGroup.populate).toHaveBeenCalled();
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
+        expect(categories.findOne).toHaveBeenCalledWith({type : mockCategory});
         expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
