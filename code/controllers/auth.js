@@ -1,8 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import { verifyAuth } from './utils.js';
-import validator from 'validator';
 import { createAttribute, resData, resError, validateAttributes } from './extraUtils.js';
 
 /**
@@ -35,10 +33,10 @@ export const register = async (req, res) => {
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //check user not registered
-        if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+        if (await User.findOne({ email: email })) return resError(res, 400, "email already registered");
 
         //check username does not exist
-        if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
+        if (await User.findOne({ username: username })) return resError(res, 400, "username already taken");
 
         //hash the password
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -61,7 +59,7 @@ export const register = async (req, res) => {
 
 
 /**
- * registerAdmin
+registerAdmin
 Request Parameters: None
 Request Body Content: An object having attributes username, email and password
 Example: {username: "admin", email: "admin@email.com", password: "securePass"}
@@ -90,10 +88,10 @@ export const registerAdmin = async (req, res) => {
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //check user not registered
-        if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+        if (await User.findOne({ email: email })) return resError(res, 400, "email already registered");
 
         //check username does not exist
-        if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
+        if (await User.findOne({ username: username })) return resError(res, 400, "username already taken");
 
         //hash the password
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -116,7 +114,7 @@ export const registerAdmin = async (req, res) => {
 
 
 /**
- * login
+login
 Request Parameters: None
 Request Body Content: An object having attributes email and password
 Example: {email: "mario.red@email.com", password: "securePass"}
@@ -130,27 +128,24 @@ Returns a 400 error if the supplied password does not match with the one in the 
  */
 export const login = async (req, res) => {
     try {
-
-        /**optional ? */
-        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        //        if (simpleAuth.flag) {
-        //            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
-        //        }
-
+        //get attributes
         const email = req.body.email;
         const password = req.body.password;
 
-        if (email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
+        //validate attributes
+        const validation = validateAttributes([
+            createAttribute(email, 'email'),
+            createAttribute(password, 'string'),
+        ])
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
-        if (email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
-
-        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
-
+        //user exists
         const user = await User.findOne({ email: email });
-        if (!user) return res.status(400).json({ error: 'user not found. register first' });
+        if (!user) return resError(res, 400, 'user not found. register first');
 
+        //password correct
         const match = await bcrypt.compare(password, user.password)
-        if (!match) return res.status(400).json({ error: 'wrong credentials' });
+        if (!match) return resError(res, 400, 'wrong credentials');
 
         //CREATE ACCESSTOKEN
         const accessToken = jwt.sign({
@@ -172,10 +167,12 @@ export const login = async (req, res) => {
         user.refreshToken = refreshToken;
         await user.save();
 
+        //set tokens in cookies
         res.cookie("accessToken", accessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
         res.cookie('refreshToken', refreshToken, { httpOnly: true, domain: "localhost", path: '/api', maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'none', secure: true })
 
-        return res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } });
+        //send tokens as data
+        return resData(res, { accessToken: accessToken, refreshToken: refreshToken });
 
     } catch (error) {
         resError(res, 500, error.message);
@@ -202,10 +199,10 @@ export const logout = async (req, res) => {
 
         const refreshToken = req.cookies.refreshToken;
         //console.log(refreshToken)
-        if (!refreshToken || refreshToken == "" || refreshToken.length == 0) return res.status(400).json({ error: "no refresh token found" });
+        if (!refreshToken || refreshToken == "" || refreshToken.length == 0) return resError(res, 400, "no refresh token found");
 
         const user = await User.findOne({ refreshToken: refreshToken });
-        if (!user) return res.status(400).json({ error: 'user not found. Are you registered or logged in?' });
+        if (!user) return resError(res, 400, 'user not found. Are you registered or logged in?');
 
 
         user.refreshToken = null;
@@ -214,7 +211,7 @@ export const logout = async (req, res) => {
         res.cookie("accessToken", "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
         res.cookie('refreshToken', "", { httpOnly: true, path: '/api', maxAge: 0, sameSite: 'none', secure: true });
 
-        return res.status(200).json({ data: { message: "User logged out" } });
+        return resData(res, { message: "User logged out" });
 
     } catch (error) {
         resError(res, 500, error.message);

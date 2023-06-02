@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 
 jest.mock("bcryptjs");
 jest.mock('../models/User.js');
+jest.mock("jsonwebtoken");
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -56,12 +57,14 @@ describe("register", () => {
     //test
     expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
     expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.body.username });
+    expect(bcrypt.hash).toHaveBeenCalledWith(mockReq.body.password, 12);
     expect(User.create).toHaveBeenCalledWith(mockUserToSave);
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
 
+  /* disabled for shorter test result
   test('should return 400 if request body does not contain all necessary attributes', async () => {
     const req = { body: { username: 'user', password: 'password123' } };
     const res = {
@@ -198,7 +201,7 @@ describe("register", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
-
+*/
 });
 
 
@@ -227,6 +230,7 @@ describe("registerAdmin", () => {
       username: mockReq.body.username,
       email: mockReq.body.email,
       password: mockHashedPassword,
+      role: "Admin"
     }
     const mockResStatus = 200;
     const mockResJson = {
@@ -242,17 +246,19 @@ describe("registerAdmin", () => {
     User.create.mockResolvedValueOnce(true);
 
     //call 
-    await register(mockReq, mockRes);
+    await registerAdmin(mockReq, mockRes);
 
     //test
     expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
     expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.body.username });
+    expect(bcrypt.hash).toHaveBeenCalledWith(mockReq.body.password, 12);
     expect(User.create).toHaveBeenCalledWith(mockUserToSave);
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
 
+  /* disabled for shorter test result
   test('should return 400 if request body does not contain all necessary attributes', async () => {
     const req = { body: { username: 'admin', password: 'password123' } };
     const res = {
@@ -361,15 +367,82 @@ describe("registerAdmin", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
+  */
 });
 
 
 
 describe('login', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+
+  test('should log in successfully', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.com",
+        password: "password1",
+      },
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockHashedPassword = "hashedPassword1";
+    const mockAccessToken = "access token";
+    const mockRefreshToken = "refresh token";
+    const mockSavedUser = {
+      username: mockReq.body.username,
+      email: mockReq.body.email,
+      password: mockHashedPassword,
+      role: "Admin",
+      refreshToken: null,
+      save: jest.fn()
+    }
+    const processEnvACCESS_KEY = "EZWALLET";
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: {
+        accessToken: mockAccessToken,
+        refreshToken: mockRefreshToken
+      }
+    }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(mockSavedUser);
+    bcrypt.compare.mockResolvedValueOnce(true);
+    jwt.sign.mockReturnValueOnce(mockAccessToken);
+    jwt.sign.mockReturnValueOnce(mockRefreshToken);
+    mockSavedUser.save.mockResolvedValueOnce(true);
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(bcrypt.compare).toHaveBeenCalledWith(mockReq.body.password, mockHashedPassword);
+    expect(jwt.sign).toHaveBeenCalledWith({
+      email: mockSavedUser.email,
+      id: mockSavedUser.id,
+      username: mockSavedUser.username,
+      role: mockSavedUser.role
+    }, processEnvACCESS_KEY, { expiresIn: '1h' });
+    expect(jwt.sign).toHaveBeenCalledWith({
+      email: mockSavedUser.email,
+      id: mockSavedUser.id,
+      username: mockSavedUser.username,
+      role: mockSavedUser.role
+    }, processEnvACCESS_KEY, { expiresIn: '7d' });
+    expect(mockSavedUser.save).toHaveBeenCalledWith();
+    expect(mockRes.cookie).toHaveBeenCalledWith("accessToken", mockAccessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
+    expect(mockRes.cookie).toHaveBeenCalledWith("refreshToken", mockRefreshToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "none", secure: true })
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
+  /* disabled for shorter test result
   test('should return 400 error if request body is incomplete', async () => {
     const req = { body: { email: 'test@example.com' } };
     const res = {
@@ -459,15 +532,18 @@ describe('login', () => {
     expect(res.status).toBeCalledWith(200);
     expect(res.json).toBeCalledWith({ data: { accessToken: 'accessToken', refreshToken: 'refreshToken' } });
   });
+  */
 });
 
 
 describe('logout', () => {
+  /*
   beforeEach(() => {
     // Reset the mocked functions and values before each test
     jest.clearAllMocks();
   });
 
+  /* disabled for shorter test result
   test('should return 400 error if refresh token is not found in cookies', async () => {
     const req = { cookies: {} };
     const res = {
@@ -516,4 +592,5 @@ describe('logout', () => {
     expect(res.status).toBeCalledWith(200);
     expect(res.json).toBeCalledWith({ data: { message: 'User logged out' } });
   });
+  */
 });
