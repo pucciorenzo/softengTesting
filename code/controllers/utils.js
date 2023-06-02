@@ -149,6 +149,7 @@ export const verifyAuth = (req, res, info) => {
       createAttribute(decodedRefreshToken.role, 'string'),
     ]
   );
+  console.log(decodedRefreshToken + validation);
   if (!validation.flag) return authenticationFail("Token is missing information");
 
   //decode access token second
