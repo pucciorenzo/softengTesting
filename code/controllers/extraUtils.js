@@ -13,7 +13,7 @@ export const validateAttribute = (attribute) => {
         const { value, type } = attribute;
 
         //incomlete/missing attribute
-        if (typeof value == "undefined" || value == null) return validationFail("incomplete attribute");
+        if (typeof value == "undefined" || value == null) return validationFail("incomplete attributes");
 
         switch (type) {
 
@@ -88,7 +88,7 @@ export const validateAttribute = (attribute) => {
             case 'email':
                 {
                     //incorrect format or invalid characters
-                    if (!validator.isEmail(value)) return validationFail("not an email");
+                    if (!validator.isEmail(value)) return validationFail("invalid email format");
                 }
                 break;
 

@@ -3,9 +3,10 @@ import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { verifyAuth } from './utils.js';
 import validator from 'validator';
+import { createAttribute, resData, resError, validateAttributes } from './extraUtils.js';
 
 /**
- * register
+register
 Request Parameters: None
 Request Body Content: An object having attributes username, email and password
 Example: {username: "Mario", email: "mario.red@email.com", password: "securePass"}
@@ -19,39 +20,42 @@ Returns a 400 error if the email in the request body identifies an already exist
  */
 export const register = async (req, res) => {
     try {
+
+        //get attributes
         const username = req.body.username;
         const email = req.body.email;
         const password = req.body.password;
 
-        if (username == undefined || email == undefined || password == undefined) return res.status(400).json({ error: "incomplete attributes" });
+        //validate attributes
+        const validation = validateAttributes([
+            createAttribute(username, 'string'),
+            createAttribute(email, 'email'),
+            createAttribute(password, 'string'),
+        ])
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
-        if (username.trim() == "" || email.trim() == "" || password.trim() == "") return res.status(400).json({ error: "empty strings" });
-
-        if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
-/*
-        //**optional? check if logged out */
-//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-//        if (simpleAuth.flag) {
-//            return res.status(400).json({ error: "please logout first" });
-//        }
-
+        //check user not registered
         if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
+
+        //check username does not exist
         if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
 
+        //hash the password
         const hashedPassword = await bcrypt.hash(password, 12);
-        const newUser = await User.create({
-            username,
-            email,
+
+        //save new user in database
+        await User.create({
+            username : username,
+            email : email,
             password: hashedPassword,
             //default role Regular
         });
 
-        await newUser.save();
+        //send successful message
+        return resData(res, { message: "User added successfully" });
 
-        return res.status(200).json({ data: { message: "User added successfully" } });
-
-    } catch (err) {
-        res.status(500);
+    } catch (error) {
+        resError(res, 500, error.message);
     }
 }
 
@@ -111,7 +115,7 @@ export const registerAdmin = async (req, res) => {
         await newUser.save();
         return res.status(200).json({ data: { message: "User added successfully" } });
 
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({ error: err.message });
     }
 }
@@ -129,10 +133,10 @@ export const registerAdmin = async (req, res) => {
         if (!validator.isEmail(email)) return res.status(400).json({ error: "invalid email format" });
 
         //**optional? check if logged out */
-//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-//        if (simpleAuth.flag) {
-//            return res.status(400).json({ error: "please logout first" });
-//        }
+        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        //        if (simpleAuth.flag) {
+        //            return res.status(400).json({ error: "please logout first" });
+        //        }
 
         if (await User.findOne({ email: email })) return res.status(400).json({ error: "email already registered" });
         if (await User.findOne({ username: username })) return res.status(400).json({ error: "username already taken" });
@@ -149,8 +153,8 @@ export const registerAdmin = async (req, res) => {
 
         return res.status(200).json({ data: { message: "User added successfully" } });
 
-    } catch (err) {
-        res.status(500);
+    } catch (error) {
+        resError(res, 500, error.message);
     }
 }
 
@@ -172,10 +176,10 @@ export const login = async (req, res) => {
     try {
 
         /**optional ? */
-//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-//        if (simpleAuth.flag) {
-//            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
-//        }
+        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        //        if (simpleAuth.flag) {
+        //            return res.status(200).json({ data: 'You are already logged in. Not you? Logout first' }); // unauthorized
+        //        }
 
         const email = req.body.email;
         const password = req.body.password;
@@ -218,7 +222,7 @@ export const login = async (req, res) => {
         return res.status(200).json({ data: { accessToken: accessToken, refreshToken: refreshToken } });
 
     } catch (error) {
-        res.status(500);
+        resError(res, 500, error.message);
     }
 }
 
@@ -235,10 +239,10 @@ export const logout = async (req, res) => {
     try {
 
         /**optional */
-//        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-//        if (!simpleAuth.flag) {
-//            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
-//        }
+        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
+        //        if (!simpleAuth.flag) {
+        //            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
+        //        }
 
         const refreshToken = req.cookies.refreshToken;
         //console.log(refreshToken)
@@ -257,6 +261,6 @@ export const logout = async (req, res) => {
         return res.status(200).json({ data: { message: "User logged out" } });
 
     } catch (error) {
-        res.status(500);
+        resError(res, 500, error.message);
     }
 }

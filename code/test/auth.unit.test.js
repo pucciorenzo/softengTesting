@@ -1,18 +1,67 @@
-import request from 'supertest';
-import { app } from '../app';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { register, registerAdmin, login, logout } from '../controllers/auth.js';
+import bcrypt from 'bcryptjs';
 
-const bcrypt = require("bcryptjs")
-
-jest.mock("bcryptjs")
+jest.mock("bcryptjs");
 jest.mock('../models/User.js');
+
+beforeEach(() => {
+  jest.resetAllMocks();
+})
 
 describe("register", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
+  test('should register user', async () => {
+
+    //mock variables
+
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "user1@ezwallet.com",
+        password: "password1",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockHashedPassword = "hashedPassword1"
+    const mockUserToSave = {
+      username: mockReq.body.username,
+      email: mockReq.body.email,
+      password: mockHashedPassword,
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: {
+        message: "User added successfully"
+      }
+    }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(false);
+    User.findOne.mockResolvedValueOnce(false);
+    bcrypt.hash.mockResolvedValueOnce(mockHashedPassword);
+    User.create.mockResolvedValueOnce(true);
+
+    //call 
+    await register(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.body.username });
+    expect(User.create).toHaveBeenCalledWith(mockUserToSave);
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
 
   test('should return 400 if request body does not contain all necessary attributes', async () => {
     const req = { body: { username: 'user', password: 'password123' } };
@@ -37,7 +86,7 @@ describe("register", () => {
     await register(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'empty strings' });
+    expect(res.json).toHaveBeenCalledWith({ error: 'invalid email format' });
   });
 
   test('should return 200 and add a new user', async () => {
@@ -75,15 +124,15 @@ describe("register", () => {
       email: 'invalid-email',
       password: 'password123',
     };
-  
+
     const mockReq = { body: requestBody };
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
-  
+
     await register(mockReq, mockRes);
-  
+
     expect(mockRes.status).toHaveBeenCalledWith(400);
     expect(mockRes.json).toHaveBeenCalledWith({ error: "invalid email format" });
   });
@@ -113,8 +162,8 @@ describe("register", () => {
   test('should return 400 if user with the same username already exists', async () => {
     const mockFindOne = jest.spyOn(User, 'findOne');
     mockFindOne
-    .mockResolvedValueOnce(null) //email check first
-    .mockResolvedValueOnce({ username: 'testuser' });
+      .mockResolvedValueOnce(null) //email check first
+      .mockResolvedValueOnce({ username: 'testuser' });
 
     const requestBody = {
       username: 'testuser',
@@ -142,7 +191,7 @@ describe("register", () => {
     };
 
     const errorMessage = 'Internal Server Error';
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => { });
 
     jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
 
@@ -207,8 +256,8 @@ describe("registerAdmin", () => {
     };
 
     jest.spyOn(User, 'findOne')
-    .mockResolvedValueOnce(null) //email check first
-    .mockResolvedValueOnce({ username: 'admin' });
+      .mockResolvedValueOnce(null) //email check first
+      .mockResolvedValueOnce({ username: 'admin' });
 
     await registerAdmin(req, res);
 
@@ -260,7 +309,7 @@ describe("registerAdmin", () => {
     };
 
     const errorMessage = 'Internal Server Error';
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => { });
 
     jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
 
