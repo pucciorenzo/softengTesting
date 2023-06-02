@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import { createAttribute, resData, resError, validateAttributes } from './extraUtils.js';
+import { createAttribute, resData, resError, validateAttribute, validateAttributes } from './extraUtils.js';
 
 /**
 register
@@ -180,7 +180,7 @@ export const login = async (req, res) => {
 }
 
 /**
- * logout
+logout
 Request Parameters: None
 Request Body Content: None
 Response data Content: A message confirming successful logout
@@ -191,16 +191,14 @@ Returns a 400 error if the refresh token in the request's cookies does not repre
 export const logout = async (req, res) => {
     try {
 
-        /**optional */
-        //        const simpleAuth = verifyAuth(req, res, { authType: 'Simple' });
-        //        if (!simpleAuth.flag) {
-        //            return res.status(401).json({ error: simpleAuth.cause + ": Are you logged in?" }) // unauthorized
-        //        }
-
+        //get attribute
         const refreshToken = req.cookies.refreshToken;
-        //console.log(refreshToken)
-        if (!refreshToken || refreshToken == "" || refreshToken.length == 0) return resError(res, 400, "no refresh token found");
 
+        //validate attribute
+        const validation = validateAttribute(
+            createAttribute(refreshToken, 'token')
+        )
+        if (!validation.flag) return resError(res, 400, validation.cause);
         const user = await User.findOne({ refreshToken: refreshToken });
         if (!user) return resError(res, 400, 'user not found. Are you registered or logged in?');
 

@@ -16,7 +16,7 @@ export const validateAttribute = (attribute) => {
         if (typeof value == "undefined" || value == null) return validationFail("incomplete attributes");
 
         switch (type) {
-
+            case 'token':
             case 'string':
                 {
                     //not a string
