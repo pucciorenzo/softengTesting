@@ -1,6 +1,14 @@
+import jwt from 'jsonwebtoken';
 import { handleDateFilterParams, verifyAuth, handleAmountFilterParams } from '../controllers/utils';
 
-describe("handleDateFilterParams", () => { 
+jest.mock('jsonwebtoken');
+
+beforeEach(() => {
+  jest.resetAllMocks();
+})
+
+
+describe("handleDateFilterParams", () => {
   test('should return an empty object when no date filtering parameters are provided', () => {
     const req = { query: {} };
     const result = handleDateFilterParams(req);
@@ -61,10 +69,51 @@ describe("handleDateFilterParams", () => {
   });
 })
 
-describe("verifyAuth", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
-    });
+describe("verifyAuth", () => {
+  test('authType Group, should authorize and refresh token', () => {
+    const mockReq = {
+      cookies: {
+        accessToken: "valid accessToken",
+        refreshToken: "valid refreshToken"
+      }
+    }
+    const mockRes = {
+      locals: {
+        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+      }
+    }
+    const mockInfo = {
+      authType: "Group",
+      emails: [
+        "user1@ezwallet.com",
+        "user2@ezwallet.com",
+        "user3@ezwallet.com",
+        "user4@ezwallet.com",
+        "user5@ezwallet.com",
+      ]
+    }
+    const mockDecodedRefreshToken = {
+      username: "user1",
+      email: "user1@ezwallet.com",
+      id: "id1",
+      role: "Regular"
+    }
+    const mockDecodedAccessToken = {
+      username: "user1",
+      email: "user1@ezwallet.com",
+      id: "id1",
+      role: "Regular"
+    }
+    const mockResult = { flag: true, cause: 'Authorized' }
+
+    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
+    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
+    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+
+    expect(result).toEqual(mockResult);
+  });
 })
 
 describe("handleAmountFilterParams", () => {
@@ -107,4 +156,4 @@ describe("handleAmountFilterParams", () => {
   });
 
 });
-  
+

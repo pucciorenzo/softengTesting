@@ -150,7 +150,7 @@ export const login = async (req, res) => {
         //CREATE ACCESSTOKEN
         const accessToken = jwt.sign({
             email: user.email,
-            id: user.id,
+            id: user._id,
             username: user.username,
             role: user.role
         }, process.env.ACCESS_KEY, { expiresIn: '1h' });
@@ -158,7 +158,7 @@ export const login = async (req, res) => {
         //CREATE REFRESH TOKEN
         const refreshToken = jwt.sign({
             email: user.email,
-            id: user.id,
+            id: user._id,
             username: user.username,
             role: user.role
         }, process.env.ACCESS_KEY, { expiresIn: '7d' });
@@ -195,13 +195,12 @@ export const logout = async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
         //validate attribute
-        const validation = validateAttribute(
-            createAttribute(refreshToken, 'token')
-        )
+        const validation = validateAttribute(createAttribute(refreshToken, 'token'));
         if (!validation.flag) return resError(res, 400, validation.cause);
+
+        //check user exists/logged in
         const user = await User.findOne({ refreshToken: refreshToken });
         if (!user) return resError(res, 400, 'user not found. Are you registered or logged in?');
-
 
         user.refreshToken = null;
         await user.save();
