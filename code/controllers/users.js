@@ -135,13 +135,14 @@ export const createGroup = async (req, res) => {
 
     //check if at least one member other than caller can be added
     if (canBeAddedMembersArray.length == 0) return resError(res, 400, "no members available to add");
-    canBeAddedMembersArray.unshift(existingUser.email);
+    canBeAddedMembersArray.unshift({ email: existingUser.email, user: existingUser._id });
 
     //create and save
     const newGroup = new Group({
       name: name,
       members: canBeAddedMembersArray
     });
+    //console.log(JSON.stringify(newGroup, null, 2));
     await newGroup.save()
       .then(data =>
         //prepare and send data

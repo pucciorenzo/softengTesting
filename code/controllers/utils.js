@@ -144,12 +144,12 @@ export const verifyAuth = (req, res, info) => {
   validation = validateAttributes(
     [
       createAttribute(decodedRefreshToken.email, 'email'),
-      createAttribute(decodedRefreshToken.id, 'string'),
+      //createAttribute(decodedRefreshToken.id, 'string'),
       createAttribute(decodedRefreshToken.username, 'string'),
       createAttribute(decodedRefreshToken.role, 'string'),
     ]
   );
-  console.log(decodedRefreshToken + validation);
+  //console.log(decodedRefreshToken + validation);
   if (!validation.flag) return authenticationFail("Token is missing information");
 
   //decode access token second
@@ -169,7 +169,7 @@ export const verifyAuth = (req, res, info) => {
   validation = validateAttributes(
     [
       createAttribute(decodedAccessToken.email, 'email'),
-      createAttribute(decodedAccessToken.id, 'string'),
+      //createAttribute(decodedAccessToken.id, 'string'),
       createAttribute(decodedAccessToken.username, 'string'),
       createAttribute(decodedAccessToken.role, 'string'),
     ]
@@ -182,7 +182,7 @@ export const verifyAuth = (req, res, info) => {
   if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) return authenticationFail("Token is missing information"); //redundant
   */
 
-  if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role || decodedAccessToken.id != decodedRefreshToken.id) return authenticationFail("Mismatched tokens");
+  if (decodedAccessToken.username !== decodedRefreshToken.username || decodedAccessToken.email !== decodedRefreshToken.email || decodedAccessToken.role !== decodedRefreshToken.role /*|| decodedAccessToken.id != decodedRefreshToken.id*/) return authenticationFail("Mismatched tokens");
 
   let isAuthorized = false;
   let cause = "";
@@ -237,15 +237,9 @@ export const verifyAuth = (req, res, info) => {
       //send refreshed message
       res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
     }
-
-    //decoding access token fails excluding expiration error
-    return authenticationPass();
-
   }
 
-
-
-  return { flag: false, cause: "unknown. Try again" };
+  return authenticationPass();
 }
 
 
