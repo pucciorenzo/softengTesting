@@ -29,6 +29,12 @@ export const createCategory = async (req, res) => {
         //get attributes
         const { type, color } = req.body;
 
+        //check attributes
+        if (type == undefined || color == undefined) return res.status(400).json({ error: "incomplete attributes" });
+
+        if (type.trim() == "" || color.trim() == "") return res.status(400).json({ error: "empty strings" });
+
+
         //validate attributes
         const validation = validateAttributes([
             createAttribute(type, 'string'),
@@ -77,6 +83,11 @@ export const updateCategory = async (req, res) => {
         // get attributes
         const newType = req.body.type;
         const newColor = req.body.color;
+
+        //check attributes
+        if (newType == undefined || newColor == undefined) return res.status(400).json({ error: "incomplete attributes" });
+
+        if (newType.trim() == "" || newColor.trim() == "") return res.status(400).json({ error: "empty strings" });
 
         //validate attributes
         const validation = validateAttributes([

@@ -22,11 +22,41 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-describe("createCategory", () => { 
-    test('Dummy test, change it', () => {
-        expect(true).toBe(true);
+describe("createCategory", () => {
+    beforeEach(async () => {
+      // Clear the categories collection before each test
+      await categories.deleteMany();
     });
-})
+  
+    test('should return 400 error if request body is incomplete', async () => {
+      const res = await request(app)
+        .post('/api/categories')
+        .send({ type: "Investments" })
+  
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe("incomplete attributes");
+    });
+  
+    test('should return 400 error if request body contains empty strings', async () => {
+      const res = await request(app)
+        .post('/api/categories')
+        .send({ type: "Investments", color: "" })
+  
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe("empty strings");
+    });
+  
+    test('should return 401 error if user is not an admin', async () => {
+
+    });
+
+    test('should return 400 error if category already exists', async () => {
+
+    });
+  
+    test('should create a new category successfully', async () => {
+
+  });
 
 describe("updateCategory", () => { 
     test('Dummy test, change it', () => {
