@@ -7,7 +7,6 @@ import dotenv from 'dotenv';
 import "jest-extended"
 import { User, Group } from '../models/User';
 import jwt from 'jsonwebtoken';
-import { verifyAuth, handleDateFilterParams } from '../controllers/utils';
 
 
 dotenv.config();
@@ -67,24 +66,7 @@ const testerAccessTokenExpired = jwt.sign({
 }, process.env.ACCESS_KEY, { expiresIn: '0s' })
 const testerAccessTokenEmpty = jwt.sign({}, process.env.ACCESS_KEY, { expiresIn: "1y" })
 
-const createUserEntry = (n) => {
-  return {
-    //_id: mongoose.Types.ObjectId(n),
-    username: `user${n}`,
-    email: `user${n}@ezwallet.com`,
-    pasword: `password${n}`,
-    role: "Regular"
-  }
-}
-const createAdminEntry = (n) => {
-  return {
-    //_id: mongoose.Types.ObjectId(n),
-    username: `admin${10 + n}`,
-    email: `admin${n}@ezwallet.com`,
-    pasword: `password${n}`,
-    role: "Admin"
-  }
-}
+
 
 describe("getUsers", () => {
   /**
