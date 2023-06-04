@@ -1,6 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "./extraUtils.js";
+import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "../extras/extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**

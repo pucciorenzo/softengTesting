@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import { verifyAuth, handleDateFilterParams, handleAmountFilterParams } from '../controllers/utils';
 
 
+
 dotenv.config();
 
 beforeAll(async () => {
@@ -28,12 +29,11 @@ afterAll(async () => {
 
 //necessary setup to ensure that each test can insert the data it needs
 beforeEach(async () => {
-    await categories.deleteMany({})
-    await transactions.deleteMany({})
-    await User.deleteMany({})
-    await Group.deleteMany({})
+    await User.deleteMany({});
+    await Group.deleteMany({});
+    await categories.deleteMany({});
+    await transactions.deleteMany({});
 })
-
 
 /**
  * Alternate way to create the necessary tokens for authentication without using the website

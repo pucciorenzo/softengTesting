@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from './extraUtils.js';
+import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "../extras/extraUtils.js";
 
 /**
 register

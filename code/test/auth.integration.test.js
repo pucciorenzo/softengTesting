@@ -3,13 +3,17 @@ import { app } from '../app';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import "jest-extended"
-import { User } from '../models/User';
+import { Group, User } from '../models/User';
 import bcrypt from "bcryptjs"
+import { categories, transactions } from '../models/model';
+
+dotenv.config();
+
 
 dotenv.config();
 
 beforeAll(async () => {
-  const dbName = "testingDatabaseAuth";
+  const dbName = "testingDatabaseController";
   const url = `${process.env.MONGO_URI}/${dbName}`;
 
   await mongoose.connect(url, {
@@ -22,11 +26,14 @@ beforeAll(async () => {
 afterAll(async () => {
   await mongoose.connection.db.dropDatabase();
   await mongoose.connection.close();
-})
+});
 
 //necessary setup to ensure that each test can insert the data it needs
 beforeEach(async () => {
-  await User.deleteMany({})
+  await User.deleteMany({});
+  await Group.deleteMany({});
+  await categories.deleteMany({});
+  await transactions.deleteMany({});
 })
 
 

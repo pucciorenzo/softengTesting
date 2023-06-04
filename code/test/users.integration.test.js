@@ -9,6 +9,7 @@ import { User, Group } from '../models/User';
 import jwt from 'jsonwebtoken';
 
 
+
 dotenv.config();
 
 beforeAll(async () => {
@@ -29,10 +30,10 @@ afterAll(async () => {
 
 //necessary setup to ensure that each test can insert the data it needs
 beforeEach(async () => {
-  await categories.deleteMany({})
-  await transactions.deleteMany({})
-  await User.deleteMany({})
-  await Group.deleteMany({})
+  await User.deleteMany({});
+  await Group.deleteMany({});
+  await categories.deleteMany({});
+  await transactions.deleteMany({});
 })
 
 /**
@@ -166,7 +167,7 @@ describe("createGroup", () => {
       });
 
 
-    //console.log(JSON.stringify(response, null, 2));
+    console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.body.data).toEqual({
       group: {

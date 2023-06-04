@@ -38,16 +38,18 @@ export const validateValueType = (attribute) => {
                     if (array.length == 0) return validationFail("empty array");
 
                     //repeating elements or invalid elements//
-                    const exists = {};
+                    //const exists = {};
                     for (const value of array) {
 
                         //not valid string element
                         let validation = validateValueType(createValueTypeObject(value, 'string'));
                         if (!validation.flag) return validationFail("at least one: " + validation.cause);
 
+                        /*
                         //repeating element
                         if (exists[value]) return validationFail("at least one repeating element");
                         exists[value] = true;
+                        */
                     }
                 }
                 break;
@@ -63,16 +65,18 @@ export const validateValueType = (attribute) => {
                     if (array.length == 0) return validationFail("empty array");
 
                     //repeating elements or invalid elements//
-                    const exists = {};
+                    //const exists = {};
                     for (const value of array) {
 
                         //not valid string element
                         let validation = validateValueType(createValueTypeObject(value, 'email'));
                         if (!validation.flag) return validationFail("at least one: " + validation.cause);
 
+                        /*
                         //repeating element
                         if (exists[value]) return validationFail("at least one repeating element");
                         exists[value] = true;
+                        */
                     }
                 }
                 break;

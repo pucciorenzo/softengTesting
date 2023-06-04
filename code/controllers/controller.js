@@ -2,7 +2,7 @@ import { categories, transactions } from "../models/model.js";
 import { Group, User } from "../models/User.js";
 import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./utils.js";
 
-import { createValueTypeObject, validateValueType, validateValueTypes, resError, resData } from "./extraUtils.js";
+import { createValueTypeObject, validateValueType, validateValueTypes, resError, resData } from "../extras/extraUtils.js";
 
 /**
  * Error response:
@@ -149,12 +149,17 @@ export const deleteCategory = async (req, res) => {
         //check more than one category exists
         if (currentTypes.length <= 1) return resError(res, 401, "only zero or one category exists");
 
-        //check all categories to be deleted exist
+        //check all categories to be deleted exists and track duplicates
+        const uniqueTypes = {};
         for (const typeToDelete of typesToDelete) {
             if (!currentTypes.includes(typeToDelete)) {
                 return resError(res, 400, "at least one type does not exist");
             }
+            uniqueTypes[typeToDelete] = typeToDelete;
         }
+
+        //remove duplicates
+        typesToDelete = Object.keys(uniqueTypes);
 
         //N==T, if deleting all categories, don't delete oldest
         let oldestType = currentTypes[0];
