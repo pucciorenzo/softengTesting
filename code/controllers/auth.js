@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
-import { createAttribute, resData, resError, validateAttribute, validateAttributes } from './extraUtils.js';
+import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "../helpers/extraUtils.js";
 
 /**
 register
@@ -25,10 +25,10 @@ export const register = async (req, res) => {
         const password = req.body.password;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(username, 'string'),
-            createAttribute(email, 'email'),
-            createAttribute(password, 'string'),
+        const validation = validateValueTypes([
+            createValueTypeObject(username, 'string'),
+            createValueTypeObject(email, 'email'),
+            createValueTypeObject(password, 'string'),
         ])
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -80,10 +80,10 @@ export const registerAdmin = async (req, res) => {
         const password = req.body.password;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(username, 'string'),
-            createAttribute(email, 'email'),
-            createAttribute(password, 'string'),
+        const validation = validateValueTypes([
+            createValueTypeObject(username, 'string'),
+            createValueTypeObject(email, 'email'),
+            createValueTypeObject(password, 'string'),
         ])
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -133,9 +133,9 @@ export const login = async (req, res) => {
         const password = req.body.password;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(email, 'email'),
-            createAttribute(password, 'string'),
+        const validation = validateValueTypes([
+            createValueTypeObject(email, 'email'),
+            createValueTypeObject(password, 'string'),
         ])
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -195,7 +195,7 @@ export const logout = async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
 
         //validate attribute
-        const validation = validateAttribute(createAttribute(refreshToken, 'token'));
+        const validation = validateValueType(createValueTypeObject(refreshToken, 'token'));
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //check user exists/logged in

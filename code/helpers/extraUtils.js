@@ -1,13 +1,13 @@
 import validator from "validator";
 
 
-export const createAttribute = (v, t) => { return { value: v, type: t } }
+export const createValueTypeObject = (v, t) => { return { value: v, type: t } }
 
 const validationFail = (c) => { return { flag: false, cause: c } }
 
 const validationPass = () => { return { flag: true, cause: 'valid' } }
 
-export const validateAttribute = (attribute) => {
+export const validateValueType = (attribute) => {
     try {
 
         const { value, type } = attribute;
@@ -38,16 +38,18 @@ export const validateAttribute = (attribute) => {
                     if (array.length == 0) return validationFail("empty array");
 
                     //repeating elements or invalid elements//
-                    const exists = {};
+                    //const exists = {};
                     for (const value of array) {
 
                         //not valid string element
-                        let validation = validateAttribute(createAttribute(value, 'string'));
+                        let validation = validateValueType(createValueTypeObject(value, 'string'));
                         if (!validation.flag) return validationFail("at least one: " + validation.cause);
 
+                        /*
                         //repeating element
                         if (exists[value]) return validationFail("at least one repeating element");
                         exists[value] = true;
+                        */
                     }
                 }
                 break;
@@ -63,16 +65,18 @@ export const validateAttribute = (attribute) => {
                     if (array.length == 0) return validationFail("empty array");
 
                     //repeating elements or invalid elements//
-                    const exists = {};
+                    //const exists = {};
                     for (const value of array) {
 
                         //not valid string element
-                        let validation = validateAttribute(createAttribute(value, 'email'));
+                        let validation = validateValueType(createValueTypeObject(value, 'email'));
                         if (!validation.flag) return validationFail("at least one: " + validation.cause);
 
+                        /*
                         //repeating element
                         if (exists[value]) return validationFail("at least one repeating element");
                         exists[value] = true;
+                        */
                     }
                 }
                 break;
@@ -94,9 +98,10 @@ export const validateAttribute = (attribute) => {
 
             case 'date':
                 {
+
                     //not YYYY-MM-DD
                     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-                    if (!dateRegex.test(value)) validationFail("invalid date format");
+                    if (!validateValueType(createValueTypeObject(value, 'string')).flag || !dateRegex.test(value)) return validationFail("invalid date format");
                 }
                 break;
 
@@ -114,10 +119,10 @@ export const validateAttribute = (attribute) => {
 
 }
 
-export const validateAttributes = (attributes) => {
+export const validateValueTypes = (attributes) => {
     try {
         for (const a of attributes) {
-            let validation = validateAttribute(a);
+            let validation = validateValueType(a);
             if (!validation.flag) return validation;
         }
         return validationPass();
