@@ -2,7 +2,7 @@ import { categories, transactions } from "../models/model.js";
 import { Group, User } from "../models/User.js";
 import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./utils.js";
 
-import { createAttribute, validateAttribute, validateAttributes, resError, resData } from "./extraUtils.js";
+import { createValueTypeObject, validateValueType, validateValueTypes, resError, resData } from "./extraUtils.js";
 
 /**
  * Error response:
@@ -30,9 +30,9 @@ export const createCategory = async (req, res) => {
         const { type, color } = req.body;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(type, 'string'),
-            createAttribute(color, 'string')
+        const validation = validateValueTypes([
+            createValueTypeObject(type, 'string'),
+            createValueTypeObject(color, 'string')
         ]);
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -79,9 +79,9 @@ export const updateCategory = async (req, res) => {
         const newColor = req.body.color;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(newType, 'string'),
-            createAttribute(newColor, 'string'),
+        const validation = validateValueTypes([
+            createValueTypeObject(newType, 'string'),
+            createValueTypeObject(newColor, 'string'),
         ]);
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -136,7 +136,7 @@ export const deleteCategory = async (req, res) => {
         let typesToDelete = req.body.types;
 
         //validate attributes
-        const validation = validateAttribute(createAttribute(typesToDelete, 'stringArray'));
+        const validation = validateValueType(createValueTypeObject(typesToDelete, 'stringArray'));
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //verify admin
@@ -233,10 +233,10 @@ export const createTransaction = async (req, res) => {
         let { username, amount, type } = req.body;
 
         //validate attributes
-        const validation = validateAttributes([
-            createAttribute(username, 'string'),
-            createAttribute(amount, 'amount'),
-            createAttribute(type, 'string'),
+        const validation = validateValueTypes([
+            createValueTypeObject(username, 'string'),
+            createValueTypeObject(amount, 'amount'),
+            createValueTypeObject(type, 'string'),
         ])
         if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -657,7 +657,7 @@ export const deleteTransaction = async (req, res) => {
         const transaction_id = req.body._id;
 
         //validate attribute
-        const validation = validateAttribute(createAttribute(transaction_id, 'string'));
+        const validation = validateValueType(createValueTypeObject(transaction_id, 'string'));
         if (!validation.flag) return resError(res, 400, validation.cause);
 
         //authenticate user
@@ -709,7 +709,7 @@ export const deleteTransactions = async (req, res) => {
         const _ids = req.body._ids;
 
         //validate attribute
-        const validation = validateAttribute(createAttribute(_ids, 'stringArray'));
+        const validation = validateValueType(createValueTypeObject(_ids, 'stringArray'));
         if (!validation.flag) resError(res, 400, validation.cause);
 
         //authenticate

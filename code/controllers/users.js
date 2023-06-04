@@ -1,6 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { createAttribute, resData, resError, validateAttribute, validateAttributes } from "./extraUtils.js";
+import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "./extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
@@ -88,9 +88,9 @@ export const createGroup = async (req, res) => {
     const name = req.body.name;
     let memberEmails = req.body.memberEmails;
 
-    const validation = validateAttributes([
-      createAttribute(name, 'string'),
-      createAttribute(memberEmails, 'emailArray')
+    const validation = validateValueTypes([
+      createValueTypeObject(name, 'string'),
+      createValueTypeObject(memberEmails, 'emailArray')
     ]);
     if (!validation.flag) return resError(res, 400, validation.cause);
 
@@ -247,7 +247,7 @@ export const addToGroup = async (req, res) => {
     const emailArray = req.body.emails;
 
     //validate attributes
-    const validation = validateAttribute(createAttribute(emailArray, 'emailArray'));
+    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
     //check group exists
@@ -343,7 +343,7 @@ export const removeFromGroup = async (req, res) => {
     let emailArray = req.body.emails;
 
     //validate attributes
-    const validation = validateAttribute(createAttribute(emailArray, 'emailArray'));
+    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
     //check group exists
@@ -446,7 +446,7 @@ export const deleteUser = async (req, res) => {
     const email = req.body.email;
 
     //validate attribute
-    const validation = validateAttribute(createAttribute(email, "string"));
+    const validation = validateValueType(createValueTypeObject(email, "string"));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
     //authenticate
@@ -510,7 +510,7 @@ export const deleteGroup = async (req, res) => {
     const name = req.body.name;
 
     //validate attribute
-    const validation = validateAttribute(createAttribute(name, "string"));
+    const validation = validateValueType(createValueTypeObject(name, "string"));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
     const auth = verifyAuth(req, res, { authType: "Admin" });

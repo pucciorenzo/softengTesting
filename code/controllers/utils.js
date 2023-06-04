@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { createAttribute, validateAttributes } from './extraUtils.js';
+import { createValueTypeObject, validateValueType, validateValueTypes } from './extraUtils.js';
 
 /**
  * Handle possible date filtering options in the query parameters for getTransactionsByUser when called by a Regular user.
@@ -28,45 +28,36 @@ Throws an error if date is present in the query parameter together with at least
 Throws an error if the value of any of the three query parameters is not a string that represents a date in the format YYYY-MM-DD
 */
 export const handleDateFilterParams = (req) => {
-  const { from, upTo, date } = req.query;
+  let { from, upTo, date } = req.query;
   //console.log(`from : ${from}, upto : ${upTo}, date : ${date}`);
-  const parseDateString = (str) => {
+  /*const parseStringAsDate = (str) => {
     return new Date(`${str}T00:00:00.000Z`);
+  };*/
+
+  //if no queries
+  if (!(date || from || upTo)) return {};
+
+  //if date present with one of the others
+  if (date && (from || upTo)) throw new Error('Cannot include date parameter with from or upTo parameters.');
+
+  //if query present but incorrect format
+  if (date && !validateValueType(createValueTypeObject(date, "date")).flag) throw new Error('date : Invalid date format. YYYY-MM-DD format expected.');
+  if (from && !validateValueType(createValueTypeObject(from, "date")).flag) throw new Error('from : Invalid date format. YYYY-MM-DD format expected.');
+  if (upTo && !validateValueType(createValueTypeObject(upTo, "date")).flag) throw new Error('upTo : Invalid date format. YYYY-MM-DD format expected.')
+
+  //start creating filter
+  const filter = {
+    date: {}
   };
 
-  if (date && (from || upTo)) {
-    throw new Error('Cannot include date parameter with from or upTo parameters.');
-  }
-
+  //if date present set from and upto dates to the date
   if (date) {
-    if (!validateParams(date, "handleDateFilterParams")) {
-      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
-    }
-    const parsedDate = parseDateString(date);
-    const fromDate = new Date(parsedDate);
-    const upToDate = new Date(parsedDate);
-    upToDate.setUTCHours(23, 59, 59, 999);
-    return { date: { $gte: fromDate, $lte: upToDate } };
+    from = date;
+    upTo = date;
   }
-
-  const filter = {};
-
-  if (from) {
-    if (!validateParams(from, "handleDateFilterParams")) {
-      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
-    }
-    const fromDate = parseDateString(from);
-    filter.date = { ...(filter.date || {}), $gte: fromDate };
-  }
-
-  if (upTo) {
-    if (!validateParams(upTo, "handleDateFilterParams")) {
-      throw new Error('Invalid date format. YYYY-MM-DD format expected.');
-    }
-    const upToDate = parseDateString(upTo);
-    upToDate.setUTCHours(23, 59, 59, 999);
-    filter.date = { ...(filter.date || {}), $lte: upToDate };
-  }
+  //if set, create and add filter with Date object
+  if (from) filter.date.$gte = new Date(from);
+  if (upTo) filter.date.$lte = new Date(upTo + "T23:59:59.999Z");
 
   return filter;
 };
@@ -116,10 +107,10 @@ export const verifyAuth = (req, res, info) => {
   const refreshToken = req.cookies.refreshToken;
 
   //validate tokens
-  let validation = validateAttributes(
+  let validation = validateValueTypes(
     [
-      createAttribute(accessToken, 'token'),
-      createAttribute(refreshToken, 'token'),
+      createValueTypeObject(accessToken, 'token'),
+      createValueTypeObject(refreshToken, 'token'),
     ])
   if (!validation.flag) return authenticationFail('invalid tokens');
 
@@ -141,12 +132,12 @@ export const verifyAuth = (req, res, info) => {
   }
 
   //validate decoded refresh token properties
-  validation = validateAttributes(
+  validation = validateValueTypes(
     [
-      createAttribute(decodedRefreshToken.email, 'email'),
-      //createAttribute(decodedRefreshToken.id, 'string'),
-      createAttribute(decodedRefreshToken.username, 'string'),
-      createAttribute(decodedRefreshToken.role, 'string'),
+      createValueTypeObject(decodedRefreshToken.email, 'email'),
+      //createValueTypeObject(decodedRefreshToken.id, 'string'),
+      createValueTypeObject(decodedRefreshToken.username, 'string'),
+      createValueTypeObject(decodedRefreshToken.role, 'string'),
     ]
   );
   //console.log(decodedRefreshToken + validation);
@@ -166,19 +157,19 @@ export const verifyAuth = (req, res, info) => {
   }
 
   //validate decoded access token properties
-  validation = validateAttributes(
+  validation = validateValueTypes(
     [
-      createAttribute(decodedAccessToken.email, 'email'),
-      //createAttribute(decodedAccessToken.id, 'string'),
-      createAttribute(decodedAccessToken.username, 'string'),
-      createAttribute(decodedAccessToken.role, 'string'),
+      createValueTypeObject(decodedAccessToken.email, 'email'),
+      //createValueTypeObject(decodedAccessToken.id, 'string'),
+      createValueTypeObject(decodedAccessToken.username, 'string'),
+      createValueTypeObject(decodedAccessToken.role, 'string'),
     ]
   );
   if (!validation.flag) return authenticationFail("Token is missing information");
 
   /*
   if (!decodedAccessToken.username || !decodedAccessToken.email || !decodedAccessToken.role) return authenticationFail("Token is missing information"); //redundant
-
+ 
   if (!decodedRefreshToken.username || !decodedRefreshToken.email || !decodedRefreshToken.role) return authenticationFail("Token is missing information"); //redundant
   */
 
@@ -198,7 +189,7 @@ export const verifyAuth = (req, res, info) => {
       break;
     }
     case 'User': {
-      if (decodedAccessToken.username == req.params.username) isAuthorized = true;
+      if (decodedAccessToken.username == info.username) isAuthorized = true;
       else cause = "cannot access other user's data";
       break;
     }
@@ -268,53 +259,25 @@ If both min and max are present then both $gte and $lte must be included
 Throws an error if the value of any of the two query parameters is not a numerical value
  */
 export const handleAmountFilterParams = (req) => {
+
   const { min, max } = req.query;
 
-  if (min && max) {
-    if (!validateParams(min, "handleAmountFilterParams"))
-      throw new Error("Invalid min. Expected a numerical value.");
-    if (!validateParams(max, "handleAmountFilterParams"))
-      throw new Error("Invalid max. Expected a numerical value.");
-    return {
-      amount: {
-        $gte: parseInt(min),
-        $lte: parseInt(max),
-      },
-    };
-  }
+  //if no query
+  if (!min && !max) return {};
 
-  if (min) {
-    if (!validateParams(min, "handleAmountFilterParams"))
-      throw new Error("Invalid min. Expected a numerical value.");
-    return { amount: { $gte: parseInt(min) } };
-  }
+  //if query present but not a numerical value
+  if (min && !validateValueType(createValueTypeObject(min, "amount")).flag) throw new Error("Invalid min. Expected a numerical value.");
+  if (max && !validateValueType(createValueTypeObject(max, "amount")).flag) throw new Error("Invalid max. Expected a numerical value.");
 
-  if (max) {
-    if (!validateParams(max, "handleAmountFilterParams"))
-      throw new Error("Invalid max. Expected a numerical value.");
-    return { amount: { $lte: parseInt(max) } };
+  //start creating filter
+  const filter = {
+    amount: {}
   }
+  //if min, create greater than filter
+  if (min) filter.amount.$gte = parseFloat(min);
+  //if max, create less than filter
+  if (max) filter.amount.$lte = parseFloat(max);
 
-  return {};
+  return filter;
+
 };
-
-export const validateParams = (toCheck, functionName) => {
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-  switch (functionName) {
-    case "register":
-    case "registerAdmin":
-      return validateEmail(toCheck.query.email);
-    case "createGroup":
-      toCheck.query.memberEmails.forEach(email => {
-        if (!validateEmail(email)) return false;
-      });
-      break;
-    case "handleDateFilterParams":
-      return (/^\d{4}-\d{2}-\d{2}$/).test(toCheck);
-    case "handleAmountFilterParams":
-      return /^\d+$/.test(toCheck);
-  }
-}
