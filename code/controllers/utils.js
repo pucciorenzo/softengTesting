@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { createValueTypeObject, validateValueType, validateValueTypes } from '../extras/extraUtils.js';
+import { createValueTypeObject, validateValueType, validateValueTypes } from '../helpers/extraUtils.js';
 
 /**
  * Handle possible date filtering options in the query parameters for getTransactionsByUser when called by a Regular user.

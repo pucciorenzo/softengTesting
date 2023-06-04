@@ -2,7 +2,7 @@ import { categories, transactions } from "../models/model.js";
 import { Group, User } from "../models/User.js";
 import { handleDateFilterParams, handleAmountFilterParams, verifyAuth } from "./utils.js";
 
-import { createValueTypeObject, validateValueType, validateValueTypes, resError, resData } from "../extras/extraUtils.js";
+import { createValueTypeObject, validateValueType, validateValueTypes, resError, resData } from "../helpers/extraUtils.js";
 
 /**
  * Error response:
