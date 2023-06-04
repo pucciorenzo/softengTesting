@@ -167,7 +167,7 @@ describe("createGroup", () => {
       });
 
 
-    console.log(JSON.stringify(response, null, 2));
+  //console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.body.data).toEqual({
       group: {

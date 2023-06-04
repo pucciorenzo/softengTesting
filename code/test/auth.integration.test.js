@@ -119,7 +119,7 @@ describe('logout', () => {
       .get("/api/logout")
       .set('Cookie', ["accessToken=validAccessToken;refreshToken=validRefreshToken"]);
 
-    console.log(JSON.stringify(response, null, 2));
+  //console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.header["set-cookie"]).toEqual(
       expect.arrayContaining([
