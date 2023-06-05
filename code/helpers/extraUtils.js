@@ -85,7 +85,8 @@ export const validateValueType = (attribute) => {
             case 'number':
             case 'float': {
                 //not a number after parsing
-                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
+                const amountRegex = /^[+-]?([0-9]*[.,])?[0-9]+$/;
+                if (!amountRegex.test(value)) return validationFail("cannot parse as floating value");
             }
                 break;
 
