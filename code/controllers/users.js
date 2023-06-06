@@ -108,6 +108,11 @@ export const createGroup = async (req, res) => {
     //check if calling user already in a group
     if (await Group.findOne({ members: { $elemMatch: { email: existingUser.email } } })) return resError(res, 400, "calling user already in group");
 
+    //remove duplicate emails
+    const uniqueEmails = {};
+    for (const email of memberEmails) uniqueEmails[email] = email;
+    memberEmails = Object.keys(uniqueEmails);
+
     //categorize other emails except calling user
     let canBeAddedMembersArray = [];
     let alreadyInGroupMembersArray = [];
@@ -123,16 +128,14 @@ export const createGroup = async (req, res) => {
         continue;
       }
       //check user not in group
-      else if (await Group.findOne({ members: { $elemMatch: { email: email } } })) {
+      if (await Group.findOne({ members: { $elemMatch: { email: email } } })) {
         //alreadyInGroupMembersArray.push({ email: email });
         alreadyInGroupMembersArray.push(email);
         continue;
       }
       //prepare to add
-      else if (!canBeAddedMembersArray.includes({ email: email, user: user._id })) {
-        canBeAddedMembersArray.push({ email: email, user: user._id });
-      }
-      else;
+      canBeAddedMembersArray.push({ email: email, user: user._id });
+
     }
 
     //check if at least one member other than caller can be added
@@ -268,29 +271,36 @@ export const addToGroup = async (req, res) => {
 
 
     //get attributes
-    const emailArray = req.body.emails;
+    let emailArray = req.body.emails;
 
     //validate attributes
     const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
     if (!validation.flag) return resError(res, 400, validation.cause);
+
+    //remove duplicate emails
+    const uniqueEmails = {};
+    for (const email of emailArray) uniqueEmails[email] = email;
+    emailArray = Object.keys(uniqueEmails);
 
     //categorize emails
     let alreadyInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeAddedMembersArray = [];
     for (const email of emailArray) {
+
       let user = await User.findOne({ email: email });
       if (!user) {
         notFoundMembersArray.push(email);
         continue;
       }
+
       if ((await Group.findOne({ 'members.email': email }))) {
         alreadyInGroupMembersArray.push(email);
         continue;
       }
-      if (!canBeAddedMembersArray.includes({ email: email, user: user._id })) {
-        canBeAddedMembersArray.push({ email: email, user: user._id });
-      }
+
+      canBeAddedMembersArray.push({ email: email, user: user._id });
+
     }
 
     //check if at least one member can be added
@@ -370,6 +380,11 @@ export const removeFromGroup = async (req, res) => {
     const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
+    //remove duplicate emails
+    const uniqueEmails = {};
+    for (const email of emailArray) uniqueEmails[email] = email;
+    emailArray = Object.keys(uniqueEmails);
+
     //categorize emails excluding first member//
     let notInGroupMembersArray = [];
     let notFoundMembersArray = [];
@@ -390,10 +405,7 @@ export const removeFromGroup = async (req, res) => {
       }
 
       //not already added for deletion
-      if (!canBeRemovedMembersArray.includes(email)) {
-        canBeRemovedMembersArray.push(email);
-        continue;
-      }
+      canBeRemovedMembersArray.push(email);
 
     }
 
