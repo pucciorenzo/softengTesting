@@ -95,7 +95,7 @@ export const updateCategory = async (req, res) => {
         if (!currentCategory) return resError(res, 400, "category does not exist");
 
         //confirm new category type does not exist
-        if (newType != currentType && await categories.findOne({ type: newType })) return resError(res, 401, "new category exists");
+        if (newType != currentType && await categories.findOne({ type: newType })) return resError(res, 400, "new category exists");
 
         //update category
         currentCategory.type = newType;
