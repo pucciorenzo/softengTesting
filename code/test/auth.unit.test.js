@@ -554,101 +554,231 @@ describe('login', () => {
     expect(mockSavedUser.save).toHaveBeenCalledWith();
     expect(mockRes.cookie).toHaveBeenCalledWith("accessToken", mockAccessToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 60 * 60 * 1000, sameSite: "none", secure: true })
     expect(mockRes.cookie).toHaveBeenCalledWith("refreshToken", mockRefreshToken, { httpOnly: true, domain: "localhost", path: "/api", maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "none", secure: true })
+
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  /* disabled for shorter test result
-  test('should return 400 error if request body is incomplete', async () => {
-    const req = { body: { email: 'test@example.com' } };
-    const res = {
+  test('Returns a 500 error if any error thrown', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.com",
+        password: "password1",
+      },
+    }
+    const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
-  });
- 
-  test('should return 400 error if request body contains empty strings', async () => {
-    const req = { body: { email: '', password: '' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'empty strings' });
-  });
- 
-  test('should return 400 error if email is not in a valid format', async () => {
-    const req = { body: { email: 'invalid-email', password: 'password' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'invalid email format' });
-  });
- 
-  test('should return 400 error if user is not found in the database', async () => {
-    User.findOne.mockResolvedValueOnce(null);
- 
-    const req = { body: { email: 'test@example.com', password: 'password' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'user not found. register first' });
-  });
- 
-  test('should return 400 error if password does not match', async () => {
-    const user = { email: 'test@example.com', password: 'hashedPassword' };
-    User.findOne.mockResolvedValueOnce(user);
-    bcrypt.compare.mockResolvedValueOnce(false);
- 
-    const req = { body: { email: 'test@example.com', password: 'wrongPassword' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'wrong credentials' });
-  });
- 
-  test('should return access and refresh tokens if login is successful', async () => {
-    const user = { email: 'test@example.com', password: 'hashedPassword', id: '123', username: 'testuser', role: 'user' };
-    User.findOne.mockResolvedValueOnce(user);
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockHashedPassword = "hashedPassword1";
+    const mockAccessToken = "access token";
+    const mockRefreshToken = "refresh token";
+    const mockSavedUser = {
+      username: mockReq.body.username,
+      email: mockReq.body.email,
+      password: mockHashedPassword,
+      role: "Admin",
+      refreshToken: null,
+      save: jest.fn()
+    }
+    const processEnvACCESS_KEY = "EZWALLET";
+    const mockResStatus = 500;
+    const mockResJson = { error: expect.any(String) }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(mockSavedUser);
     bcrypt.compare.mockResolvedValueOnce(true);
-    jwt.sign.mockReturnValueOnce('accessToken');
-    jwt.sign.mockReturnValueOnce('refreshToken');
- 
-    const req = { body: { email: 'test@example.com', password: 'password' } };
-    const res = {
+    jwt.sign.mockReturnValueOnce(mockAccessToken);
+    jwt.sign.mockReturnValueOnce(mockRefreshToken);
+    mockSavedUser.save.mockRejectedValueOnce(new Error("something went wrong"));
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(bcrypt.compare).toHaveBeenCalledWith(mockReq.body.password, mockHashedPassword);
+    expect(jwt.sign).toHaveBeenCalledWith({
+      email: mockSavedUser.email,
+      id: mockSavedUser.id,
+      username: mockSavedUser.username,
+      role: mockSavedUser.role
+    }, processEnvACCESS_KEY, { expiresIn: '1h' });
+    expect(jwt.sign).toHaveBeenCalledWith({
+      email: mockSavedUser.email,
+      id: mockSavedUser.id,
+      username: mockSavedUser.username,
+      role: mockSavedUser.role
+    }, processEnvACCESS_KEY, { expiresIn: '7d' });
+    expect(mockSavedUser.save).toHaveBeenCalledWith();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+  test('Returns a 400 error if the supplied password does not match with the one in the database  ', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.com",
+        password: "password1",
+      },
+    }
+    const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
- 
-    await login(req, res);
- 
-    expect(res.status).toBeCalledWith(200);
-    expect(res.json).toBeCalledWith({ data: { accessToken: 'accessToken', refreshToken: 'refreshToken' } });
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockHashedPassword = "hashedPassword1";
+    const mockSavedUser = {
+      username: mockReq.body.username,
+      email: mockReq.body.email,
+      password: mockHashedPassword,
+      role: "Admin",
+      refreshToken: null,
+      save: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(mockSavedUser);
+    bcrypt.compare.mockResolvedValueOnce(false);
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(bcrypt.compare).toHaveBeenCalledWith(mockReq.body.password, mockHashedPassword);
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
-  */
+
+  test('Returns a 400 error if the email in the request body does not identify a user in the database  ', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.com",
+        password: "password1",
+      },
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(null);
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+  test('Returns a 400 error if the email in the request body is not in a valid email format  ', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.coms",
+        password: "password1",
+      },
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+  test('Returns a 400 error if at least one of the parameters in the request body is an empty string  ', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        email: "user1@ezwallet.coms",
+        password: "",
+      },
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+  test('Returns a 400 error if the request body does not contain all the necessary attributes  ', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        password: "password1",
+      },
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    //call 
+    await login(mockReq, mockRes);
+
+    //test
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+
+
+
 });
 
 
