@@ -47,7 +47,7 @@ describe("getUsers", () => {
     }
 
     //mock implementations
-    verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
     User.find.mockResolvedValue([
       { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
       { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
@@ -67,7 +67,67 @@ describe("getUsers", () => {
 
   })
 
+  test("returns 500 error when error is thrown", async () => {
+
+    //mock variables
+    const mockReq = {
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const errorMessage = "database error";
+    const mockResStatus = 500;
+    const mockResJson = { error: errorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.find.mockRejectedValueOnce(new Error(errorMessage))
+
+    //call function
+    await getUsers(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.find).toHaveBeenCalledWith({});
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+
+    //mock variables
+    const mockReq = {
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const errorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: errorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: errorMessage });
+
+    //call function
+    await getUsers(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
 })
+
 
 describe("getUser", () => {
 
