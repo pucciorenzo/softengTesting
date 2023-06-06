@@ -47,9 +47,9 @@ beforeEach(() => {
 });
 
 describe("createCategory", () => {
-    beforeEach(() => {
+    afterEach(() => {
         jest.clearAllMocks();
-      });
+    });
     
     test('should return 400 error if request body is incomplete', async () => {
         const req = { body: { type: 'testType' } };
@@ -58,6 +58,8 @@ describe("createCategory", () => {
           json: jest.fn(),
         };
     
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
+
         await createCategory(req, res);
     
         expect(res.status).toBeCalledWith(400);
@@ -70,6 +72,8 @@ describe("createCategory", () => {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await createCategory(req, res);
     
@@ -143,9 +147,33 @@ describe("createCategory", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const req = { body: { type: 'testType', color: 'testColor' } };
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(categories, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+    
+        await createCategory(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
+
 })
 
 describe("updateCategory", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    
     test('should return 400 error if request body is incomplete', async () => {
         const req = {
             params: {type: 'currentTestType'},
@@ -155,6 +183,8 @@ describe("updateCategory", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await updateCategory(req, res);
     
@@ -171,11 +201,13 @@ describe("updateCategory", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await updateCategory(req, res);
     
         expect(res.status).toBeCalledWith(400);
-        expect(res.json).toBeCalledWith({ error: 'empty strings' });
+        expect(res.json).toBeCalledWith({ error: 'empty string' });
     });
 
     test('should return 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
@@ -356,9 +388,32 @@ describe("updateCategory", () => {
             expect(mockRes.json).toHaveBeenCalledWith(mockResData);
         }
     );    
+
+    test('should return 500 if an error occurs', async () => {
+        const req = { body: { type: 'testType', color: 'testColor' } };
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(categories, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+    
+        await updateCategory(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("deleteCategory", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    
     test('should return 400 error if request body is incomplete', async () => {
         const req = {
             params: {},
@@ -368,6 +423,8 @@ describe("deleteCategory", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await deleteCategory(req, res);
     
@@ -407,6 +464,8 @@ describe("deleteCategory", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await deleteCategory(req, res);
     
@@ -423,6 +482,8 @@ describe("deleteCategory", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await deleteCategory(req, res);
     
@@ -566,9 +627,38 @@ describe("deleteCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
 
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const req = {             
+            params: {
+            },
+            body: {
+                types: ["C", "B", "A", "D"]
+            } 
+        };
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(categories, 'find').mockRejectedValue(new Error(errorMessage));
+    
+        await deleteCategory(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("getCategories", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should retreive all categories', async () => {
         const mockReq = {
             params: {
@@ -632,9 +722,32 @@ describe("getCategories", () => {
         expect(res.status).toBeCalledWith(401);
         expect(res.json).toBeCalledWith({ error: 'Unauthorized' });
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const req = { body: { type: 'testType', color: 'testColor' } };
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(categories, 'find').mockRejectedValue(new Error(errorMessage));
+    
+        await getCategories(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("createTransaction", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should return 400 error if request body is incomplete', async () => {
         const req = { 
             params: {
@@ -649,6 +762,8 @@ describe("createTransaction", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
 
         await createTransaction(req, res);
 
@@ -671,6 +786,8 @@ describe("createTransaction", () => {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
+        
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
     
         await createTransaction(req, res);
     
@@ -696,6 +813,8 @@ describe("createTransaction", () => {
         const mockUser = {
             username: 'user1'
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
           
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(mockUser);
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(mockUser);
@@ -731,6 +850,8 @@ describe("createTransaction", () => {
         const mockCategory = {
             type: 'food'
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
         
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(mockUser);
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(mockUser2);
@@ -757,13 +878,15 @@ describe("createTransaction", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
           
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(null);
       
         await createTransaction(req, res);
 
         expect(res.status).toBeCalledWith(400);
-        expect(res.json).toBeCalledWith({ error: 'user passed in the request body does not exist' });
+        expect(res.json).toBeCalledWith({ error: 'user does not exist' });
     });
 
     test('should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
@@ -785,6 +908,8 @@ describe("createTransaction", () => {
         const mockUser = {
             username: 'user1'
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
         
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(mockUser);
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(null);
@@ -810,6 +935,8 @@ describe("createTransaction", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         };
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' })
 
         await createTransaction(req, res);
 
@@ -898,9 +1025,39 @@ describe("createTransaction", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const req = { 
+            params: {
+                username: "user1",
+            },
+            body: { 
+                username: "user1",
+                amount: 100,
+                type: 'food'
+            } 
+        };
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+          };
+        const errorMessage = 'Error';
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+    
+        await createTransaction(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("getAllTransactions", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = {
             params: {
@@ -974,9 +1131,119 @@ describe("getAllTransactions", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
+    
+    test('should return 500 if an error occurs', async () => {
+        const req = {
+            params: {
+            },
+            body: {
+            }
+        }
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+        jest.spyOn(transactions, 'aggregate').mockRejectedValueOnce(new Error(errorMessage));
+    
+        await getAllTransactions(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("getTransactionsByUser", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    
+    test('should return 400 error if the user does not exist', async () => {
+        const mockUsername = 'nonexistentuser';
+        const mockReq = {
+            url: '/api/users/nonexistentuser/transactions',
+            params: {
+                username: mockUsername
+            },
+            body: {}
+        };
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {}
+        };
+      
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+        handleDateFilterParams.mockReturnValue({});
+        handleAmountFilterParams.mockReturnValue({});
+        User.findOne.mockResolvedValue(false);
+      
+        await getTransactionsByUser(mockReq, mockRes);
+      
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: mockUsername });
+        expect(handleDateFilterParams).toHaveBeenCalledWith(mockReq);
+        expect(handleAmountFilterParams).toHaveBeenCalledWith(mockReq);
+        expect(User.findOne).toHaveBeenCalledWith({ username: mockUsername });
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: 'user does not exist' });
+    });
+
+    test('should return 401 error if called by an authenticated user who is not the same user (user route)', async () => {
+        const mockUsername = 'user2';
+        const mockReq = {
+            url: '/api/users/user1/transactions',
+            params: {
+                username: 'user1'
+            },
+            body: {}
+        };
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {}
+        };
+
+        verifyAuth.mockReturnValue({ flag: false, cause: 'Unauthorized' });
+        handleDateFilterParams.mockReturnValue({});
+        handleAmountFilterParams.mockReturnValue({});
+
+        await getTransactionsByUser(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: 'User', username: 'user1' });
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
+    });
+
+    test('should return 401 error if called by an authenticated user who is not an admin (admin route)', async () => {
+        const mockReq = {
+            url: '/api/transactions/users/user1',
+            params: {
+            username: 'user1'
+            },
+            body: {}
+        };
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {}
+        };
+        
+        verifyAuth.mockReturnValue({ flag: false, cause: 'Not admin' });
+        handleDateFilterParams.mockReturnValue({});
+        handleAmountFilterParams.mockReturnValue({});
+    
+        await getTransactionsByUser(mockReq, mockRes);
+    
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not admin' });
+      });
+
     test('should return all users transactions (user route with date)', async () => {
         const mockDate = "2023-04-01";
         const mockUsername = "user1";
@@ -1057,6 +1324,22 @@ describe("getTransactionsByUser", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const req = { body: { type: 'testType', color: 'testColor' } };
+        const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+        
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        
+        verifyAuth.mockRejectedValue(new Error(Error));
+    
+        await getTransactionsByUser(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("getTransactionsByUserByCategory", () => {
@@ -1344,6 +1627,8 @@ describe("deleteTransaction", () => {
             }
         }
 
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+
         await deleteTransaction(req, res);
 
         expect(res.status).toBeCalledWith(400);
@@ -1366,6 +1651,8 @@ describe("deleteTransaction", () => {
             }
         }
 
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+
         await deleteTransaction(req, res);
     
         expect(res.status).toBeCalledWith(400);
@@ -1387,6 +1674,8 @@ describe("deleteTransaction", () => {
             locals: {
             }
         }   
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(null);
         
@@ -1412,6 +1701,8 @@ describe("deleteTransaction", () => {
             }
         }   
         
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
+
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(true);
         jest.spyOn(transactions, 'findOne').mockResolvedValue(false);
         
@@ -1439,6 +1730,8 @@ describe("deleteTransaction", () => {
         const mockTransaction = {
             _id: "id1", username: "user2", type: "type1", date: Date.now()
         }
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
         
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(true);
         jest.spyOn(transactions, 'findOne').mockResolvedValue(mockTransaction);
@@ -1467,10 +1760,13 @@ describe("deleteTransaction", () => {
         const mockTransaction = {
             _id: "id1", username: "user1", type: "type1", date: Date.now()
         }
+
+
+        verifyAuth.mockReturnValue({ flag: false, cause: 'Unauthorized' });
         
         jest.spyOn(User, 'findOne').mockResolvedValueOnce(true);
         jest.spyOn(transactions, 'findOne').mockResolvedValue(mockTransaction);
-        verifyAuth.mockReturnValue({ flag: false, cause: 'Unauthorized' });
+        
         
         await deleteTransaction(req, res);
 
@@ -1505,6 +1801,7 @@ describe("deleteTransaction", () => {
             }
         }
         verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+        
         User.findOne.mockResolvedValue(true);
         transactions.findOne.mockResolvedValue(mockTransaction);
         transactions.deleteOne.mockResolvedValue(true);
@@ -1518,6 +1815,41 @@ describe("deleteTransaction", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
+
+    test('should return 500 if an error occurs', async () => {
+        const mockUsername = "user1";
+        const mockTransaction_id = "id1";
+        const req = {
+            params: {
+                username: mockUsername
+            },
+            body: {
+                _id: mockTransaction_id
+            }
+        }
+        const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockTransaction = {
+            _id: "id1", username: "user1", type: "type1", date: Date.now()
+        }
+
+        const errorMessage = 'Error';
+
+        verifyAuth.mockReturnValue({ flag: true, cause: "authorized" });
+        User.findOne.mockResolvedValue(true);
+        transactions.findOne.mockResolvedValue(mockTransaction);
+    
+        jest.spyOn(console, 'error').mockImplementation(() => {});    
+        jest.spyOn(transactions, 'deleteOne').mockRejectedValueOnce(new Error(errorMessage));
+    
+        await deleteTransaction(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(500);
+      });
 })
 
 describe("deleteTransactions", () => {
@@ -1531,6 +1863,8 @@ describe("deleteTransactions", () => {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
         }
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
 
         await deleteTransactions(req, res);
 
@@ -1557,6 +1891,8 @@ describe("deleteTransactions", () => {
             locals: {
             }
         }
+
+        verifyAuth.mockReturnValue({ flag: true, cause: 'Authorized' });
 
         await deleteTransactions(req, res);
 

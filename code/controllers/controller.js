@@ -95,7 +95,7 @@ export const updateCategory = async (req, res) => {
         if (!currentCategory) return resError(res, 400, "category does not exist");
 
         //confirm new category type does not exist
-        if (newType != currentType && await categories.findOne({ type: newType })) return resError(res, 401, "new category exists");
+        if (newType != currentType && await categories.findOne({ type: newType })) return resError(res, 400, "new category exists");
 
         //update category
         currentCategory.type = newType;
@@ -149,7 +149,7 @@ export const deleteCategory = async (req, res) => {
         let currentTypes = (await categories.find({})).map(c => c.type);
 
         //check more than one category exists
-        if (currentTypes.length <= 1) return resError(res, 401, "only zero or one category exists");
+        if (currentTypes.length <= 1) return resError(res, 400, "only zero or one category exists");
 
         //check all categories to be deleted exists and track duplicates
         const uniqueTypes = {};
@@ -255,11 +255,12 @@ export const createTransaction = async (req, res) => {
         //convert amount to number if string
         amount = parseFloat(amount);
 
+        //check users exist
+        if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
+        if (!(await User.findOne({ username: req.params.username }))) return resError(res, 400, "user passed as a route parameter does not exist");
+
         //check if calling user adds his own transaction
         if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");
-
-        //check user exists
-        if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
 
         //check category exists
         if (!(await categories.findOne({ type: type }))) return resError(res, 400, "category does not exist");
