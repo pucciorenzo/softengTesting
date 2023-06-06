@@ -84,6 +84,10 @@ Returns a 401 error if called by a user who is not authenticated (authType = Sim
 export const createGroup = async (req, res) => {
   try {
 
+    //authenticate
+    const auth = verifyAuth(req, res, { authType: "Simple" });
+    if (!auth.flag) return resError(res, 401, auth.cause);
+
     //get attributes
     const name = req.body.name;
     let memberEmails = req.body.memberEmails;
@@ -93,10 +97,6 @@ export const createGroup = async (req, res) => {
       createValueTypeObject(memberEmails, 'emailArray')
     ]);
     if (!validation.flag) return resError(res, 400, validation.cause);
-
-    //authenticate
-    const auth = verifyAuth(req, res, { authType: "Simple" });
-    if (!auth.flag) return resError(res, 401, auth.cause);
 
     // check if group exists
     if (await Group.findOne({ name: name })) return resError(res, 400, "group already exists");
@@ -243,13 +243,6 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const addToGroup = async (req, res) => {
   try {
 
-    //get attributes
-    const emailArray = req.body.emails;
-
-    //validate attributes
-    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
-    if (!validation.flag) return resError(res, 400, validation.cause);
-
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
     if (!group) return resError(res, 400, "group does not exist");
@@ -263,14 +256,21 @@ export const addToGroup = async (req, res) => {
 
       //admin route
     } else if (req.url.includes("/insert")) {
+
       const auth = verifyAuth(req, res, { authType: "Admin" });
       if (!auth.flag) return resError(res, 401, auth.cause);
 
     }
-    //unknown error
-    else {
-      throw new Error('unknown route');
-    }
+    //unknown route
+    else throw new Error('unknown route');
+
+
+    //get attributes
+    const emailArray = req.body.emails;
+
+    //validate attributes
+    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     //categorize emails
     let alreadyInGroupMembersArray = [];
@@ -339,13 +339,6 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const removeFromGroup = async (req, res) => {
   try {
 
-    //get attributes
-    let emailArray = req.body.emails;
-
-    //validate attributes
-    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
-    if (!validation.flag) return resError(res, 400, validation.cause);
-
     //check group exists
     let group = await Group.findOne({ name: req.params.name });
     if (!group) return resError(res, 400, "group does not exist");
@@ -368,6 +361,12 @@ export const removeFromGroup = async (req, res) => {
     }
     //unknown route
     else throw new Error('unknown route');
+    //get attributes
+    let emailArray = req.body.emails;
+
+    //validate attributes
+    const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
+    if (!validation.flag) return resError(res, 400, validation.cause);
 
     //categorize emails excluding first member//
     let notInGroupMembersArray = [];
@@ -442,16 +441,17 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const deleteUser = async (req, res) => {
   try {
+
+    //authenticate
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.flag) return resError(res, 401, auth.cause);
+
     //get attribute
     const email = req.body.email;
 
     //validate attribute
     const validation = validateValueType(createValueTypeObject(email, "string"));
     if (!validation.flag) return resError(res, 400, validation.cause);
-
-    //authenticate
-    const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) return resError(res, 401, auth.cause);
 
     //check user exists
     const user = await User.findOne({ email: email });
@@ -506,15 +506,15 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteGroup = async (req, res) => {
   try {
 
+    const auth = verifyAuth(req, res, { authType: "Admin" });
+    if (!auth.flag) return resError(res, 401, auth.cause);
+
     //get attribute
     const name = req.body.name;
 
     //validate attribute
     const validation = validateValueType(createValueTypeObject(name, "string"));
     if (!validation.flag) return resError(res, 400, validation.cause);
-
-    const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) return resError(res, 401, auth.cause);
 
     const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
     if (!deletedCount) return resError(res, 401, "group does not exist");

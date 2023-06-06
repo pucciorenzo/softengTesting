@@ -26,14 +26,12 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const createCategory = async (req, res) => {
     try {
 
+        //authenticate
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause);
+
         //get attributes
         const { type, color } = req.body;
-
-        //check attributes
-        if (type == undefined || color == undefined) return res.status(400).json({ error: "incomplete attributes" });
-
-        if (type.trim() == "" || color.trim() == "") return res.status(400).json({ error: "empty strings" });
-
 
         //validate attributes
         const validation = validateValueTypes([
@@ -41,10 +39,6 @@ export const createCategory = async (req, res) => {
             createValueTypeObject(color, 'string')
         ]);
         if (!validation.flag) return resError(res, 400, validation.cause);
-
-        //authenticate
-        const auth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!auth.flag) return resError(res, 401, auth.cause);
 
         //check if category exists
         if (await categories.findOne({ type: type })) return resError(res, 400, "category already exists");
@@ -77,6 +71,11 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const updateCategory = async (req, res) => {
     try {
+
+        //authenticate
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
+
         //get parameters
         const currentType = req.params.type;
 
@@ -84,21 +83,12 @@ export const updateCategory = async (req, res) => {
         const newType = req.body.type;
         const newColor = req.body.color;
 
-        //check attributes
-        if (newType == undefined || newColor == undefined) return res.status(400).json({ error: "incomplete attributes" });
-
-        if (newType.trim() == "" || newColor.trim() == "") return res.status(400).json({ error: "empty strings" });
-
         //validate attributes
         const validation = validateValueTypes([
             createValueTypeObject(newType, 'string'),
             createValueTypeObject(newColor, 'string'),
         ]);
         if (!validation.flag) return resError(res, 400, validation.cause);
-
-        //authenticate
-        const auth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
         //confirm category to be updated exists
         const currentCategory = await categories.findOne({ type: currentType });
@@ -143,16 +133,17 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const deleteCategory = async (req, res) => {
     try {
+
+        //verify admin
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
+
         //get attributes
         let typesToDelete = req.body.types;
 
         //validate attributes
         const validation = validateValueType(createValueTypeObject(typesToDelete, 'stringArray'));
         if (!validation.flag) return resError(res, 400, validation.cause);
-
-        //verify admin
-        const auth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!auth.flag) return resError(res, 401, auth.cause); // unauthorized
 
         //get current categories types in database
         let currentTypes = (await categories.find({})).map(c => c.type);
@@ -245,6 +236,11 @@ Returns a 401 error if called by an authenticated user who is not the same user 
  */
 export const createTransaction = async (req, res) => {
     try {
+
+        //authenticate
+        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+        if (!auth.flag) return resError(res, 401, auth.cause);
+
         //get attributes
         let { username, amount, type } = req.body;
 
@@ -261,10 +257,6 @@ export const createTransaction = async (req, res) => {
 
         //check if calling user adds his own transaction
         if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");
-
-        //authenticate
-        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-        if (!auth.flag) return resError(res, 401, auth.cause);
 
         //check user exists
         if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
@@ -669,16 +661,16 @@ Returns a 401 error if called by an authenticated user who is not the same user 
 export const deleteTransaction = async (req, res) => {
     try {
 
+        //authenticate user
+        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
+        if (!auth.flag) return resError(res, 401, auth.cause)
+
         //get attribute
         const transaction_id = req.body._id;
 
         //validate attribute
         const validation = validateValueType(createValueTypeObject(transaction_id, 'string'));
         if (!validation.flag) return resError(res, 400, validation.cause);
-
-        //authenticate user
-        const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
-        if (!auth.flag) return resError(res, 401, auth.cause)
 
         //get parameter
         const username = req.params.username;
@@ -721,16 +713,16 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const deleteTransactions = async (req, res) => {
     try {
 
+        //authenticate
+        const auth = verifyAuth(req, res, { authType: 'Admin' });
+        if (!auth.flag) return resError(res, 401, auth.cause) //unauthorized
+
         //get attribute
         const _ids = req.body._ids;
 
         //validate attribute
         const validation = validateValueType(createValueTypeObject(_ids, 'stringArray'));
         if (!validation.flag) resError(res, 400, validation.cause);
-
-        //authenticate
-        const auth = verifyAuth(req, res, { authType: 'Admin' });
-        if (!auth.flag) return resError(res, 401, auth.cause) //unauthorized
 
         //check if all transactions exist
         for (const _id of _ids) {
