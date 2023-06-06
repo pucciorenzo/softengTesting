@@ -167,15 +167,19 @@ describe("createGroup", () => {
       });
 
 
-  //console.log(JSON.stringify(response, null, 2));
+    //console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.body.data).toEqual({
       group: {
         name: "group1",
         members: [{ email: "user1@ezwallet.com" }, { email: "user2@ezwallet.com" }]
       },
+      /*
       membersNotFound: [{ email: "user7@ezwallet.com" }],
-      alreadyInGroup: [{ email: "user3@ezwallet.com" }]
+      alreadyInGroup:  [{ email: "user3@ezwallet.com" }]
+      */
+      membersNotFound: ["user7@ezwallet.com"],
+      alreadyInGroup: ["user3@ezwallet.com"]
     })
   })
 
@@ -437,13 +441,22 @@ describe("removeFromGroup", () => {
         ]
       },
       membersNotFound: [
+        /*
         { email: "user5@ezwallet.com" },
         { email: "admin3@ezwallet.com" },
+        */
+        "user5@ezwallet.com",
+        "admin3@ezwallet.com",
       ],
       notInGroup: [
+        /*
         { email: "user3@ezwallet.com" },
         { email: "admin1@ezwallet.com" },
         { email: "admin2@ezwallet.com" },
+        */
+        "user3@ezwallet.com",
+        "admin1@ezwallet.com",
+        "admin2@ezwallet.com",
       ]
     })
 

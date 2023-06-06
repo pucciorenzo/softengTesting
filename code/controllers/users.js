@@ -118,12 +118,14 @@ export const createGroup = async (req, res) => {
       //check user exists
       let user = await User.findOne({ email: email });
       if (!user) {
-        notFoundMembersArray.push({ email: email });
+        //notFoundMembersArray.push({ email: email });
+        notFoundMembersArray.push(email);
         continue;
       }
       //check user not in group
       else if (await Group.findOne({ members: { $elemMatch: { email: email } } })) {
-        alreadyInGroupMembersArray.push({ email: email });
+        //alreadyInGroupMembersArray.push({ email: email });
+        alreadyInGroupMembersArray.push(email);
         continue;
       }
       //prepare to add
@@ -411,8 +413,8 @@ export const removeFromGroup = async (req, res) => {
             name: data.name,
             members: data.members.map(m => { return { email: m.email } })
           },
-          notInGroup: notInGroupMembersArray.map(email => { return { email: email } }),
-          membersNotFound: notFoundMembersArray.map(email => { return { email: email } })
+          notInGroup: notInGroupMembersArray,//.map(email => { return { email: email } }),
+          membersNotFound: notFoundMembersArray,//.map(email => { return { email: email } })
         })
       );
 

@@ -368,12 +368,20 @@ describe("createGroup", () => {
         ]
       },
       alreadyInGroup: [
+        /*
         { email: "user2@ezwallet.com" },
         { email: "user5@ezwallet.com" },
+        */
+        "user2@ezwallet.com",
+        "user5@ezwallet.com",
       ],
       membersNotFound: [
+        /*
         { email: "user3@ezwallet.com" },
         { email: "user6@ezwallet.com" },
+        */
+        "user3@ezwallet.com",
+        "user6@ezwallet.com",
       ]
     }
     const mockUsers = [
@@ -738,12 +746,12 @@ describe("removeFromGroup", () => {
         ]
       },
       notInGroup: [
-        { email: "user3@ezwallet.com" },
-        { email: "user4@ezwallet.com" },
+        /*{ email: */"user3@ezwallet.com"/* }*/,
+        /*{ email: */"user4@ezwallet.com"/* }*/,
       ],
       membersNotFound: [
-        { email: "user5@ezwallet.com" },
-        { email: "user6@ezwallet.com" },
+        /*{ email: */"user5@ezwallet.com"/* }*/,
+        /*{ email: */"user6@ezwallet.com"/* }*/,
       ],
     }
     const mockResStatus = 200;
