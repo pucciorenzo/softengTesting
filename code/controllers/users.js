@@ -393,6 +393,8 @@ export const removeFromGroup = async (req, res) => {
     //unknown route
     else throw new Error('unknown route')
 
+    //check group has more than one members
+    if (memberEmails.length == 1) return resError(res, 400, "Only one member in group");
 
     //get attributes
     let emailArray = req.body.emails;

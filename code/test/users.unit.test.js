@@ -2295,6 +2295,115 @@ describe("addToGroup", () => {
 
 describe("removeFromGroup", () => {
 
+  test("should remove from the group (admin route)", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
+      { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular" },
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockUpdatedGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+      ],
+    }
+    const mockToDeleteIds = [
+      "id1",
+      "id2",
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/pull",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = {
+      group: {
+        name: mockName,
+        members: [
+          { email: "user0@ezwallet.com" },
+        ]
+      },
+      notInGroup: [
+      /*{ email: */"user3@ezwallet.com"/* }*/,
+      /*{ email: */"user4@ezwallet.com"/* }*/,
+      ],
+      membersNotFound: [
+      /*{ email: */"user5@ezwallet.com"/* }*/,
+      /*{ email: */"user6@ezwallet.com"/* }*/,
+      ],
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    User.findOne.mockResolvedValueOnce(mockUsers[1]);
+    User.findOne.mockResolvedValueOnce(mockUsers[2]);
+    User.findOne.mockResolvedValueOnce(mockUsers[3]);
+    User.findOne.mockResolvedValueOnce(mockUsers[4]);
+    User.findOne.mockResolvedValueOnce(mockUsers[5]);
+    User.findOne.mockResolvedValueOnce(mockUsers[6]);
+    mockGroup.members.pull.mockReturnValueOnce(true)
+    mockGroup.save.mockResolvedValueOnce(mockUpdatedGroup);
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] });
+    expect(mockGroup.members.pull).toHaveBeenCalledWith(...mockToDeleteIds);
+    expect(mockGroup.save).toHaveBeenCalled();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
   test("should remove from the group (user route)", async () => {
 
     //mock variables
@@ -2407,6 +2516,712 @@ describe("removeFromGroup", () => {
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
+
+
+  test("returns error 500 when error is thrown", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
+      { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular" },
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockToDeleteIds = [
+      "id1",
+      "id2",
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "internal error";
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[1]);
+    User.findOne.mockResolvedValueOnce(mockUsers[2]);
+    User.findOne.mockResolvedValueOnce(mockUsers[3]);
+    User.findOne.mockResolvedValueOnce(mockUsers[4]);
+    User.findOne.mockResolvedValueOnce(mockUsers[5]);
+    User.findOne.mockResolvedValueOnce(mockUsers[6]);
+    mockGroup.members.pull.mockReturnValueOnce(true)
+    mockGroup.save.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] });
+    expect(mockGroup.members.pull).toHaveBeenCalledWith(...mockToDeleteIds);
+    expect(mockGroup.save).toHaveBeenCalled();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      //"user1@ezwallet.com",
+      //"user2@ezwallet.com",
+      "user3@ezwallet.com", //exists not in group
+      "user4@ezwallet.com", //exists not in gorup
+      "user5@ezwallet.com", //does not exist
+      "user6@ezwallet.com", //does not exist
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
+      { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular" },
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[1]);
+    User.findOne.mockResolvedValueOnce(mockUsers[2]);
+    User.findOne.mockResolvedValueOnce(mockUsers[3]);
+    User.findOne.mockResolvedValueOnce(mockUsers[4]);
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if at least one of the emails is not in a valid email format  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      //"user1@ezwallet.com",
+      //"user2@ezwallet.com",
+      "user3@ezwallet.com", //exists not in group
+      "user4.@ezwallet.com", //exists not in gorup
+      "user5@ezwallet.com", //does not exist
+      "user6@ezwallet.com", //does not exist
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if at least one of the emails is an empty string  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      //"user1@ezwallet.com",
+      //"user2@ezwallet.com",
+      "user3@ezwallet.com", //exists not in group
+      "", //exists not in gorup
+      "user5@ezwallet.com", //does not exist
+      "user6@ezwallet.com", //does not exist
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the group contains only one member before deleting any user  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+    ]
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com"
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized"
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user route)  ", async () => {
+
+    //mock variables
+    const mockName = "group2"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/remove",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(null);                  //group with name exists
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/pull",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String)
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    Group.findOne.mockResolvedValueOnce(null);                  //group with name exists
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull  ", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/pull",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage }); //authorized
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns 500 error when accessed by unknown route", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" },
+      ],
+      pull: jest.fn(),
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockReq = {
+      url: "/api/groups/" + mockName,
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+        refreshToken: "refresh token"
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unknown route";
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+
+    //call function
+    await removeFromGroup(mockReq, mockRes);
+
+    //tests
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
 })
 
 describe("deleteUser", () => {
