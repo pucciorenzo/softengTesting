@@ -78,13 +78,13 @@ describe("getUsers", () => {
       locals: {
       }
     }
-    const errorMessage = "database error";
+    const mockErrorMessage = "database error";
     const mockResStatus = 500;
-    const mockResJson = { error: errorMessage }
+    const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    User.find.mockRejectedValueOnce(new Error(errorMessage))
+    User.find.mockRejectedValueOnce(new Error(mockErrorMessage));
 
     //call function
     await getUsers(mockReq, mockRes);
@@ -92,6 +92,7 @@ describe("getUsers", () => {
     //tests
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(User.find).toHaveBeenCalledWith({});
+
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
@@ -108,12 +109,12 @@ describe("getUsers", () => {
       locals: {
       }
     }
-    const errorMessage = "unauthorized";
+    const mockErrorMessage = "unauthorized";
     const mockResStatus = 401;
-    const mockResJson = { error: errorMessage }
+    const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
-    verifyAuth.mockReturnValueOnce({ flag: false, cause: errorMessage });
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
 
     //call function
     await getUsers(mockReq, mockRes);
@@ -161,13 +162,159 @@ describe("getUser", () => {
     await getUser(mockReq, mockRes);
 
     //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockReq.params.username });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.params.username });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("should retreive user (admin auth)", async () => {
+
+    //mock variables
+    const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
+    const mockReq = {
+      params: {
+        username: mockUser.username
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = { username: mockUser.username, email: mockUser.email, role: mockUser.role };
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValue(mockUser);
+
+    //call function
+    await getUser(mockReq, mockRes);
+
+    //tests
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.params.username });
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
+
+  test("returns 500 error when error is thrown", async () => {
+
+    //mock variables
+    const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
+    const mockReq = {
+      params: {
+        username: mockUser.username
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "database error";
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "unauthorized" });
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+    //call function
+    await getUser(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockReq.params.username });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.params.username });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the username passed as the route parameter does not represent a user in the database  ", async () => {
+
+    //mock variables
+    const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
+    const mockReq = {
+      params: {
+        username: mockUser.username
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "user not found";
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "unauthorized" });
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(null);
+
+    //call function
+    await getUser(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockReq.params.username });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.params.username });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)  ", async () => {
+
+    //mock variables
+    const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
+    const mockReq = {
+      params: {
+        username: mockUser.username
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "unauthorized" });
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
+
+    //call function
+    await getUser(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "User", username: mockReq.params.username });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
 
 })
 
