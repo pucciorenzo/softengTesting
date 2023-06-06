@@ -1243,7 +1243,8 @@ describe("getGroups", () => {
 });
 
 describe("getGroup", () => {
-  test("should retreive the group", async () => {
+
+  test("should retreive the group (user auth)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1293,6 +1294,177 @@ describe("getGroup", () => {
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
+
+  test("should retreive the group (admin auth)", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [{ _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }, { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" }]
+    }
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = {
+      group: { name: "group1", members: [{ email: "user1@ezwallet.com" }, { email: "user2@ezwallet.com" }] }
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    Group.findOne.mockResolvedValue(mockGroup);
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("returns 500 error if error thrown", async () => {
+
+    //mock variables
+    const mockName = "group1";
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "internal error";
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [{ _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }, { _id: "id2", email: "user2@ezwallet.com", user: "user_id2" }]
+    }
+    const mockMemberEmails = [
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+    ]
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValue(mockGroup);
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValue(null);
+
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
 })
 
 describe("addToGroup", () => {
