@@ -2082,9 +2082,219 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
+  test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockMemberEmails = [
+      "user1@ezwallet.com",
+    ]
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage }); //authorized
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
+
+    //mock variables
+    const mockName = "group1"
+
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/insert",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "unauthorized";
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage }); //authorized
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if group not found in admin route", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/insert",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    Group.findOne.mockResolvedValueOnce(null);
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 500 error when function accessed using unknown route", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+
 })
 
 describe("removeFromGroup", () => {
+
   test("should remove from the group (user route)", async () => {
 
     //mock variables
