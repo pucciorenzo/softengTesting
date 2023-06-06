@@ -487,7 +487,7 @@ export const deleteUser = async (req, res) => {
     const email = req.body.email;
 
     //validate attribute
-    const validation = validateValueType(createValueTypeObject(email, "string"));
+    const validation = validateValueType(createValueTypeObject(email, "email"));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
     //check user exists

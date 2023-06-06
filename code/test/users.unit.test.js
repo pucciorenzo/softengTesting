@@ -3265,6 +3265,7 @@ describe("deleteUser", () => {
     transactions.deleteMany.mockResolvedValueOnce({ deletedCount: mockDeletedTransactions });
     Group.findOne.mockResolvedValueOnce(mockGroup);
     mockGroup.members.pull.mockReturnValueOnce(true);
+    mockGroup.save.mockResolvedValueOnce(true);
 
     await deleteUser(mockReq, mockRes);
 
@@ -3274,10 +3275,414 @@ describe("deleteUser", () => {
     expect(transactions.deleteMany).toHaveBeenCalledWith({ username: mockUser.username });
     expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
     expect(mockGroup.members.pull).toHaveBeenCalledWith("id0");
+    expect(mockGroup.save).toHaveBeenCalled();
+
     expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
+
+  test("should return 500 when error is thrown", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = "internal error"
+    const mocKResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(mockUser);
+    User.deleteOne.mockResolvedValueOnce(true);
+    transactions.deleteMany.mockResolvedValueOnce({ deletedCount: mockDeletedTransactions });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
+    mockGroup.members.pull.mockReturnValueOnce(true);
+    mockGroup.save.mockRejectedValue(new Error(mockErrorMessage));
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+    expect(User.deleteOne).toHaveBeenCalledWith(mockUser);
+    expect(transactions.deleteMany).toHaveBeenCalledWith({ username: mockUser.username });
+    expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
+    expect(mockGroup.members.pull).toHaveBeenCalledWith("id0");
+    expect(mockGroup.save).toHaveBeenCalled();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("should delete user and group", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mocKResStatus = 200;
+    const mockResJson = {
+      data:
+      {
+        deletedTransactions: mockDeletedTransactions,
+        deletedFromGroup: mockDeletedFromGroup
+      },
+    }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(mockUser);
+    User.deleteOne.mockResolvedValueOnce(true);
+    transactions.deleteMany.mockResolvedValueOnce({ deletedCount: mockDeletedTransactions });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
+    Group.deleteOne.mockResolvedValueOnce(true);
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+    expect(User.deleteOne).toHaveBeenCalledWith(mockUser);
+    expect(transactions.deleteMany).toHaveBeenCalledWith({ username: mockUser.username });
+    expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
+    expect(Group.deleteOne).toHaveBeenCalledWith(mockGroup);
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("should delete user but not group member", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = false;
+    const mocKResStatus = 200;
+    const mockResJson = {
+      data:
+      {
+        deletedTransactions: mockDeletedTransactions,
+        deletedFromGroup: mockDeletedFromGroup
+      },
+    }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(mockUser);
+    User.deleteOne.mockResolvedValueOnce(true);
+    transactions.deleteMany.mockResolvedValueOnce({ deletedCount: mockDeletedTransactions });
+    Group.findOne.mockResolvedValueOnce(null);
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+    expect(User.deleteOne).toHaveBeenCalledWith(mockUser);
+    expect(transactions.deleteMany).toHaveBeenCalledWith({ username: mockUser.username });
+    expect(Group.findOne).toHaveBeenCalledWith({ members: { $elemMatch: { email: mockEmail } } });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the email passed in the request body represents an admin  ", async () => {
+
+    //mock variables
+    const mockEmail = "admin0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id10", username: "admin0", email: "admin0@ezwallet.com", password: "hashedPassword0", role: "Admin" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = expect.any(String);
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(mockUser);
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the email passed in the request body does not represent a user in the database  ", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet.com";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = expect.any(String);
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    User.findOne.mockResolvedValueOnce(null);
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the email passed in the request body is not in correct email format  ", async () => {
+
+    //mock variables
+    const mockEmail = "user0.@ezwallet";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = expect.any(String);
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the email passed in the request body is an empty string  ", async () => {
+
+    //mock variables
+    const mockEmail = "";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = expect.any(String);
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+  test("Returns a 400 error if the request body does not contain all the necessary atributes  ", async () => {
+
+    //mock variables
+    const mockEmail = "";
+    const mockReq = {
+      body: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = expect.any(String);
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+
+    //mock variables
+    const mockEmail = "user0@ezwallet";
+    const mockReq = {
+      body: {
+        email: mockEmail
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockUser = { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" };
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+      ],
+      save: jest.fn()
+    }
+    mockGroup.members.pull = jest.fn();
+    const mockDeletedTransactions = 5;
+    const mockDeletedFromGroup = true;
+    const mockErrorMessage = "unauthorized";
+    const mocKResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
+
+    await deleteUser(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+
 });
 
 describe("deleteGroup", () => {
