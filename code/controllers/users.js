@@ -185,7 +185,7 @@ export const getGroups = async (req, res) => {
     return resData(res, filter);
 
   } catch (error) {
-    resError(res, error.message);
+    resError(res, 500, error.message);
   }
 }
 

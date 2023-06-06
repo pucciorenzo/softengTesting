@@ -1170,6 +1170,76 @@ describe("getGroups", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
+  test("returns 500 error when error thrown", async () => {
+
+    const mockReq = {
+      params: {
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "internal error"
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.find.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+    //call function
+    await getGroups(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.find).toHaveBeenCalledWith({});
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+
+    const mockReq = {
+      params: {
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "unauthorized"
+    const mockResStatus = 401;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
+
+    //call function
+    await getGroups(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
 });
 
 describe("getGroup", () => {
