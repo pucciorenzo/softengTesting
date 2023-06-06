@@ -10,6 +10,10 @@ jest.mock("jsonwebtoken");
 beforeEach(() => {
   jest.resetAllMocks();
 })
+afterEach(() => {
+  jest.resetAllMocks();
+})
+
 
 describe("register", () => {
   afterEach(() => {
@@ -63,145 +67,309 @@ describe("register", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
+  test('should return a 400 error if the username in the request body identifies an already existing user', async () => {
 
-  /* disabled for shorter test result
-  test('should return 400 if request body does not contain all necessary attributes', async () => {
-    const req = { body: { username: 'user', password: 'password123' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    };
-
-    await register(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'incomplete attributes' });
-  });
-
-  test('should return 400 if at least one of the parameters in the request body is an empty string', async () => {
-    const req = { body: { username: 'user', email: '', password: 'password123' } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    };
-
-    await register(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'invalid email format' });
-  });
-
-  test('should return 200 and add a new user', async () => {
-    const mockFindOne = jest.spyOn(User, 'findOne');
-    mockFindOne.mockResolvedValue(null);
-
-    const mockCreate = jest.spyOn(User, 'create');
-    mockCreate.mockResolvedValue({ username: 'testuser', email: 'test@email.com' });
-
-    const mockHash = jest.spyOn(bcrypt, 'hash');
-    mockHash.mockResolvedValue('hashedPassword');
-
-    const requestBody = {
-      username: 'testuser',
-      email: 'test@email.com',
-      password: 'password123',
-    };
-
-    const mockReq = { body: requestBody };
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "user1@ezwallet.com",
+        password: "password1",
+      }
+    }
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+      locals: {
+      }
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) };
 
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(false);
+    User.findOne.mockResolvedValueOnce(true);
+
+    //call 
     await register(mockReq, mockRes);
 
-    expect(mockRes.status).toHaveBeenCalledWith(200);
-    expect(mockRes.json).toHaveBeenCalledWith({ data: 'user added succesfully' });
-    expect(mockHash).toHaveBeenCalledWith('password123', 12);
-  });
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
+    expect(User.findOne).toHaveBeenCalledWith({ username: mockReq.body.username });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
-  test('should return 400 if the email is not well formatted', async () => {
-    const requestBody = {
-      username: 'testuser',
-      email: 'invalid-email',
-      password: 'password123',
-    };
+  })
 
-    const mockReq = { body: requestBody };
+  test('should return a 400 error if the email in the request body identifies an already existing user', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "user1@ezwallet.com",
+        password: "password1",
+      }
+    }
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+      locals: {
+      }
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) };
 
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(true);
+
+    //call 
     await register(mockReq, mockRes);
 
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ error: "invalid email format" });
-  });
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
 
-  test('should return 400 if user with the same email already exists', async () => {
-    const mockFindOne = jest.spyOn(User, 'findOne');
-    mockFindOne.mockResolvedValue({ email: 'test@example.com' });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
-    const requestBody = {
-      username: 'testuser',
-      email: 'test@example.com',
-      password: 'password123',
-    };
+  })
 
-    const mockReq = { body: requestBody };
+  test('should return a 500 error if error is occurs', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "user1@ezwallet.com",
+        password: "password1",
+      }
+    }
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+      locals: {
+      }
+    }
+    const mockResStatus = 500;
+    const mockResJson = { error: expect.any(String) };
 
+    //mock implementations
+    User.findOne.mockRejectedValue( new Error("Some error"));
+
+    //call 
     await register(mockReq, mockRes);
 
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ error: "email already registered" });
-  });
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockReq.body.email });
 
-  test('should return 400 if user with the same username already exists', async () => {
-    const mockFindOne = jest.spyOn(User, 'findOne');
-    mockFindOne
-      .mockResolvedValueOnce(null) //email check first
-      .mockResolvedValueOnce({ username: 'testuser' });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
-    const requestBody = {
-      username: 'testuser',
-      email: 'test@example.com',
-      password: 'password123',
-    };
+  })
 
-    const mockReq = { body: requestBody };
+  test('should return a 400 error if the email in the request body is not in a valid email format', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "user@ezwallet",
+        password: "password1",
+      }
+    }
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    };
+      locals: {
+      }
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
 
     await register(mockReq, mockRes);
 
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ error: "username already taken" });
-  });
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
-  test('should return 500 if an error occurs', async () => {
-    const req = { body: { username: 'admin', email: 'admin@example.com', password: 'password123' } };
-    const res = {
+  })
+
+
+  test('should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        email: "",
+        password: "password1",
+      }
+    }
+    const mockRes = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    };
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
 
-    const errorMessage = 'Internal Server Error';
-    jest.spyOn(console, 'error').mockImplementation(() => { });
+    await register(mockReq, mockRes);
 
-    jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
-    await register(req, res);
+  })
 
-    expect(res.status).toHaveBeenCalledWith(500);
-  });
-*/
+  test('should return a 400 error if the request body does not contain all the necessary attributes', async () => {
+
+    //mock variables
+    const mockReq = {
+      body: {
+        username: "user1",
+        password: "password1",
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) }
+
+    await register(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  /*
+    test('should return 400 if at least one of the parameters in the request body is an empty string', async () => {
+      const req = { body: { username: 'user', email: '', password: 'password123' } };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+  
+      await register(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ error: 'invalid email format' });
+    });
+  
+    test('should return 200 and add a new user', async () => {
+      const mockFindOne = jest.spyOn(User, 'findOne');
+      mockFindOne.mockResolvedValue(null);
+  
+      const mockCreate = jest.spyOn(User, 'create');
+      mockCreate.mockResolvedValue({ username: 'testuser', email: 'test@email.com' });
+  
+      const mockHash = jest.spyOn(bcrypt, 'hash');
+      mockHash.mockResolvedValue('hashedPassword');
+  
+      const requestBody = {
+        username: 'testuser',
+        email: 'test@email.com',
+        password: 'password123',
+      };
+  
+      const mockReq = { body: requestBody };
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      await register(mockReq, mockRes);
+  
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({ data: 'user added succesfully' });
+      expect(mockHash).toHaveBeenCalledWith('password123', 12);
+    });
+  
+    test('should return 400 if the email is not well formatted', async () => {
+      const requestBody = {
+        username: 'testuser',
+        email: 'invalid-email',
+        password: 'password123',
+      };
+  
+      const mockReq = { body: requestBody };
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      await register(mockReq, mockRes);
+  
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: "invalid email format" });
+    });
+  
+    test('should return 400 if user with the same email already exists', async () => {
+      const mockFindOne = jest.spyOn(User, 'findOne');
+      mockFindOne.mockResolvedValue({ email: 'test@example.com' });
+  
+      const requestBody = {
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123',
+      };
+  
+      const mockReq = { body: requestBody };
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      await register(mockReq, mockRes);
+  
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: "email already registered" });
+    });
+  
+    test('should return 400 if user with the same username already exists', async () => {
+      const mockFindOne = jest.spyOn(User, 'findOne');
+      mockFindOne
+        .mockResolvedValueOnce(null) //email check first
+        .mockResolvedValueOnce({ username: 'testuser' });
+  
+      const requestBody = {
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'password123',
+      };
+  
+      const mockReq = { body: requestBody };
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      await register(mockReq, mockRes);
+  
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: "username already taken" });
+    });
+  
+    test('should return 500 if an error occurs', async () => {
+      const req = { body: { username: 'admin', email: 'admin@example.com', password: 'password123' } };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+  
+      const errorMessage = 'Internal Server Error';
+      jest.spyOn(console, 'error').mockImplementation(() => { });
+  
+      jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error(errorMessage));
+  
+      await register(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  */
 });
 
 
