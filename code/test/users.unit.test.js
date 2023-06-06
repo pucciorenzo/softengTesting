@@ -3686,7 +3686,7 @@ describe("deleteUser", () => {
 });
 
 describe("deleteGroup", () => {
-  test("should delete user and member in a group", async () => {
+  test("should delete group successfully", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
@@ -3711,14 +3711,170 @@ describe("deleteGroup", () => {
     }
 
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    Group.deleteMany.mockResolvedValueOnce({ deletedCount: 1 });
+    Group.deleteOne.mockResolvedValueOnce({ deletedCount: 1 });
 
     await deleteGroup(mockReq, mockRes);
 
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
-    expect(Group.deleteMany).toHaveBeenCalledWith({ name: mockName });
+    expect(Group.deleteOne).toHaveBeenCalledWith({ name: mockName });
     expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
+
+  test("should return 500 error if error thrown", async () => {
+    //mock variables
+    const mockName = "group1";
+    const mockReq = {
+      body: {
+        name: mockName
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "internal error";
+    const mocKResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.deleteOne.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.deleteOne).toHaveBeenCalledWith({ name: mockName });
+    
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+
+  test("Returns a 400 error if the name passed in the request body does not represent a group in the database  ", async () => {
+    //mock variables
+    const mockName = "group1";
+    const mockReq = {
+      body: {
+        name: mockName
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "group does not exist";
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.deleteOne.mockResolvedValueOnce({ deletedCount: 0 });
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.deleteOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the name passed in the request body is an empty string  ", async () => {
+    //mock variables
+    const mockName = "";
+    const mockReq = {
+      body: {
+        name: mockName
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "empty string";
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+    //mock variables
+    const mockName = "";
+    const mockReq = {
+      body: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "incomplete attributes";
+    const mocKResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+    //mock variables
+    const mockName = "group1";
+    const mockReq = {
+      body: {
+        name: mockName
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+
+    const mockErrorMessage = "unauthorized";
+    const mocKResStatus = 401;
+    const mockResJson = { error: mockErrorMessage }
+
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
+
+    await deleteGroup(mockReq, mockRes);
+
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+
+  })
+
+
 })

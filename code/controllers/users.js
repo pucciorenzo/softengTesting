@@ -553,14 +553,13 @@ export const deleteGroup = async (req, res) => {
     const validation = validateValueType(createValueTypeObject(name, "string"));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
-    const deletedCount = (await Group.deleteMany({ name: name })).deletedCount;
-    if (!deletedCount) return resError(res, 401, "group does not exist");
-    if (deletedCount > 1) throw new Error('multiple groups deleted!');
+    const deletedCount = (await Group.deleteOne({ name: name })).deletedCount;
+    if (!deletedCount) return resError(res, 400, "group does not exist");
 
     return resData(res, { message: "Group deleted successfully" });
 
   } catch (error) {
-    res.status(500).json(error.message);
+    resError(res, 500, error.message);
   }
 
 }
