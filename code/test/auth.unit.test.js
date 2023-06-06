@@ -777,8 +777,6 @@ describe('login', () => {
   });
 
 
-
-
 });
 
 
@@ -840,54 +838,121 @@ describe('logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  /* disabled for shorter test result
-  test('should return 400 error if refresh token is not found in cookies', async () => {
-    const req = { cookies: {} };
-    const res = {
+  test('returns 500 error if error is thrown', async () => {
+
+    //mock variables
+    const mockAccessToken = "access token";
+    const mockRefreshToken = "refresh token";
+    const mockReq = {
+      cookies: {
+        accessToken: mockAccessToken,
+        refreshToken: mockRefreshToken
+      },
+      body: {
+
+      }
+    }
+    const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-      cookie: jest.fn(),
-    };
- 
-    await logout(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'no refresh token found' });
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockLoggedInUser = {
+      username: "user1",
+      email: "user1@ezwallet.com",
+      password: "hashedPassword1",
+      role: "Regular",
+      refreshToken: mockRefreshToken,
+      save: jest.fn()
+    }
+    const mockResStatus = 500;
+    const mockResJson = { error: expect.any(String) };
+
+    //mock implementations
+    User.findOne.mockResolvedValueOnce(mockLoggedInUser);
+    mockLoggedInUser.save.mockRejectedValue(new Error("save error"));
+
+    //call 
+    await logout(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ refreshToken: mockRefreshToken });
+    expect(mockLoggedInUser.save).toHaveBeenCalledWith();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
- 
-  test('should return 400 error if refresh token does not represent a user in the database', async () => {
-    const refreshToken = 'invalidRefreshToken';
+
+  test("Returns a 400 error if the refresh token in the request's cookies does not represent a user in the database ", async () => {
+
+    //mock variables
+    const mockAccessToken = "access token";
+    const mockRefreshToken = "refresh token";
+    const mockReq = {
+      cookies: {
+        accessToken: mockAccessToken,
+        refreshToken: mockRefreshToken
+      },
+      body: {
+
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) };
+
+    //mock implementations
     User.findOne.mockResolvedValueOnce(null);
- 
-    const req = { cookies: { refreshToken } };
-    const res = {
+
+    //call 
+    await logout(mockReq, mockRes);
+
+    //test
+    expect(User.findOne).toHaveBeenCalledWith({ refreshToken: mockRefreshToken });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  });
+
+  test("Returns a 400 error if the request does not have a refresh token in the cookies  ", async () => {
+
+    //mock variables
+    const mockAccessToken = "access token";
+    const mockRefreshToken = "";
+    const mockReq = {
+      cookies: {
+        accessToken: mockAccessToken,
+        refreshToken: mockRefreshToken
+      },
+      body: {
+
+      }
+    }
+    const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-      cookie: jest.fn(),
-    };
- 
-    await logout(req, res);
- 
-    expect(res.status).toBeCalledWith(400);
-    expect(res.json).toBeCalledWith({ error: 'user not found. Are you registered or logged in?' });
+      locals: {
+      },
+      cookie: jest.fn()
+    }
+    const mockResStatus = 400;
+    const mockResJson = { error: expect.any(String) };
+
+    //call 
+    await logout(mockReq, mockRes);
+
+    //test
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
- 
-  test('should successfully logout the user', async () => {
-    const refreshToken = 'validRefreshToken';
-    const user = { refreshToken: refreshToken, save: jest.fn() };
-    User.findOne.mockResolvedValueOnce(user);
- 
-    const req = { cookies: { refreshToken } };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-      cookie: jest.fn(),
-    };
- 
-    await logout(req, res);
- 
-    expect(res.status).toBeCalledWith(200);
-    expect(res.json).toBeCalledWith({ data: { message: 'User logged out' } });
-  });
-  */
+
+
 });
