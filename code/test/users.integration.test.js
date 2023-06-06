@@ -359,14 +359,24 @@ describe("addToGroup", () => {
         ]
       },
       membersNotFound: [
+        /*
         { email: "user5@ezwallet.com" },
         { email: "admin3@ezwallet.com" },
+        */
+        "user5@ezwallet.com",
+        "admin3@ezwallet.com",
       ],
       alreadyInGroup: [
+        /*
         { email: "user1@ezwallet.com" },
         { email: "user2@ezwallet.com" },
         { email: "user3@ezwallet.com" },
         { email: "admin2@ezwallet.com" },
+        */
+        "user1@ezwallet.com",
+        "user2@ezwallet.com",
+        "user3@ezwallet.com",
+        "admin2@ezwallet.com",
       ]
     })
 
@@ -378,7 +388,6 @@ describe("addToGroup", () => {
 
 
 describe("removeFromGroup", () => {
-
 
   test("should remove from group keeping the oldest(user route)", async () => {
 

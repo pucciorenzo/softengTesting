@@ -248,27 +248,34 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const addToGroup = async (req, res) => {
   try {
 
-    //check group exists
-    let group = await Group.findOne({ name: req.params.name });
-    if (!group) return resError(res, 400, "group does not exist");
+    let group;
 
     //authenticate//
-    if (req.url.includes("/add")) {
+    if (req.url.includes("/insert")) {
+
+      const auth = verifyAuth(req, res, { authType: "Admin" });
+      if (!auth.flag) return resError(res, 401, auth.cause);
+
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
+
+    }
+    //user route
+    else if (req.url.includes("/add")) {
+
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
 
       //user route
       const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(m => { return m.email }) });
       if (!auth.flag) return resError(res, 401, auth.cause);
 
       //admin route
-    } else if (req.url.includes("/insert")) {
-
-      const auth = verifyAuth(req, res, { authType: "Admin" });
-      if (!auth.flag) return resError(res, 401, auth.cause);
-
     }
     //unknown route
     else throw new Error('unknown route');
-
 
     //get attributes
     let emailArray = req.body.emails;
@@ -317,8 +324,8 @@ export const addToGroup = async (req, res) => {
               name: data.name,
               members: data.members.map(m => { return { email: m.email } })
             },
-            alreadyInGroup: alreadyInGroupMembersArray.map(email => { return { email: email } }),
-            membersNotFound: notFoundMembersArray.map(email => { return { email: email } })
+            alreadyInGroup: alreadyInGroupMembersArray,//.map(email => { return { email: email } }),
+            membersNotFound: notFoundMembersArray,//.map(email => { return { email: email } })
           }
         ));
 
@@ -351,28 +358,42 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
 export const removeFromGroup = async (req, res) => {
   try {
 
-    //check group exists
-    let group = await Group.findOne({ name: req.params.name });
-    if (!group) return resError(res, 400, "group does not exist");
-
-    //get current member emails
-    let memberEmails = group.members.map(m => m.email);
+    let group, memberEmails;
 
     //authenticate//
-    if (req.url.includes("/remove")) {
+    //admin route
+    if (req.url.includes("/pull")) {
 
-      //user route
-      const auth = verifyAuth(req, res, { authType: "Group", emails: memberEmails });
+      const auth = verifyAuth(req, res, { authType: "Admin" });
       if (!auth.flag) return resError(res, 401, auth.cause);
 
-      //admin route
-    } else if (req.url.includes("/pull")) {
-      const auth = verifyAuth(req, res, { authType: "Admin" });
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
+
+      //get current member emails
+      memberEmails = group.members.map(m => m.email);
+
+
+    }
+    //user route
+    else if (req.url.includes("/remove")) {
+
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
+
+      //get current member emails
+      memberEmails = group.members.map(m => m.email);
+
+      const auth = verifyAuth(req, res, { authType: "Group", emails: memberEmails });
       if (!auth.flag) return resError(res, 401, auth.cause);
 
     }
     //unknown route
-    else throw new Error('unknown route');
+    else throw new Error('unknown route')
+
+
     //get attributes
     let emailArray = req.body.emails;
 

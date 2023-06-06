@@ -1468,7 +1468,8 @@ describe("getGroup", () => {
 })
 
 describe("addToGroup", () => {
-  test("should add to the group (user route)", async () => {
+
+  test("should add to the group (user route) filtering repeating emails", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -1485,14 +1486,17 @@ describe("addToGroup", () => {
       "user5@ezwallet.com",
       "user6@ezwallet.com",
       "user7@ezwallet.com",
+      "user4@ezwallet.com",
     ]
     const mockUsers = [
-      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular" },
-      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
-      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
-      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular" },
-      { _id: "id6", username: "user6", email: "user6@ezwallet.com", password: "hashedPassword6", role: "Regular" },
-      { _id: "id7", username: "user7", email: "user7@ezwallet.com", password: "hashedPassword7", role: "Regular" },
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular", group: true },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular", group: true },
+      false,
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular", group: true },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular", group: false },
+      false,
+      { _id: "id6", username: "user6", email: "user6@ezwallet.com", password: "hashedPassword6", role: "Regular", group: true },
+      { _id: "id7", username: "user7", email: "user7@ezwallet.com", password: "hashedPassword7", role: "Regular", group: false },
     ]
 
     const mockSavedGroup = {
@@ -1508,7 +1512,7 @@ describe("addToGroup", () => {
         { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
         { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
       ],
-      save: jest.fn().mockResolvedValueOnce(mockSavedGroup)
+      save: jest.fn()
     }
     const mockReq = {
       url: "/api/groups/" + mockName + "/add",
@@ -1539,15 +1543,25 @@ describe("addToGroup", () => {
         ]
       },
       alreadyInGroup: [
+        /*
         { email: "user0@ezwallet.com" },
         { email: "user1@ezwallet.com" },
         { email: "user3@ezwallet.com" },
         { email: "user6@ezwallet.com" },
+        */
+        "user0@ezwallet.com",
+        "user1@ezwallet.com",
+        "user3@ezwallet.com",
+        "user6@ezwallet.com",
       ],
       membersNotFound: [
+        /*
         { email: "user2@ezwallet.com" },
         { email: "user5@ezwallet.com" },
-      ]
+        */
+        "user2@ezwallet.com",
+        "user5@ezwallet.com",
+      ],
     }
     const mockResStatus = 200;
     const mockResJson = {
@@ -1557,20 +1571,15 @@ describe("addToGroup", () => {
     //mock implementations
     Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
-    User.findOne.mockResolvedValueOnce(mockUsers[0]);           //user exists
-    Group.findOne.mockResolvedValueOnce(true);                  //user in current group 
-    User.findOne.mockResolvedValueOnce(mockUsers[1]);           //user exists
-    Group.findOne.mockResolvedValueOnce(true);                  //user in current group 
-    User.findOne.mockResolvedValueOnce(false);                  //user does not exists
-    User.findOne.mockResolvedValueOnce(mockUsers[2]);           //user  exists
-    Group.findOne.mockResolvedValueOnce(true);                  //user a group member
-    User.findOne.mockResolvedValueOnce(mockUsers[3]);           //user exists
-    Group.findOne.mockResolvedValueOnce(false);                 //user not a group member
-    User.findOne.mockResolvedValueOnce(false);                  //user does not exists
-    User.findOne.mockResolvedValueOnce(mockUsers[4]);           //user  exists
-    Group.findOne.mockResolvedValueOnce(true);                  //user a group member
-    User.findOne.mockResolvedValueOnce(mockUsers[5]);           //user exists
-    Group.findOne.mockResolvedValueOnce(false);                 //user not a group member
+    User.findOne.mockResolvedValueOnce(mockUsers[0]); mockUsers[0] ? Group.findOne.mockResolvedValueOnce(mockUsers[0].group) : 0;
+    User.findOne.mockResolvedValueOnce(mockUsers[1]); mockUsers[1] ? Group.findOne.mockResolvedValueOnce(mockUsers[1].group) : 1;
+    User.findOne.mockResolvedValueOnce(mockUsers[2]); mockUsers[2] ? Group.findOne.mockResolvedValueOnce(mockUsers[2].group) : 2;
+    User.findOne.mockResolvedValueOnce(mockUsers[3]); mockUsers[3] ? Group.findOne.mockResolvedValueOnce(mockUsers[3].group) : 3;
+    User.findOne.mockResolvedValueOnce(mockUsers[4]); mockUsers[4] ? Group.findOne.mockResolvedValueOnce(mockUsers[4].group) : 4;
+    User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
+    User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
+    User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
+    mockGroup.save.mockResolvedValue(mockSavedGroup);
 
     //call function
     await addToGroup(mockReq, mockRes);
@@ -1578,24 +1587,501 @@ describe("addToGroup", () => {
     //tests
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[0] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[1] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[3] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[4] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[6] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[7] });
-    expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[7] });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] }); mockUsers[0] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[0] }) : 0;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] }); mockUsers[1] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[1] }) : 1;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] }); mockUsers[2] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[2] }) : 2;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] }); mockUsers[3] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[3] }) : 3;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] }); mockUsers[4] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[4] }) : 4;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] }); mockUsers[5] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[5] }) : 5;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] }); mockUsers[6] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[6] }) : 6;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[7] }); mockUsers[7] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[7] }) : 7;
+
     expect(mockGroup.save).toHaveBeenCalled();
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
+
+  test("should add to the group (admin route) filtering repeating emails", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular", group: true },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular", group: true },
+      false,
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular", group: true },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular", group: false },
+      false,
+      { _id: "id6", username: "user6", email: "user6@ezwallet.com", password: "hashedPassword6", role: "Regular", group: true },
+      { _id: "id7", username: "user7", email: "user7@ezwallet.com", password: "hashedPassword7", role: "Regular", group: false },
+    ]
+
+    const mockSavedGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" },
+        { _id: "id4", email: "user4@ezwallet.com", user: "user_id4" },
+        { _id: "id7", email: "user7@ezwallet.com", user: "user_id7" },
+      ]
+    }
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/insert",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockResData = {
+      group: {
+        name: mockName,
+        members: [
+          { email: "user0@ezwallet.com" },
+          { email: "user1@ezwallet.com" },
+          { email: "user4@ezwallet.com" },
+          { email: "user7@ezwallet.com" },
+
+        ]
+      },
+      alreadyInGroup: [
+        /*
+        { email: "user0@ezwallet.com" },
+        { email: "user1@ezwallet.com" },
+        { email: "user3@ezwallet.com" },
+        { email: "user6@ezwallet.com" },
+        */
+        "user0@ezwallet.com",
+        "user1@ezwallet.com",
+        "user3@ezwallet.com",
+        "user6@ezwallet.com",
+      ],
+      membersNotFound: [
+        /*
+        { email: "user2@ezwallet.com" },
+        { email: "user5@ezwallet.com" },
+        */
+        "user2@ezwallet.com",
+        "user5@ezwallet.com",
+      ],
+    }
+    const mockResStatus = 200;
+    const mockResJson = {
+      data: mockResData
+    }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[0]); mockUsers[0] ? Group.findOne.mockResolvedValueOnce(mockUsers[0].group) : 0;
+    User.findOne.mockResolvedValueOnce(mockUsers[1]); mockUsers[1] ? Group.findOne.mockResolvedValueOnce(mockUsers[1].group) : 1;
+    User.findOne.mockResolvedValueOnce(mockUsers[2]); mockUsers[2] ? Group.findOne.mockResolvedValueOnce(mockUsers[2].group) : 2;
+    User.findOne.mockResolvedValueOnce(mockUsers[3]); mockUsers[3] ? Group.findOne.mockResolvedValueOnce(mockUsers[3].group) : 3;
+    User.findOne.mockResolvedValueOnce(mockUsers[4]); mockUsers[4] ? Group.findOne.mockResolvedValueOnce(mockUsers[4].group) : 4;
+    User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
+    User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
+    User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
+    mockGroup.save.mockResolvedValue(mockSavedGroup);
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] }); mockUsers[0] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[0] }) : 0;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] }); mockUsers[1] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[1] }) : 1;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] }); mockUsers[2] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[2] }) : 2;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] }); mockUsers[3] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[3] }) : 3;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] }); mockUsers[4] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[4] }) : 4;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] }); mockUsers[5] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[5] }) : 5;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] }); mockUsers[6] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[6] }) : 6;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[7] }); mockUsers[7] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[7] }) : 7;
+
+    expect(mockGroup.save).toHaveBeenCalled();
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("returns 500 error when error is thrown", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+    ]
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular", group: true },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular", group: true },
+      false,
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular", group: true },
+      { _id: "id4", username: "user4", email: "user4@ezwallet.com", password: "hashedPassword4", role: "Regular", group: false },
+      false,
+      { _id: "id6", username: "user6", email: "user6@ezwallet.com", password: "hashedPassword6", role: "Regular", group: true },
+      { _id: "id7", username: "user7", email: "user7@ezwallet.com", password: "hashedPassword7", role: "Regular", group: false },
+    ]
+
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = "internal error";
+    const mockResStatus = 500;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[0]); mockUsers[0] ? Group.findOne.mockResolvedValueOnce(mockUsers[0].group) : 0;
+    User.findOne.mockResolvedValueOnce(mockUsers[1]); mockUsers[1] ? Group.findOne.mockResolvedValueOnce(mockUsers[1].group) : 1;
+    User.findOne.mockResolvedValueOnce(mockUsers[2]); mockUsers[2] ? Group.findOne.mockResolvedValueOnce(mockUsers[2].group) : 2;
+    User.findOne.mockResolvedValueOnce(mockUsers[3]); mockUsers[3] ? Group.findOne.mockResolvedValueOnce(mockUsers[3].group) : 3;
+    User.findOne.mockResolvedValueOnce(mockUsers[4]); mockUsers[4] ? Group.findOne.mockResolvedValueOnce(mockUsers[4].group) : 4;
+    User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
+    User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
+    User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
+    mockGroup.save.mockRejectedValue(new Error(mockErrorMessage));
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] }); mockUsers[0] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[0] }) : 0;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] }); mockUsers[1] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[1] }) : 1;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] }); mockUsers[2] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[2] }) : 2;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] }); mockUsers[3] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[3] }) : 3;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] }); mockUsers[4] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[4] }) : 4;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] }); mockUsers[5] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[5] }) : 5;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] }); mockUsers[6] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[6] }) : 6;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[7] }); mockUsers[7] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[7] }) : 7;
+
+    expect(mockGroup.save).toHaveBeenCalled();
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+    ]
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockUsers = [
+      { _id: "id0", username: "user0", email: "user0@ezwallet.com", password: "hashedPassword0", role: "Regular", group: true },
+      { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular", group: true },
+      false,
+      { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular", group: true },
+      false,
+      false,
+      { _id: "id6", username: "user6", email: "user6@ezwallet.com", password: "hashedPassword6", role: "Regular", group: true },
+      { _id: "id7", username: "user7", email: "user7@ezwallet.com", password: "hashedPassword7", role: "Regular", group: true },
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[0]); mockUsers[0] ? Group.findOne.mockResolvedValueOnce(mockUsers[0].group) : 0;
+    User.findOne.mockResolvedValueOnce(mockUsers[1]); mockUsers[1] ? Group.findOne.mockResolvedValueOnce(mockUsers[1].group) : 1;
+    User.findOne.mockResolvedValueOnce(mockUsers[2]); mockUsers[2] ? Group.findOne.mockResolvedValueOnce(mockUsers[2].group) : 2;
+    User.findOne.mockResolvedValueOnce(mockUsers[3]); mockUsers[3] ? Group.findOne.mockResolvedValueOnce(mockUsers[3].group) : 3;
+    User.findOne.mockResolvedValueOnce(mockUsers[4]); mockUsers[4] ? Group.findOne.mockResolvedValueOnce(mockUsers[4].group) : 4;
+    User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
+    User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
+    User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] }); mockUsers[0] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[0] }) : 0;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] }); mockUsers[1] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[1] }) : 1;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] }); mockUsers[2] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[2] }) : 2;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] }); mockUsers[3] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[3] }) : 3;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] }); mockUsers[4] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[4] }) : 4;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[5] }); mockUsers[5] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[5] }) : 5;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[6] }); mockUsers[6] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[6] }) : 6;
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[7] }); mockUsers[7] ? expect(Group.findOne).toHaveBeenCalledWith({ 'members.email': mockEmails[7] }) : 7;
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if at least one of the member emails is not in a valid email format", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+    ]
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1.@ezwallet.com",
+      "user2@ezwallet.com",
+      "user3@ezwallet.com",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if at least one of the member emails is an empty string", async () => {
+
+    //mock variables
+    const mockName = "group1"
+    const mockMemberEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+    ]
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockGroup = {
+      _id: "id1", name: "group1", members: [
+        { _id: "id0", email: "user0@ezwallet.com", user: "user_id0" },
+        { _id: "id1", email: "user1@ezwallet.com", user: "user_id1" }
+      ],
+      save: jest.fn()
+    }
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+    const mockEmails = [
+      "user0@ezwallet.com",
+      "user1@ezwallet.com",
+      "user2@ezwallet.com",
+      "",
+      "user4@ezwallet.com",
+      "user5@ezwallet.com",
+      "user6@ezwallet.com",
+      "user7@ezwallet.com",
+      "user4@ezwallet.com",
+    ]
+    const mockReq = {
+      url: "/api/groups/" + mockName + "/add",
+      params: {
+        name: mockName
+      },
+      body: {
+        emails: mockEmails
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage };
+
+    //mock implementations
+    Group.findOne.mockResolvedValueOnce(null);
+
+    //call function
+    await addToGroup(mockReq, mockRes);
+
+    //tests
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+
 })
 
 describe("removeFromGroup", () => {
