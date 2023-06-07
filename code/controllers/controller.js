@@ -373,11 +373,8 @@ export const getTransactionsByUser = async (req, res) => {
             throw new Error('unknown route');
         }
 
-        //get parameter
-        const username = req.params.username;
-
         //check if user exists
-        if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
+        if (! await User.findOne({ username: req.params.username })) return resError(res, 400, "user does not exist");
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -395,7 +392,7 @@ export const getTransactionsByUser = async (req, res) => {
             {
                 //filter the transactions
                 $match: {
-                    username: username,
+                    username: req.params.username,
                     ...dateFilter,
                     ...amountFilter
                 }
@@ -432,32 +429,25 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         //authenticate//
         //admin route
         if (req.url.includes("/transactions/users/")) {
-
             const auth = verifyAuth(req, res, { authType: 'Admin' });
             if (!auth.flag) return resError(res, 401, auth.cause);
 
         }
         //user route
         else if (req.url.includes("/transactions/category/")) {
-
             const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!auth.flag) return resError(res, 401, auth.cause);
-
         }
         //unknown route
         else {
             throw new Error('unknown route');
         }
 
-        //get parameters
-        const username = req.params.username;
-        const category = req.params.category;
-
         //check user exists
-        if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
+        if (! await User.findOne({ username: req.params.username })) return resError(res, 400, "user does not exist");
 
         //check category exists
-        if (! await categories.findOne({ type: category })) return resError(res, 400, "category does not exist");
+        if (! await categories.findOne({ type: req.params.category })) return resError(res, 400, "category does not exist");
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -475,8 +465,8 @@ export const getTransactionsByUserByCategory = async (req, res) => {
             {
                 //filter
                 $match: {
-                    username: username,
-                    type: category
+                    username: req.params.username,
+                    type: req.params.category
                 }
             },
             { $unwind: "$categories_info" }
@@ -507,28 +497,30 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroup = async (req, res) => {
     try {
+        let route;
 
-        //check group exists, retreive group and populate with the reference user member's data
-        const group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
-        if (!group) return res.status(400).json("group does not exist");
+        if (req.url.includes("/transactions/groups"))
+            route = 'admin';
+        else if ((/groups\/.+\/transactions/).test(req.url))
+            route = 'user'
+        else throw new Error('unknown route');
+        
+        let group = await Group.findOne({ name: req.params.name });
+        if(!group) return res.status(400).json( { error: "group does not exist" } );
+
+        let auth;
 
         //authenticate//
-        //admin route
-        if (req.url.includes("/transactions/groups")) {
-
-            const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.flag) return resError(res, 401, auth.cause);
-
+        switch(route) {
+            case 'admin':   //admin route
+                auth = verifyAuth(req, res, { authType: 'Admin' });
+                if (!auth.flag) return resError(res, 401, auth.cause);
+            case 'user':    //user route
+                auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+                if (!auth.flag) return resError(res, 401, auth.cause);
         }
-        //user route
-        else if ((/groups\/.+\/transactions/).test(req.url)) {
 
-            const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
-            if (!auth.flag) return resError(res, 401, auth.cause);
-
-        }
-        //unknown route
-        else throw new Error('unknown route');
+        group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
 
         //retreive and send data
         await transactions.aggregate(
@@ -560,6 +552,7 @@ export const getTransactionsByGroup = async (req, res) => {
             resData(res, data);
         });
     } catch (error) {
+        console.log(error);
         resError(res, 500, error.message);
     }
 }
@@ -580,32 +573,35 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
+        let route;
 
-        //check group exists, retreive group and populate with the reference user member's data
-        const group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
-        if (!group) return resError(res, 400, "group does not exist");
-
-        //authenticate//
-        //admin route
-        if (req.url.includes("/transactions/groups/")) {
-
-            const auth = verifyAuth(req, res, { authType: 'Admin' });
-            if (!auth.flag) return resError(res, 401, auth.cause);
-
-        }
-        //user route
-        else if (req.url.includes("/transactions/category")) {
-
-            const auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
-            if (!auth.flag) return resError(res, 401, auth.cause);
-
-        }
-        //unknown route
+        if (req.url.includes("/transactions/groups"))
+            route = 'admin';
+        else if((/groups\/.+\/transactions/).test(req.url))
+            route = 'user';
         else throw new Error('unknown route');
 
+        const groupName = req.params.name;
+
+        let group = await Group.findOne({ name: groupName });
+        if(!group) return res.status(400).json( { error: "group does not exist" } );
+        
         //check category exists
         const category = req.params.category;
         if (!(await categories.findOne({ type: category }))) return resError(res, 400, "category does not exist");
+
+        let auth;
+        //authenticate//
+        switch(route) {
+        case 'admin':   //admin route
+            auth = verifyAuth(req, res, { authType: 'Admin' });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+        case 'user':   //user route
+            auth = verifyAuth(req, res, { authType: "Group", emails: group.members.map(member => member.email) });
+            if (!auth.flag) return resError(res, 401, auth.cause);
+        }
+
+        group = await (await Group.findOne({ name: groupName })).populate('members.user');
 
         await transactions.aggregate(
             [
@@ -637,7 +633,9 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
             //send data
             resData(res, data);
         });
+
     } catch (error) {
+        console.log(error);
         resError(res, 500, error.message);
     }
 }
