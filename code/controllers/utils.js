@@ -111,7 +111,8 @@ export const verifyAuth = (req, res, info) => {
     [
       createValueTypeObject(accessToken, 'token'),
       createValueTypeObject(refreshToken, 'token'),
-    ])
+    ]
+  )
   if (!validation.flag) return authenticationFail('invalid tokens');
 
   //start decoding tokens and refresh if needed//
@@ -152,7 +153,7 @@ export const verifyAuth = (req, res, info) => {
   } catch (error) {
 
     //decoding access token fails excluding expiration error
-    return authenticationFail(error.name);
+    return authenticationFail(error.message);
 
   }
 
@@ -228,6 +229,7 @@ export const verifyAuth = (req, res, info) => {
       //send refreshed message
       res.locals.refreshedTokenMessage = 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls';
     }
+    else return authenticationFail(error.message);
   }
 
   return authenticationPass();

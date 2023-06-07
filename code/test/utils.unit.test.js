@@ -79,60 +79,205 @@ describe("handleDateFilterParams", () => {
   });
 })
 
+
+const mockValidToken = "valid token";
+const mockInvalidToken = "invalid token";
+
+const mockValidDecodedUserToken = {
+  username: "user0",
+  email: "user0@ezwallet.com",
+  id: "id",
+  role: "Regular"
+}
+const mockValidDecodedAdminToken = {
+  username: "admin0",
+  email: "admin0@ezwallet.com",
+  id: "id",
+  role: "Admin"
+}
+const mockDecodedMissingInfoToken = {
+  username: "user0",
+  email: "",
+  id: "id",
+  role: "Regular"
+}
+
+const mockTokenExpiredError = new Error("Verify failed"); mockTokenExpiredError.name = "TokenExpiredError";
+
+
 describe("verifyAuth", () => {
-  test('authType Simple, should authorize and refresh token', () => {
+
+  test('authType Simple, should authorize without refresh token', () => {
+
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
       authType: "Simple"
     }
-    const mockDecodedRefreshToken = {
-      username: "Simple",
-      email: "simple@ezwallet.com",
-      id: "simple",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "Simple",
-      email: "simple@ezwallet.com",
-      id: "simple",
-      role: "Regular"
-    }
+
     const mockResult = { flag: true, cause: 'Authorized' }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    expect(mockRes.locals.refreshedTokenMessage).toEqual(null)
+    expect(result).toEqual(mockResult);
+  });
+
+  test('authType Simple, should authorize and refresh token', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: true, cause: 'Authorized' }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+    expect(result).toEqual(mockResult);
+  });
+
+  test('authType User, should authorize and refresh token (username match', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
+      },
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "User",
+      username: "user0"
+    }
+
+    const mockResult = { flag: true, cause: 'Authorized' }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+    expect(result).toEqual(mockResult);
+  });
+
+  test('authType User, should not authorize (username mismatch)', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
+      },
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "User",
+      username: "user10"
+    }
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
 
     expect(result).toEqual(mockResult);
   });
 
-  test('authType Group, should authorize and refresh token since the email is in the group', () => {
+  test('authType Group, should authorize and refresh token (user in group email', () => {
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
       authType: "Group",
       emails: [
+        "user0@ezwallet.com",
         "user1@ezwallet.com",
         "user2@ezwallet.com",
         "user3@ezwallet.com",
@@ -140,44 +285,43 @@ describe("verifyAuth", () => {
         "user5@ezwallet.com",
       ]
     }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
     const mockResult = { flag: true, cause: 'Authorized' }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
 
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
     expect(result).toEqual(mockResult);
   });
 
   test('authType Group, should not authorize since user not in the group', () => {
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
       authType: "Group",
       emails: [
+        //"user0@ezwallet.com",
         "user1@ezwallet.com",
         "user2@ezwallet.com",
         "user3@ezwallet.com",
@@ -185,620 +329,472 @@ describe("verifyAuth", () => {
         "user5@ezwallet.com",
       ]
     }
-    const mockDecodedRefreshToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      id: "id6",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      id: "id6",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'user not in group' }
+    const mockResult = { flag: false, cause: expect.any(String) }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
 
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
     expect(result).toEqual(mockResult);
+
   });
-//redundant
-/*
-  test('authType Group, should not authorize since refreshToken is missing information', () => {
+
+  test('authType Admin, should authorize and refresh token (user role is admin', () => {
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
-      authType: "Group",
-      emails: [
-        "user1@ezwallet.com",
-        "user2@ezwallet.com",
-        "user3@ezwallet.com",
-        "user4@ezwallet.com",
-        "user5@ezwallet.com",
-      ]
+      authType: "Admin",
+      //  emails: [
+      //    "user0@ezwallet.com",
+      //    "user1@ezwallet.com",
+      //    "user2@ezwallet.com",
+      //    "user3@ezwallet.com",
+      //    "user4@ezwallet.com",
+      //    "user5@ezwallet.com",
+      //  ]
     }
-    const mockDecodedRefreshToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      id: "id6",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
+    const mockResult = { flag: true, cause: expect.any(String) }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    jwt.verify.mockReturnValueOnce(mockValidDecodedAdminToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedAdminToken);
+    jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
 
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedAdminToken, "EZWALLET", { expiresIn: '1h' })
+    expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
     expect(result).toEqual(mockResult);
   });
 
-  test('authType Group, should not authorize since accesssToken is missing information', () => {
+  test('authType Admin, should not authorize(user role is not admin', () => {
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
-      authType: "Group",
-      emails: [
-        "user1@ezwallet.com",
-        "user2@ezwallet.com",
-        "user3@ezwallet.com",
-        "user4@ezwallet.com",
-        "user5@ezwallet.com",
-      ]
+      authType: "Admin",
+      //  emails: [
+      //    "user0@ezwallet.com",
+      //    "user1@ezwallet.com",
+      //    "user2@ezwallet.com",
+      //    "user3@ezwallet.com",
+      //    "user4@ezwallet.com",
+      //    "user5@ezwallet.com",
+      //  ]
     }
-    const mockDecodedRefreshToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      id: "id6",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user6",
-      email: "user6@ezwallet.com",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
+    const mockResult = { flag: false, cause: expect.any(String) }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
 
-    expect(result).toEqual(mockResult);
-  });
-*/
-
-  test('authType User, should authorize and refresh token', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockResult = { flag: true, cause: 'Authorized' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedAdminToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
 
     expect(result).toEqual(mockResult);
   });
 
-  test('authType User, should not authorize since not the same user', () => {
+  test('authType unknown, should not authorize', () => {
+
     const mockReq = {
       cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
     }
     const mockRes = {
+      cookie: jest.fn(),
       locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user2",
-      email: "user2@ezwallet.com",
-      id: "id2",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user2",
-      email: "user2@ezwallet.com",
-      id: "id2",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: "cannot access other user's data"}
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-//redundant
-/*
-  test('authType User, should not authorize since refreshToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('authType User, should not authorize since accessToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-*/
-
-  test('authType Admin, should authorize and refresh token', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "Admin"
-    }
-    const mockDecodedRefreshToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockDecodedAccessToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockResult = { flag: true, cause: 'Authorized' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('authType Admin, should not authorize because not an admin', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "Admin"
-    }
-    const mockDecodedRefreshToken = {
-      username: "User1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "User1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'not an admin' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-//redundant
-/*
-  test('authType Admin, should not authorize since refreshToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "Admin"
-    }
-    const mockDecodedRefreshToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      role: "Admin"
-    }
-    const mockDecodedAccessToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('authType Admin, should not authorize since accessToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "Admin"
-    }
-    const mockDecodedRefreshToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockDecodedAccessToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      role: "Admin"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-*/
-
-  test('Should not authorize since invalid tokens', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: " ",
-        refreshToken: " "
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "Admin"
-    }
-    const mockDecodedRefreshToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockDecodedAccessToken = {
-      username: "Admin",
-      email: "admin@ezwallet.com",
-      id: "admin",
-      role: "Admin"
-    }
-    const mockResult = { flag: false, cause: 'invalid tokens' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('Should not authorize since refreshToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('Should not authorize since accessToken is missing information', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-      }
-    }
-    const mockInfo = {
-      authType: "User",
-      username:"user1"
-    }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Token is missing information' }
-
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-
-    const result = verifyAuth(mockReq, mockRes, mockInfo);
-
-    expect(result).toEqual(mockResult);
-  });
-
-  test('unknown autherization requested', () => {
-    const mockReq = {
-      cookies: {
-        accessToken: "valid accessToken",
-        refreshToken: "valid refreshToken"
-      }
-    }
-    const mockRes = {
-      locals: {
-        refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
+        refreshedTokenMessage: null
       }
     }
     const mockInfo = {
       authType: "Random"
     }
-    const mockDecodedRefreshToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockDecodedAccessToken = {
-      username: "user1",
-      email: "user1@ezwallet.com",
-      id: "id1",
-      role: "Regular"
-    }
-    const mockResult = { flag: false, cause: 'Unknown authorization requested' }
 
-    jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-    jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-    jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
 
     expect(result).toEqual(mockResult);
-    });
+  });
 
-    test('Should authorize, unknown cause', () => {
-      const mockReq = {
-        cookies: {
-          accessToken: "valid accessToken",
-          refreshToken: "valid refreshToken"
-        }
+  test('authType Simple, should not authorize if error occurs when refreshing', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
-      const mockRes = {
-        locals: {
-          refreshedTokenMessage: 'Access token has been refreshed. Remember to copy the new one in the headers of subsequent calls'
-        }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
       }
-      const mockInfo = {
-        authType: "User",
-        username:"user1"
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+  test('should not authorize if mismatched tokens', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
       }
-      const mockDecodedRefreshToken = {
-        username: "user1",
-        email: "user1@ezwallet.com",
-        id: "id1",
-        role: "Regular"
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
       }
-      const mockDecodedAccessToken = {
-        username: "user1",
-        email: "user1@ezwallet.com",
-        id: "id1",
-        role: "Regular"
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedAdminToken);
+    //jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+  test('should not authorize if access token with missing information', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockInvalidToken,
+        refreshToken: mockValidToken
       }
-      const mockResult = { flag: false, cause: 'unknown. Try again' }
-  
-      jwt.verify.mockReturnValueOnce(mockDecodedRefreshToken);
-      jwt.verify.mockReturnValueOnce(mockDecodedAccessToken);
-      //jwt.verify.mockImplementationOnce(() => { throw new Error("TokenExpiredError") });
-  
-      const result = verifyAuth(mockReq, mockRes, mockInfo);
-  
-      expect(result).toEqual(mockResult);
-    });
-})
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    //jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+
+  test('should not authorize if access token verify fails', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockInvalidToken,
+        refreshToken: mockValidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    //console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+  test('should not authorize if refresh token with missing information', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockValidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+
+  test('should not authorize if refresh token verify fails', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockInvalidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    //jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    //jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw new Error("some different error") });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+  test('should not authorize if refresh token expired', () => {
+
+    const mockReq = {
+      cookies: {
+        accessToken: mockValidToken,
+        refreshToken: mockInvalidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    //jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    //jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+
+  test('should not authorize if missing/empty token', () => {
+
+    const mockReq = {
+      cookies: {
+        refreshToken: mockInvalidToken
+      }
+    }
+    const mockRes = {
+      cookie: jest.fn(),
+      locals: {
+        refreshedTokenMessage: null
+      }
+    }
+    const mockInfo = {
+      authType: "Simple"
+    }
+
+    const mockResult = { flag: false, cause: expect.any(String) }
+
+    //jwt.verify.mockReturnValueOnce(mockDecodedMissingInfoToken);
+    //jwt.verify.mockReturnValueOnce(mockValidDecodedUserToken);
+    //jwt.verify.mockImplementationOnce(() => { throw mockTokenExpiredError });
+    //jwt.sign.mockReturnValueOnce(mockValidToken);
+
+    const result = verifyAuth(mockReq, mockRes, mockInfo);
+    console.log(JSON.stringify({ result, mockRes }, null, 2));
+
+    //expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
+    //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: false });
+
+    //expect(jwt.sign).toHaveBeenCalledWith(mockValidDecodedUserToken, "EZWALLET", { expiresIn: '1h' })
+    //expect(mockRes.cookie).toHaveBeenCalledWith('accessToken', mockValidToken, { httpOnly: true, path: '/api', maxAge: 60 * 60 * 1000, sameSite: 'none', secure: true });
+    //expect(mockRes.locals.refreshedTokenMessage).toEqual(expect.any(String))
+
+    expect(result).toEqual(mockResult);
+  });
+
+
+});
+
+
 
 describe("handleAmountFilterParams", () => {
   test("should return an empty object when no query parameters are provided", () => {
