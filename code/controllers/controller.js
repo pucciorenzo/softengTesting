@@ -342,13 +342,10 @@ export const getTransactionsByUser = async (req, res) => {
         //let dateFilter = { date: { $gte: new Date("2023-04-30T00:00:00.000Z") } };
         let dateFilter = {};
         let amountFilter = {};
-        let username;
 
         //authenticate//
         //admin route
         if ((/transactions\/users/).test(req.url)) {
-            const parts = req.url.split('/');  
-            username = parts[4];
 
             //authenticate as admin
             const auth = verifyAuth(req, res, { authType: 'Admin' });
@@ -361,11 +358,9 @@ export const getTransactionsByUser = async (req, res) => {
 
         //user route
         else if ((/\/users\/.+\/transactions.*/).test(req.url)) {
-            const parts = req.url.split('/');  
-            username = parts[3];
 
             //authenticate as user
-            const auth = verifyAuth(req, res, { authType: "User", username: username });
+            const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!auth.flag) return resError(res, 401, auth.cause);
 
             //also use filters if specified in parameter
@@ -379,7 +374,7 @@ export const getTransactionsByUser = async (req, res) => {
         }
 
         //check if user exists
-        if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
+        if (! await User.findOne({ username: req.params.username })) return resError(res, 400, "user does not exist");
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -397,7 +392,7 @@ export const getTransactionsByUser = async (req, res) => {
             {
                 //filter the transactions
                 $match: {
-                    username: username,
+                    username: req.params.username,
                     ...dateFilter,
                     ...amountFilter
                 }
@@ -430,30 +425,18 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByUserByCategory = async (req, res) => {
     try {
-        let username;
-        let category
 
         //authenticate//
         //admin route
         if (req.url.includes("/transactions/users/")) {
-            const parts = req.url.split('/');  
-            username = parts[4];
-            category = parts[6];
-
             const auth = verifyAuth(req, res, { authType: 'Admin' });
             if (!auth.flag) return resError(res, 401, auth.cause);
 
         }
         //user route
         else if (req.url.includes("/transactions/category/")) {
-            const parts = req.url.split('/');  
-            username = parts[3];
-            category = parts[6];
-
-
-            const auth = verifyAuth(req, res, { authType: "User", username: username });
+            const auth = verifyAuth(req, res, { authType: "User", username: req.params.username });
             if (!auth.flag) return resError(res, 401, auth.cause);
-
         }
         //unknown route
         else {
@@ -461,10 +444,10 @@ export const getTransactionsByUserByCategory = async (req, res) => {
         }
 
         //check user exists
-        if (! await User.findOne({ username: username })) return resError(res, 400, "user does not exist");
+        if (! await User.findOne({ username: req.params.username })) return resError(res, 400, "user does not exist");
 
         //check category exists
-        if (! await categories.findOne({ type: category })) return resError(res, 400, "category does not exist");
+        if (! await categories.findOne({ type: req.params.category })) return resError(res, 400, "category does not exist");
 
         /**
         * MongoDB equivalent to the query "SELECT * FROM transactions, categories WHERE transactions.type = categories.type"
@@ -482,8 +465,8 @@ export const getTransactionsByUserByCategory = async (req, res) => {
             {
                 //filter
                 $match: {
-                    username: username,
-                    type: category
+                    username: req.params.username,
+                    type: req.params.category
                 }
             },
             { $unwind: "$categories_info" }
@@ -514,24 +497,15 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroup = async (req, res) => {
     try {
-        
-        let groupName;
-        let group;
         let route;
 
-        if (req.url.includes("/transactions/groups")) {
-            const parts = req.url.split('/');  
-            groupName = parts[4];
+        if (req.url.includes("/transactions/groups"))
             route = 'admin';
-        }
-        else if ((/groups\/.+\/transactions/).test(req.url)) {
-            const parts = req.url.split('/');  
-            groupName = parts[3];
+        else if ((/groups\/.+\/transactions/).test(req.url))
             route = 'user'
-        }
         else throw new Error('unknown route');
         
-        group = await Group.findOne({ name: groupName });
+        let group = await Group.findOne({ name: req.params.name });
         if(!group) return res.status(400).json( { error: "group does not exist" } );
 
         let auth;
@@ -546,7 +520,7 @@ export const getTransactionsByGroup = async (req, res) => {
                 if (!auth.flag) return resError(res, 401, auth.cause);
         }
 
-        group = await (await Group.findOne({ name: groupName })).populate('members.user');
+        group = await (await Group.findOne({ name: req.params.name })).populate('members.user');
 
         //retreive and send data
         await transactions.aggregate(
@@ -599,29 +573,21 @@ Returns a 401 error if called by an authenticated user who is not an admin (auth
  */
 export const getTransactionsByGroupByCategory = async (req, res) => {
     try {
-        let groupName;
-        let group;
-        let category;
         let route;
 
-        if (req.url.includes("/transactions/groups")) {
-            const parts = req.url.split('/');  
-            groupName = parts[4];
-            category = parts[6];
+        if (req.url.includes("/transactions/groups"))
             route = 'admin';
-        }
-        else if((/groups\/.+\/transactions/).test(req.url)) { 
-            const parts = req.url.split('/');  
-            groupName = parts[3];
-            category = parts[6];
+        else if((/groups\/.+\/transactions/).test(req.url))
             route = 'user';
-        }
         else throw new Error('unknown route');
 
-        group = await Group.findOne({ name: groupName });
+        const groupName = req.params.name;
+
+        let group = await Group.findOne({ name: groupName });
         if(!group) return res.status(400).json( { error: "group does not exist" } );
         
         //check category exists
+        const category = req.params.category;
         if (!(await categories.findOne({ type: category }))) return resError(res, 400, "category does not exist");
 
         let auth;
@@ -667,6 +633,7 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
             //send data
             resData(res, data);
         });
+
     } catch (error) {
         console.log(error);
         resError(res, 500, error.message);
