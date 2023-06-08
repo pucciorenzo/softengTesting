@@ -51,7 +51,7 @@ describe("getUsers", () => {
 
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    User.find.mockResolvedValue([
+    User.find.mockResolvedValueOnce([
       { _id: "id1", username: "user1", email: "user1@ezwallet.com", password: "hashedPassword1", role: "Regular" },
       { _id: "id2", username: "user2", email: "user2@ezwallet.com", password: "hashedPassword2", role: "Regular" },
       { _id: "id3", username: "user3", email: "user3@ezwallet.com", password: "hashedPassword3", role: "Regular" },
@@ -159,7 +159,7 @@ describe("getUser", () => {
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: false, cause: "unauthorized" });
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    User.findOne.mockResolvedValue(mockUser);
+    User.findOne.mockResolvedValueOnce(mockUser);
 
     //call function
     await getUser(mockReq, mockRes);
@@ -196,7 +196,7 @@ describe("getUser", () => {
 
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    User.findOne.mockResolvedValue(mockUser);
+    User.findOne.mockResolvedValueOnce(mockUser);
 
     //call function
     await getUser(mockReq, mockRes);
@@ -1158,7 +1158,7 @@ describe("getGroups", () => {
 
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
-    Group.find.mockResolvedValue(mockGroups);
+    Group.find.mockResolvedValueOnce(mockGroups);
 
     //call function
     await getGroups(mockReq, mockRes);
@@ -1280,7 +1280,7 @@ describe("getGroup", () => {
     }
 
     //mock implementations
-    Group.findOne.mockResolvedValue(mockGroup);
+    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
 
@@ -1327,7 +1327,7 @@ describe("getGroup", () => {
     }
 
     //mock implementations
-    Group.findOne.mockResolvedValue(mockGroup);
+    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
 
     //call function
@@ -1412,7 +1412,7 @@ describe("getGroup", () => {
     const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
-    Group.findOne.mockResolvedValue(mockGroup);
+    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
     verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
 
@@ -1452,7 +1452,7 @@ describe("getGroup", () => {
     const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
-    Group.findOne.mockResolvedValue(null);
+    Group.findOne.mockResolvedValueOnce(null);
 
 
     //call function
@@ -1579,7 +1579,7 @@ describe("addToGroup", () => {
     User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
     User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
     User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
-    mockGroup.save.mockResolvedValue(mockSavedGroup);
+    mockGroup.save.mockResolvedValueOnce(mockSavedGroup);
 
     //call function
     await addToGroup(mockReq, mockRes);
@@ -1707,7 +1707,7 @@ describe("addToGroup", () => {
     User.findOne.mockResolvedValueOnce(mockUsers[5]); mockUsers[5] ? Group.findOne.mockResolvedValueOnce(mockUsers[5].group) : 5;
     User.findOne.mockResolvedValueOnce(mockUsers[6]); mockUsers[6] ? Group.findOne.mockResolvedValueOnce(mockUsers[6].group) : 6;
     User.findOne.mockResolvedValueOnce(mockUsers[7]); mockUsers[7] ? Group.findOne.mockResolvedValueOnce(mockUsers[7].group) : 7;
-    mockGroup.save.mockResolvedValue(mockSavedGroup);
+    mockGroup.save.mockResolvedValueOnce(mockSavedGroup);
 
     //call function
     await addToGroup(mockReq, mockRes);
