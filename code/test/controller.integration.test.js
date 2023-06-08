@@ -1521,7 +1521,7 @@ describe("getTransactionsByUserByCategory", () => {
         const response = await request(app)
             .get("/api/transactions/users/user1/category/type2")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1614,7 +1614,7 @@ describe("getTransactionsByUserByCategory", () => {
         const response = await request(app)
             .get("/api/users/user1/transactions/category/type2")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1847,7 +1847,7 @@ describe("getTransactionsByGroup", () => {
         const response = await request(app)
             .get("/api/groups/group2/transactions")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1911,7 +1911,7 @@ describe("getTransactionsByGroup", () => {
         const response = await request(app)
             .get("/api/transactions/groups/group2")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(200);
         expect(response.body.data).toEqual(
@@ -1980,7 +1980,7 @@ describe("getTransactionsByGroup", () => {
         const response = await request(app)
             .get("/api/transactions/groups/group2")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -2106,7 +2106,7 @@ describe("getTransactionsByGroup", () => {
         const response = await request(app)
             .get("/api/groups/group3/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -2249,7 +2249,7 @@ describe("getTransactionsByGroupByCategory", () => {
         const response = await request(app)
             .get("/api/groups/group2/transactions/category/type4")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -2448,7 +2448,7 @@ describe("getTransactionsByGroupByCategory", () => {
         const response = await request(app)
             .get("/api/groups/group3/transactions/category/type4")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -2512,7 +2512,7 @@ describe("getTransactionsByGroupByCategory", () => {
         const response = await request(app)
             .get("/api/transactions/groups/group3/category/type4")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -2576,7 +2576,7 @@ describe("getTransactionsByGroupByCategory", () => {
         const response = await request(app)
             .get("/api/transactions/groups/group1/category/type5")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -2714,7 +2714,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ _id: (await transactions.find({}))[4]._id });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toHaveProperty("error");
@@ -2779,7 +2779,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _id: (await transactions.find({}))[3]._id });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -2844,7 +2844,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _id: (await mongoose.Types.ObjectId()) });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -2909,7 +2909,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _id: (await transactions.find({}))[4]._id });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -2974,7 +2974,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _id: "" });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -3039,7 +3039,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({});
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -3105,7 +3105,7 @@ describe("deleteTransaction", () => {
             .delete("/api/users/user1/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _id: "someid" });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(500);
         expect(response.body).toHaveProperty("error");
@@ -3250,7 +3250,7 @@ describe("deleteTransactions", () => {
             .delete("/api/transactions/")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ _ids: transactionIds });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toHaveProperty("error");
@@ -3319,7 +3319,7 @@ describe("deleteTransactions", () => {
             .delete("/api/transactions/")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ _ids: transactionIds });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -3388,7 +3388,7 @@ describe("deleteTransactions", () => {
             .delete("/api/transactions/")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ _ids: transactionIds });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -3456,7 +3456,7 @@ describe("deleteTransactions", () => {
             .delete("/api/transactions/")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({});
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toHaveProperty("error");
@@ -3525,7 +3525,7 @@ describe("deleteTransactions", () => {
             .delete("/api/transactions/")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ _ids: transactionIds });
-        console.log(JSON.stringify(response, null, 2));
+       //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(500);
         expect(response.body).toHaveProperty("error");
