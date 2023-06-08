@@ -424,6 +424,232 @@ describe("deleteCategory", () => {
 
     });
 
+    test('should delete all categories provided (N>T)', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "type2", "type3",] });
+        console.log(JSON.stringify(response, null, 3));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            {
+                message: expect.any(String),
+                count: 3
+            }
+        )
+
+    });
+
+    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1",] });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if at least one of the types in the array does not represent a category in the database', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "type5", "type2", "type3", "type1",] });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the array passed in the request body is empty    ', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: [] });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if at least one of the types in the array is an empty string    ', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "", "type2", "type3", "type1"] });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if called when there is only one category in the database    ', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1"] });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the request body does not contain all the necessary attributes    ', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({});
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+
 })
 
 describe("getCategories", () => {

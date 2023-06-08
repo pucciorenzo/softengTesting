@@ -9,7 +9,7 @@ import { createValueTypeObject, validateValueType, validateValueTypes, resError,
  * res.status(errorCode).json({ error: "Error message" });
  */
 
-
+2
 
 /**
 * createCategory
@@ -151,17 +151,15 @@ export const deleteCategory = async (req, res) => {
         //check more than one category exists
         if (currentTypes.length <= 1) return resError(res, 400, "only zero or one category exists");
 
+        //remove duplicates
+        typesToDelete = removeDuplicates(typesToDelete);
+
         //check all categories to be deleted exists and track duplicates
-        const uniqueTypes = {};
         for (const typeToDelete of typesToDelete) {
             if (!currentTypes.includes(typeToDelete)) {
                 return resError(res, 400, "at least one type does not exist");
             }
-            uniqueTypes[typeToDelete] = typeToDelete;
         }
-
-        //remove duplicates
-        typesToDelete = Object.keys(uniqueTypes);
 
         //N==T, if deleting all categories, don't delete oldest
         let oldestType = currentTypes[0];
