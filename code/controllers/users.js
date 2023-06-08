@@ -442,7 +442,7 @@ export const removeFromGroup = async (req, res) => {
         continue;
       }
 
-      //not already added for deletion
+      // added for deletion
       canBeRemovedMembersArray.push(email);
 
     }

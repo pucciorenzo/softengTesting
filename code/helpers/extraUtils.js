@@ -74,7 +74,7 @@ export const validateValueType = (attribute) => {
                 {
                     //invalid string
                     let validation = validateValueType(createValueTypeObject(value, 'string'));
-                    if (!validation.flag) return validationFail("at least one: " + validation.cause);
+                    if (!validation.flag) return validationFail(validation.cause);
                     //incorrect format or invalid characters
                     if (!validator.isEmail(value)) return validationFail("invalid email format");
                 }
