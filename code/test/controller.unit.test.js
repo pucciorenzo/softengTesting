@@ -2828,4 +2828,50 @@ describe("deleteTransactions", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     })
+
+    test('should return 500 error if error thrown', async () => {
+        const mockTransaction_ids = [
+            "id1",
+            "id2",
+            "id3",
+            "id4",
+            "id5",
+        ];
+        const mockReq = {
+            params: {
+            },
+            body: {
+                _ids: mockTransaction_ids
+            }
+        }
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            locals: {
+            }
+        }
+        const mockResStatus = 500
+        const mockErrorMessage = "internal error";
+        const mockResData = { error: mockErrorMessage }
+
+        verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+        transactions.countDocuments.mockResolvedValueOnce(true);
+        transactions.countDocuments.mockResolvedValueOnce(true);
+        transactions.countDocuments.mockResolvedValueOnce(true);
+        transactions.countDocuments.mockResolvedValueOnce(true);
+        transactions.countDocuments.mockResolvedValueOnce(true);
+        transactions.deleteMany.mockRejectedValueOnce(new Error(mockErrorMessage));
+
+        await deleteTransactions(mockReq, mockRes);
+
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id1" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id2" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id3" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id4" });
+        expect(transactions.countDocuments).toHaveBeenCalledWith({ _id: "id5" });
+        expect(transactions.deleteMany).toHaveBeenCalledWith({ _id: { $in: mockTransaction_ids } });
+        expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+        expect(mockRes.json).toHaveBeenCalledWith(mockResData);
+    })
 })

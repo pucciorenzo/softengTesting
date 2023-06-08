@@ -220,7 +220,7 @@ export const getGroup = async (req, res) => {
 
     }
     //authenticate user, check group first
-    else if (!auth.flag) {
+    else {
 
       //check group exists
       group = await Group.findOne({ name: req.params.name });
