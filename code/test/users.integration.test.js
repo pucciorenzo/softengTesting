@@ -2334,7 +2334,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "user5@ezwallet.com" });
 
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2379,7 +2379,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "user5@ezwalletcom" });
 
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2424,7 +2424,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "" });
 
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2470,7 +2470,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({});
 
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2515,7 +2515,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "admin2@ezwallet.com" });
 
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2560,7 +2560,160 @@ describe("deleteGroup", () => {
     //console.log(response);
 
     expect(response.status).toEqual(200);
-    expect(response.body.data).toHaveProperty("message");
+    expect(response.body).toHaveProperty("data.message");
 
   })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+
+    await User.insertMany(
+      [
+        { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+        { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+        { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+        { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+        { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+        { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+        { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+      ]
+    );
+
+    await Group.insertMany(
+      [
+        {
+          name: "group1",
+          members: [
+            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+          ]
+        },
+      ]
+    );
+
+    const response = await request(app)
+      .delete("/api/groups")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({ name: "group1" });
+
+   //console.log(response);
+
+    expect(response.status).toEqual(401);
+    expect(response.body).toHaveProperty("error");
+
+  })
+
+  test("Returns a 400 error if the name passed in the request body does not represent a group in the database", async () => {
+
+    await User.insertMany(
+      [
+        { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+        { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+        { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+        { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+        { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+        { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+        { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+      ]
+    );
+
+    await Group.insertMany(
+      [
+        {
+          name: "group1",
+          members: [
+            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+          ]
+        },
+      ]
+    );
+
+    const response = await request(app)
+      .delete("/api/groups")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({ name: "group2" });
+
+   //console.log(response);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error");
+
+  })
+
+  test("Returns a 400 error if the name passed in the request body is an empty string", async () => {
+
+    await User.insertMany(
+      [
+        { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+        { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+        { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+        { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+        { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+        { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+        { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+      ]
+    );
+
+    await Group.insertMany(
+      [
+        {
+          name: "group1",
+          members: [
+            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+          ]
+        },
+      ]
+    );
+
+    const response = await request(app)
+      .delete("/api/groups")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({ name: "" });
+
+   //console.log(response);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error");
+
+  })
+
+  test("Returns a 400 error if the request body does not contain all the necessary attributes", async () => {
+
+    await User.insertMany(
+      [
+        { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+        { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+        { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+        { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+        { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+        { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+        { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+      ]
+    );
+
+    await Group.insertMany(
+      [
+        {
+          name: "group1",
+          members: [
+            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+          ]
+        },
+      ]
+    );
+
+    const response = await request(app)
+      .delete("/api/groups")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({});
+
+   //console.log(response);
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error");
+
+  })
+
 });
