@@ -600,6 +600,7 @@ describe("createGroup", () => {
 
 
 describe("getGroups", () => {
+
   test("should get all groups", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -649,6 +650,47 @@ describe("getGroups", () => {
       ]
     )
   })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+
+    const response = await request(app)
+      .get("/api/groups")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+
+
+
+    console.log(JSON.stringify(response, null, 2));
+    expect(response.status).toEqual(401);
+    expect(response.body).toHaveProperty("error");
+  });
+
+
 
 });
 
