@@ -996,6 +996,464 @@ describe("addToGroup", () => {
 
   })
 
+
+  test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/add")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    //console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(401);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
+  test("should add to group (admin route)", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/insert")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(200);
+    expect(response.body.data).toEqual({
+      group: {
+        name: "group1",
+        members: [
+          { email: "user1@ezwallet.com" },
+          { email: "user2@ezwallet.com" },
+          { email: "user4@ezwallet.com" },
+          { email: "admin1@ezwallet.com" },
+        ]
+      },
+      membersNotFound: [
+        /*
+        { email: "user5@ezwallet.com" },
+        { email: "admin3@ezwallet.com" },
+        */
+        "user5@ezwallet.com",
+        "admin3@ezwallet.com",
+      ],
+      alreadyInGroup: [
+        /*
+        { email: "user1@ezwallet.com" },
+        { email: "user2@ezwallet.com" },
+        { email: "user3@ezwallet.com" },
+        { email: "admin2@ezwallet.com" },
+        */
+        "user1@ezwallet.com",
+        "user2@ezwallet.com",
+        "user3@ezwallet.com",
+        "admin2@ezwallet.com",
+      ]
+    })
+
+  })
+
+  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/insert")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(401);
+    expect(response.body).toHaveProperty("error");
+
+  })
+
+  test("Returns a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/add")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet..com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
+  test("Returns a 400 error if at least one of the member emails is an empty string  ", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/add")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
+  test("Returns a 400 error if all the provided emails represent users that are already in a group or do not exist in the database  ", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      //{ username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin1" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group1/add")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database ", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      //{ username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin1" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group3/add")
+      .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database ", async () => {
+
+    const usersArray = [
+      { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+      { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+      { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+      //{ username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+      { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+      { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+    ]
+
+    await User.insertMany(usersArray);
+
+    await Group.insertMany([
+      {
+        name: "group1",
+        members: [
+          await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+      {
+        name: "group2",
+        members: [
+          await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin2" }).then(u => { return { email: u.email, user: u.id } }),
+          await User.findOne({ username: "admin1" }).then(u => { return { email: u.email, user: u.id } }),
+        ]
+      },
+    ])
+
+    const response = await request(app)
+      .patch("/api/groups/group3/insert")
+      .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+      .send({
+        emails: [
+          "user1@ezwallet.com", //caller, already in group
+          "user2@ezwallet.com", //already in group
+          "user3@ezwallet.com", //already in different group
+          "user4@ezwallet.com", //can add
+          "admin1@ezwallet.com", //can add
+          "admin2@ezwallet.com", //already in different group
+          "user5@ezwallet.com", //inexistent
+          "admin3@ezwallet.com", //inexistent
+        ]
+      })
+
+    console.log(JSON.stringify(response, null, 2));
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toHaveProperty("error")
+
+  })
+
 });
 
 

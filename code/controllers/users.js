@@ -1,6 +1,6 @@
 import { Group, User } from "../models/User.js";
 import { transactions } from "../models/model.js";
-import { createValueTypeObject, resData, resError, validateValueType, validateValueTypes } from "../helpers/extraUtils.js";
+import { createValueTypeObject, removeDuplicates, resData, resError, validateValueType, validateValueTypes } from "../helpers/extraUtils.js";
 import { verifyAuth } from "./utils.js";
 
 /**
@@ -302,10 +302,7 @@ export const addToGroup = async (req, res) => {
     const validation = validateValueType(createValueTypeObject(emailArray, 'emailArray'));
     if (!validation.flag) return resError(res, 400, validation.cause);
 
-    //remove duplicate emails
-    const uniqueEmails = {};
-    for (const email of emailArray) uniqueEmails[email] = email;
-    emailArray = Object.keys(uniqueEmails);
+    emailArray = removeDuplicates(emailArray);
 
     //categorize emails
     let alreadyInGroupMembersArray = [];
