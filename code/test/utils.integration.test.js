@@ -34,6 +34,12 @@ beforeEach(async () => {
     await categories.deleteMany({});
     await transactions.deleteMany({});
 })
+afterEach(async () => {
+    await User.deleteMany({});
+    await Group.deleteMany({});
+    await categories.deleteMany({});
+    await transactions.deleteMany({});
+})
 
 /**
  * Alternate way to create the necessary tokens for authentication without using the website
@@ -57,6 +63,14 @@ const userTokenExpired = jwt.sign({
     username: "tester",
     role: "Regular"
 }, process.env.ACCESS_KEY, { expiresIn: '0s' })
+
+const adminTokenExpired = jwt.sign({
+    email: "admin@email.com",
+    //id: existingUser.id, The id field is not required in any check, so it can be omitted
+    username: "admin",
+    role: "Admin"
+}, process.env.ACCESS_KEY, { expiresIn: '0s' })
+
 
 const userTokenEmpty = jwt.sign({}, process.env.ACCESS_KEY, { expiresIn: "1y" })
 
@@ -111,7 +125,7 @@ describe("handleDateFilterParams", () => {
             }
         })
     });
-    
+
 
     test('should return correct filter using date parameters', () => {
         const req = {
@@ -212,7 +226,7 @@ describe("handleDateFilterParams", () => {
 
 describe("verifyAuth", () => {
 
-    test("should authorize user and refreshToken where authType==Group ", () => {
+    test("should authorize user and refresh token authType==Simple ", () => {
 
         const req = {
             cookies: {
@@ -231,8 +245,8 @@ describe("verifyAuth", () => {
             locals: {},
         }
 
-        const response = verifyAuth(req, res, { authType: "User", username: "tester" });
-
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(true)).toBe(true);
         expect(res.cookieArgs).toEqual({
@@ -252,7 +266,456 @@ describe("verifyAuth", () => {
 
     })
 
+    test("should not authorize user and refresh token authType==Simple ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: adminTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+
+    test("should authorize user and refresh token authType==Admin ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: adminTokenExpired,
+                refreshToken: adminTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Admin" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(true)).toBe(true);
+        expect(res.cookieArgs).toEqual({
+            name: 'accessToken', //The cookie arguments must have the name set to "accessToken" (value updated)
+            value: expect.any(String), //The actual value is unpredictable (jwt string), so it must exist
+            options: { //The same options as during creation
+                httpOnly: true,
+                path: '/api',
+                maxAge: 60 * 60 * 1000,
+                sameSite: 'none',
+                secure: true,
+            },
+        })
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(true)
+
+    })
+    test("should not authorize user authType==Admin ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Admin" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+    })
+
+    test("should authorize user and refresh token authType==User ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "User", username: "tester" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(true)).toBe(true);
+        expect(res.cookieArgs).toEqual({
+            name: 'accessToken', //The cookie arguments must have the name set to "accessToken" (value updated)
+            value: expect.any(String), //The actual value is unpredictable (jwt string), so it must exist
+            options: { //The same options as during creation
+                httpOnly: true,
+                path: '/api',
+                maxAge: 60 * 60 * 1000,
+                sameSite: 'none',
+                secure: true,
+            },
+        })
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(true)
+
+    })
+
+
+    test("should not authorize user and refresh token authType==User ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "User", username: "tester2" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+    })
+
+    test("should authorize user and refresh token where authType==Group ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, {
+            authType: "Group", emails: ["tester@test.com", "tester1@test.com", "tester2@test.com"]
+        });
+
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(true)).toBe(true);
+        expect(res.cookieArgs).toEqual({
+            name: 'accessToken', //The cookie arguments must have the name set to "accessToken" (value updated)
+            value: expect.any(String), //The actual value is unpredictable (jwt string), so it must exist
+            options: { //The same options as during creation
+                httpOnly: true,
+                path: '/api',
+                maxAge: 60 * 60 * 1000,
+                sameSite: 'none',
+                secure: true,
+            },
+        })
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(true)
+    })
+
+    test("should not authorize user and refresh token where authType==Group ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Group", emails: ["tester1@test.com", "tester2@test.com"] });
+
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+    })
+
+    test("should not authorize user and refresh token where authType==Unknown ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenExpired,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Unknow", emails: ["tester1@test.com", "tester2@test.com"] });
+
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+    })
+
+    test("should not authorize if access token missing information ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenEmpty,
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+    test("should not authorize if refresh token missing information ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenValid,
+                refreshToken: userTokenEmpty
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+    test("should not authorize if access token cannot be verified ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: "cannot verify",
+                refreshToken: userTokenValid
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+    test("should not authorize if refresh token cannot be verified ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenValid,
+                refreshToken: "cannot verify"
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+    test("should not authorize if refresh token expired ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenValid,
+                refreshToken: userTokenExpired
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
+
+    test("should not authorize if missing tokens ", () => {
+
+        const req = {
+            cookies: {
+                accessToken: userTokenValid,
+            }
+        }
+
+        //The inner working of the cookie function is as follows: the response object's cookieArgs object values are set
+        const cookieMock = (name, value, options) => {
+            res.cookieArgs = { name, value, options };
+        }
+        //In this case the response object must have a "cookie" function that sets the needed values, as well as a "locals" object where the message must be set 
+        const res = {
+            cookie: cookieMock,
+            locals: {},
+        }
+
+        const response = verifyAuth(req, res, { authType: "Simple" });
+        console.log(response);
+        //The response must have a true value (valid refresh token and expired access token)
+        expect(Object.values(response).includes(false)).toBe(true);
+
+        //The response object must have a field that contains the message, with the name being either "message" or "refreshedTokenMessage"
+        const message = res.locals.refreshedTokenMessage ? true : (res.locals.message ? true : false);
+        expect(message).toBe(false)
+
+    })
 })
+
+
+
+
+
 
 describe("handleAmountFilterParams", () => {
     test('should return correct filter using min and max queries', () => {
