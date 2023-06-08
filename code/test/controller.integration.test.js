@@ -684,6 +684,27 @@ describe("getCategories", () => {
         )
 
     });
+
+    test('Returns a 401 error if called by a user who is not authenticated (authType = Simple)    ', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${userTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) })
+
+    });
 })
 
 describe("createTransaction", () => {
