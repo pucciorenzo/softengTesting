@@ -101,7 +101,7 @@ describe("getUsers", () => {
 
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockReq = {
@@ -246,7 +246,7 @@ describe("getUser", () => {
 
   })
 
-  test("Returns a 400 error if the username passed as the route parameter does not represent a user in the database  ", async () => {
+  test("should return a 400 error if the username passed as the route parameter does not represent a user in the database  ", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -283,7 +283,7 @@ describe("getUser", () => {
 
   })
 
-  test("Returns a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -645,7 +645,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database  ", async () => {
+  test("should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -720,7 +720,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the user who calls the API is already in a group  ", async () => {
+  test("should return a 400 error if the user who calls the API is already in a group  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -783,7 +783,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the user who calls the API is not found using refresh token ", async () => {
+  test("should return a 400 error if the user who calls the API is not found using refresh token ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -844,7 +844,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
+  test("should return a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -893,7 +893,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the group name passed in the request body is an empty string", async () => {
+  test("should return a 400 error if the group name passed in the request body is an empty string", async () => {
 
     //mock variables
     const mockName = "";
@@ -940,7 +940,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if at least one of the member emails is an empty string  ", async () => {
+  test("should return a 400 error if at least one of the member emails is an empty string  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -987,7 +987,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
+  test("should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1034,7 +1034,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1072,7 +1072,7 @@ describe("createGroup", () => {
 
   })
 
-  test("Returns a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1206,7 +1206,7 @@ describe("getGroups", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     const mockReq = {
       params: {
@@ -1382,7 +1382,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1429,7 +1429,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (admin)  ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1468,7 +1468,7 @@ describe("getGroup", () => {
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user)  ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1864,7 +1864,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
+  test("should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -1952,7 +1952,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if at least one of the member emails is not in a valid email format", async () => {
+  test("should return a 400 error if at least one of the member emails is not in a valid email format", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2014,7 +2014,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if at least one of the member emails is an empty string", async () => {
+  test("should return a 400 error if at least one of the member emails is an empty string", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2076,7 +2076,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2125,7 +2125,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
+  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2185,7 +2185,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2236,7 +2236,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if group not found in admin route", async () => {
+  test("should return a 400 error if group not found in admin route", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2287,7 +2287,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 500 error when function accessed using unknown route", async () => {
+  test("should return a 500 error when function accessed using unknown route", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2653,7 +2653,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database  ", async () => {
+  test("should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2733,7 +2733,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if at least one of the emails is not in a valid email format  ", async () => {
+  test("should return a 400 error if at least one of the emails is not in a valid email format  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2798,7 +2798,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if at least one of the emails is an empty string  ", async () => {
+  test("should return a 400 error if at least one of the emails is an empty string  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2863,7 +2863,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2918,7 +2918,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group contains only one member before deleting any user  ", async () => {
+  test("should return a 400 error if the group contains only one member before deleting any user  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2969,7 +2969,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3034,7 +3034,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user route)  ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route)  ", async () => {
 
     //mock variables
     const mockName = "group2"
@@ -3092,7 +3092,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)  ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3152,7 +3152,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3210,7 +3210,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns 500 error when accessed by unknown route", async () => {
+  test("should return 500 error when accessed by unknown route", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3483,7 +3483,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("Returns a 400 error if the email passed in the request body represents an admin  ", async () => {
+  test("should return a 400 error if the email passed in the request body represents an admin  ", async () => {
 
     //mock variables
     const mockEmail = "admin0@ezwallet.com";
@@ -3525,7 +3525,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("Returns a 400 error if the email passed in the request body does not represent a user in the database  ", async () => {
+  test("should return a 400 error if the email passed in the request body does not represent a user in the database  ", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3567,7 +3567,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("Returns a 400 error if the email passed in the request body is not in correct email format  ", async () => {
+  test("should return a 400 error if the email passed in the request body is not in correct email format  ", async () => {
 
     //mock variables
     const mockEmail = "user0.@ezwallet";
@@ -3607,7 +3607,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("Returns a 400 error if the email passed in the request body is an empty string  ", async () => {
+  test("should return a 400 error if the email passed in the request body is an empty string  ", async () => {
 
     //mock variables
     const mockEmail = "";
@@ -3646,7 +3646,7 @@ describe("deleteUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
-  test("Returns a 400 error if the request body does not contain all the necessary atributes  ", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary atributes  ", async () => {
 
     //mock variables
     const mockEmail = "";
@@ -3685,7 +3685,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet";
@@ -3798,7 +3798,7 @@ describe("deleteGroup", () => {
   })
 
 
-  test("Returns a 400 error if the name passed in the request body does not represent a group in the database  ", async () => {
+  test("should return a 400 error if the name passed in the request body does not represent a group in the database  ", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
@@ -3830,7 +3830,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("Returns a 400 error if the name passed in the request body is an empty string  ", async () => {
+  test("should return a 400 error if the name passed in the request body is an empty string  ", async () => {
     //mock variables
     const mockName = "";
     const mockReq = {
@@ -3860,7 +3860,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("Returns a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
     //mock variables
     const mockName = "";
     const mockReq = {
@@ -3889,7 +3889,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {

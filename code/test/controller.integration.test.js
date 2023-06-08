@@ -86,7 +86,7 @@ describe("createCategory", () => {
         )
     })
 
-    test('Returns a 400 error if the type of category passed in the request body represents an already existing category in the database', async () => {
+    test('should return a 400 error if the type of category passed in the request body represents an already existing category in the database', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -105,7 +105,7 @@ describe("createCategory", () => {
         expect(response.body).toEqual({ error: mockErrorMessage });
     })
 
-    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+    test('should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
         await categories.insertMany(
             [
@@ -125,7 +125,7 @@ describe("createCategory", () => {
         expect(response.body).toEqual({ error: mockErrorMessage });
     })
 
-    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+    test('should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
         await categories.insertMany(
             [
@@ -145,7 +145,7 @@ describe("createCategory", () => {
         expect(response.body).toEqual({ error: mockErrorMessage });
     })
 
-    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+    test('should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
 
         await categories.insertMany(
             [
@@ -238,7 +238,7 @@ describe("updateCategory", () => {
 
     });
 
-    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+    test('should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -268,7 +268,7 @@ describe("updateCategory", () => {
     });
 
 
-    test('Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one', async () => {
+    test('should return a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one', async () => {
 
         await categories.insertMany(
             [
@@ -298,7 +298,7 @@ describe("updateCategory", () => {
 
     });
 
-    test('Returns a 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
+    test('should return a 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
 
         await categories.insertMany(
             [
@@ -328,7 +328,7 @@ describe("updateCategory", () => {
 
     });
 
-    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+    test('should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
         await categories.insertMany(
             [
@@ -358,7 +358,7 @@ describe("updateCategory", () => {
 
     });
 
-    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+    test('should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
         await categories.insertMany(
             [
@@ -467,7 +467,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+    test('should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -499,7 +499,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 400 error if at least one of the types in the array does not represent a category in the database', async () => {
+    test('should return a 400 error if at least one of the types in the array does not represent a category in the database', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -531,7 +531,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 400 error if the array passed in the request body is empty    ', async () => {
+    test('should return a 400 error if the array passed in the request body is empty    ', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -563,7 +563,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 400 error if at least one of the types in the array is an empty string    ', async () => {
+    test('should return a 400 error if at least one of the types in the array is an empty string    ', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -595,7 +595,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 400 error if called when there is only one category in the database    ', async () => {
+    test('should return a 400 error if called when there is only one category in the database    ', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -623,7 +623,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('Returns a 400 error if the request body does not contain all the necessary attributes    ', async () => {
+    test('should return a 400 error if the request body does not contain all the necessary attributes    ', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -691,7 +691,7 @@ describe("getCategories", () => {
 
     });
 
-    test('Returns a 401 error if called by a user who is not authenticated (authType = Simple)    ', async () => {
+    test('should return a 401 error if called by a user who is not authenticated (authType = Simple)    ', async () => {
         await categories.insertMany(
             [
                 { type: "type0", color: "color0" },
@@ -764,7 +764,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 401 error if called by an authenticated user who is not the same user as the one in the route parameter (authType = User)', async () => {
+    test('should return a 401 error if called by an authenticated user who is not the same user as the one in the route parameter (authType = User)', async () => {
 
         await User.insertMany(
             [
@@ -809,7 +809,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
+    test('should return a 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
 
         await User.insertMany(
             [
@@ -854,7 +854,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
+    test('should return a 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
 
         await User.insertMany(
             [
@@ -899,7 +899,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the username passed in the request body does not represent a user in the database', async () => {
+    test('should return a 400 error if the username passed in the request body does not represent a user in the database', async () => {
 
         await User.insertMany(
             [
@@ -944,7 +944,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the username passed in the request body is not equal to the one passed as a route parameter', async () => {
+    test('should return a 400 error if the username passed in the request body is not equal to the one passed as a route parameter', async () => {
 
         await User.insertMany(
             [
@@ -989,7 +989,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the type of category passed in the request body does not represent a category in the database', async () => {
+    test('should return a 400 error if the type of category passed in the request body does not represent a category in the database', async () => {
 
         await User.insertMany(
             [
@@ -1034,7 +1034,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+    test('should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
         await User.insertMany(
             [
@@ -1079,7 +1079,7 @@ describe("createTransaction", () => {
 
     });
 
-    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+    test('should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
         await User.insertMany(
             [
@@ -1168,7 +1168,7 @@ describe("getAllTransactions", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
 
         await categories.insertMany(
             [
@@ -1251,7 +1251,7 @@ describe("getTransactionsByUser", () => {
             ]
         )
     })
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username", async () => {
 
         await User.insertMany(
             [
@@ -1342,7 +1342,7 @@ describe("getTransactionsByUser", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions", async () => {
+    test("should return a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions", async () => {
 
         await User.insertMany(
             [
@@ -1385,7 +1385,7 @@ describe("getTransactionsByUser", () => {
         expect(response.body).toEqual({ error: expect.any(String) })
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions", async () => {
+    test("should return a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions", async () => {
 
         await User.insertMany(
             [
@@ -1483,7 +1483,7 @@ describe("getTransactionsByUserByCategory", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username/category/:category", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/users/:username/category/:category", async () => {
 
         await User.insertMany(
             [
@@ -1576,7 +1576,7 @@ describe("getTransactionsByUserByCategory", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions/category/:category", async () => {
+    test("should return a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User) if the route is /api/users/:username/transactions/category/:category", async () => {
 
         await User.insertMany(
             [
@@ -1620,7 +1620,7 @@ describe("getTransactionsByUserByCategory", () => {
         expect(response.body).toEqual({ error: expect.any(String) });
     })
 
-    test("Returns a 400 error if the category passed as a route parameter does not represent a category in the database", async () => {
+    test("should return a 400 error if the category passed as a route parameter does not represent a category in the database", async () => {
 
         await User.insertMany(
             [
@@ -1665,7 +1665,7 @@ describe("getTransactionsByUserByCategory", () => {
 
     })
 
-    test("Returns a 400 error if the username passed as a route parameter does not represent a user in the database", async () => {
+    test("should return a 400 error if the username passed as a route parameter does not represent a user in the database", async () => {
 
         await User.insertMany(
             [
@@ -1790,7 +1790,7 @@ describe("getTransactionsByGroup", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions", async () => {
+    test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions", async () => {
 
         await User.insertMany(
             [
@@ -1923,7 +1923,7 @@ describe("getTransactionsByGroup", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name", async () => {
 
         await User.insertMany(
             [
@@ -1986,7 +1986,7 @@ describe("getTransactionsByGroup", () => {
         expect(response.body).toEqual({ error: expect.any(String) });
     })
 
-    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database     (admin route, auth first)   ", async () => {
+    test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database     (admin route, auth first)   ", async () => {
 
         await User.insertMany(
             [
@@ -2049,7 +2049,7 @@ describe("getTransactionsByGroup", () => {
         expect(response.body).toEqual({ error: "group does not exist" })
     })
 
-    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user route, group check first) ", async () => {
+    test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route, group check first) ", async () => {
 
         await User.insertMany(
             [
@@ -2191,7 +2191,7 @@ describe("getTransactionsByGroupByCategory", () => {
         )
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions/category/:category", async () => {
+    test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions/category/:category", async () => {
 
         await User.insertMany(
             [
@@ -2325,7 +2325,7 @@ describe("getTransactionsByGroupByCategory", () => {
     })
 
 
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name/category/:category", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name/category/:category", async () => {
 
         await User.insertMany(
             [
@@ -2390,7 +2390,7 @@ describe("getTransactionsByGroupByCategory", () => {
     })
 
 
-    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database(user route, group check first)", async () => {
+    test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database(user route, group check first)", async () => {
 
         await User.insertMany(
             [
@@ -2454,7 +2454,7 @@ describe("getTransactionsByGroupByCategory", () => {
         expect(response.body).toEqual({ error: expect.any(String) })
     })
 
-    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)", async () => {
+    test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)", async () => {
 
         await User.insertMany(
             [
@@ -2518,7 +2518,7 @@ describe("getTransactionsByGroupByCategory", () => {
         expect(response.body).toEqual({ error: expect.any(String) })
     })
 
-    test("Returns a 400 error if the category passed as a route parameter does not represent a category in the database", async () => {
+    test("should return a 400 error if the category passed as a route parameter does not represent a category in the database", async () => {
 
         await User.insertMany(
             [
@@ -2655,7 +2655,7 @@ describe("deleteTransaction", () => {
         expect(response.body.data).toHaveProperty("message");
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User)", async () => {
+    test("should return a 401 error if called by an authenticated user who is not the same user as the one in the route (authType = User)", async () => {
 
         await User.insertMany(
             [
@@ -2720,7 +2720,7 @@ describe("deleteTransaction", () => {
         expect(response.body).toHaveProperty("error");
     })
 
-    test("Returns a 400 error if the _id in the request body represents a transaction made by a different user than the one in the route", async () => {
+    test("should return a 400 error if the _id in the request body represents a transaction made by a different user than the one in the route", async () => {
 
         await User.insertMany(
             [
@@ -2785,7 +2785,7 @@ describe("deleteTransaction", () => {
         expect(response.body).toHaveProperty("error");
     })
 
-    test("Returns a 400 error if the _id in the request body does not represent a transaction in the database", async () => {
+    test("should return a 400 error if the _id in the request body does not represent a transaction in the database", async () => {
 
         await User.insertMany(
             [
@@ -2850,7 +2850,7 @@ describe("deleteTransaction", () => {
         expect(response.body).toHaveProperty("error");
     })
 
-    test("Returns a 400 error if the username passed as a route parameter does not represent a user in the database", async () => {
+    test("should return a 400 error if the username passed as a route parameter does not represent a user in the database", async () => {
 
         await User.insertMany(
             [
@@ -2915,7 +2915,7 @@ describe("deleteTransaction", () => {
         expect(response.body).toHaveProperty("error");
     })
 
-    test("Returns a 400 error if the _id in the request body is an empty string    ", async () => {
+    test("should return a 400 error if the _id in the request body is an empty string    ", async () => {
 
         await User.insertMany(
             [
@@ -2980,7 +2980,7 @@ describe("deleteTransaction", () => {
         expect(response.body).toHaveProperty("error");
     })
 
-    test("Returns a 400 error if the request body does not contain all the necessary attributes ", async () => {
+    test("should return a 400 error if the request body does not contain all the necessary attributes ", async () => {
 
         await User.insertMany(
             [
@@ -3046,7 +3046,7 @@ describe("deleteTransaction", () => {
     })
 
 
-    test("Returns a 500 error if the id is not valid db id", async () => {
+    test("should return a 500 error if the id is not valid db id", async () => {
 
         await User.insertMany(
             [
@@ -3189,7 +3189,7 @@ describe("deleteTransactions", () => {
 
     })
 
-    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+    test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
 
         await User.insertMany(
             [
@@ -3257,7 +3257,7 @@ describe("deleteTransactions", () => {
 
     })
 
-    test("Returns a 400 error if at least one of the ids in the array does not represent a transaction in the database", async () => {
+    test("should return a 400 error if at least one of the ids in the array does not represent a transaction in the database", async () => {
 
         await User.insertMany(
             [
@@ -3326,7 +3326,7 @@ describe("deleteTransactions", () => {
 
     })
 
-    test("Returns a 400 error if at least one of the ids in the array is an empty string    ", async () => {
+    test("should return a 400 error if at least one of the ids in the array is an empty string    ", async () => {
 
         await User.insertMany(
             [
@@ -3395,7 +3395,7 @@ describe("deleteTransactions", () => {
 
     })
 
-    test("Returns a 400 error if the request body does not contain all the necessary attributes ", async () => {
+    test("should return a 400 error if the request body does not contain all the necessary attributes ", async () => {
 
         await User.insertMany(
             [
@@ -3463,7 +3463,7 @@ describe("deleteTransactions", () => {
 
     })
 
-    test("Returns a 500 error if the transactions id is not valid", async () => {
+    test("should return a 500 error if the transactions id is not valid", async () => {
 
         await User.insertMany(
             [

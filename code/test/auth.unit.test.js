@@ -559,7 +559,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 500 error if any error thrown', async () => {
+  test('should return a 500 error if any error thrown', async () => {
 
     //mock variables
     const mockReq = {
@@ -621,7 +621,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 400 error if the supplied password does not match with the one in the database  ', async () => {
+  test('should return a 400 error if the supplied password does not match with the one in the database  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -664,7 +664,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 400 error if the email in the request body does not identify a user in the database  ', async () => {
+  test('should return a 400 error if the email in the request body does not identify a user in the database  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -696,7 +696,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 400 error if the email in the request body is not in a valid email format  ', async () => {
+  test('should return a 400 error if the email in the request body is not in a valid email format  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -723,7 +723,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 400 error if at least one of the parameters in the request body is an empty string  ', async () => {
+  test('should return a 400 error if at least one of the parameters in the request body is an empty string  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -750,7 +750,7 @@ describe('login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('Returns a 400 error if the request body does not contain all the necessary attributes  ', async () => {
+  test('should return a 400 error if the request body does not contain all the necessary attributes  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -838,7 +838,7 @@ describe('logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('returns 500 error if error is thrown', async () => {
+  test('should return 500 error if error is thrown', async () => {
 
     //mock variables
     const mockAccessToken = "access token";
@@ -885,7 +885,7 @@ describe('logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test("Returns a 400 error if the refresh token in the request's cookies does not represent a user in the database ", async () => {
+  test("should return a 400 error if the refresh token in the request's cookies does not represent a user in the database ", async () => {
 
     //mock variables
     const mockAccessToken = "access token";
@@ -922,7 +922,7 @@ describe('logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test("Returns a 400 error if the request does not have a refresh token in the cookies  ", async () => {
+  test("should return a 400 error if the request does not have a refresh token in the cookies  ", async () => {
 
     //mock variables
     const mockAccessToken = "access token";
