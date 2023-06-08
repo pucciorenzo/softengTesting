@@ -723,7 +723,7 @@ export const deleteTransactions = async (req, res) => {
 
         //validate attribute
         const validation = validateValueType(createValueTypeObject(_ids, 'stringArray'));
-        if (!validation.flag) resError(res, 400, validation.cause);
+        if (!validation.flag) return resError(res, 400, validation.cause);
 
         //check if all transactions exist
         for (const _id of _ids) {
