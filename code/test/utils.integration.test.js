@@ -246,7 +246,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(true)).toBe(true);
         expect(res.cookieArgs).toEqual({
@@ -286,7 +286,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -317,7 +317,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Admin" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(true)).toBe(true);
         expect(res.cookieArgs).toEqual({
@@ -356,7 +356,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Admin" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -384,7 +384,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "User", username: "tester" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(true)).toBe(true);
         expect(res.cookieArgs).toEqual({
@@ -425,7 +425,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "User", username: "tester2" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -552,7 +552,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -582,7 +582,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -612,7 +612,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -642,7 +642,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -672,7 +672,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
@@ -701,7 +701,7 @@ describe("verifyAuth", () => {
         }
 
         const response = verifyAuth(req, res, { authType: "Simple" });
-        console.log(response);
+       //console.log(response);
         //The response must have a true value (valid refresh token and expired access token)
         expect(Object.values(response).includes(false)).toBe(true);
 
