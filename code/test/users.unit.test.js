@@ -1280,16 +1280,16 @@ describe("getGroup", () => {
     }
 
     //mock implementations
-    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
 
     //call function
     await getGroup(mockReq, mockRes);
 
     //tests
-    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
@@ -1327,21 +1327,21 @@ describe("getGroup", () => {
     }
 
     //mock implementations
-    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
 
     //call function
     await getGroup(mockReq, mockRes);
 
     //tests
-    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
 
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("returns 500 error if error thrown", async () => {
+  test("returns 500 error if error thrown (admin)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1367,6 +1367,7 @@ describe("getGroup", () => {
     const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" });
     Group.findOne.mockRejectedValueOnce(new Error(mockErrorMessage));
 
 
@@ -1374,6 +1375,7 @@ describe("getGroup", () => {
     await getGroup(mockReq, mockRes);
 
     //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
 
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
@@ -1412,22 +1414,22 @@ describe("getGroup", () => {
     const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
-    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: false, cause: "not admin" });
+    Group.findOne.mockResolvedValueOnce(mockGroup);
     verifyAuth.mockReturnValueOnce({ flag: false, cause: mockErrorMessage });
 
     //call function
     await getGroup(mockReq, mockRes);
 
     //tests
-    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (admin)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1452,6 +1454,7 @@ describe("getGroup", () => {
     const mockResJson = { error: mockErrorMessage }
 
     //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: false, cause: " not admin" });
     Group.findOne.mockResolvedValueOnce(null);
 
 
@@ -1459,6 +1462,46 @@ describe("getGroup", () => {
     await getGroup(mockReq, mockRes);
 
     //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+    expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+
+    expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
+    expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
+  })
+  test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user)  ", async () => {
+
+    //mock variables
+    const mockName = "group1";
+
+    const mockReq = {
+      params: {
+        name: mockName
+      },
+      body: {
+      },
+      cookies: {
+      }
+    }
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      locals: {
+      }
+    }
+    const mockErrorMessage = expect.any(String);
+    const mockResStatus = 400;
+    const mockResJson = { error: mockErrorMessage }
+
+    //mock implementations
+    verifyAuth.mockReturnValueOnce({ flag: true, cause: " authorized" });
+    Group.findOne.mockResolvedValueOnce(null);
+
+
+    //call function
+    await getGroup(mockReq, mockRes);
+
+    //tests
+    expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
 
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
@@ -3748,7 +3791,7 @@ describe("deleteGroup", () => {
 
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(Group.deleteOne).toHaveBeenCalledWith({ name: mockName });
-    
+
     expect(mockRes.status).toHaveBeenCalledWith(mocKResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
