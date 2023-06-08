@@ -63,7 +63,8 @@
 
 ## Coverage white box
 
-Report here the screenshot of coverage values obtained with jest-- coverage 
+<!-- Report here the screenshot of coverage values obtained with jest-- coverage  -->
+![Coverage ScreenShot](/diagrams/Coverage.png){: .shadow}
 
 
 
