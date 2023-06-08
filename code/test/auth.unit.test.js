@@ -838,7 +838,7 @@ describe('logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('should return 500 error if error is thrown', async () => {
+  test('should return a 500 error if error is thrown', async () => {
 
     //mock variables
     const mockAccessToken = "access token";

@@ -70,7 +70,7 @@ describe("getUsers", () => {
 
   })
 
-  test("returns 500 error when error is thrown", async () => {
+  test("should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockReq = {
@@ -209,7 +209,7 @@ describe("getUser", () => {
 
   })
 
-  test("returns 500 error when error is thrown", async () => {
+  test("should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -566,7 +566,7 @@ describe("createGroup", () => {
   })
 
 
-  test("returns 500 error if error is thrown", async () => {
+  test("should return a 500 error if error is thrown", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1170,7 +1170,7 @@ describe("getGroups", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("returns 500 error when error thrown", async () => {
+  test("should return a 500 error when error thrown", async () => {
 
     const mockReq = {
       params: {
@@ -1341,7 +1341,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("returns 500 error if error thrown (admin)", async () => {
+  test("should return a 500 error if error thrown (admin)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1772,7 +1772,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("returns 500 error when error is thrown", async () => {
+  test("should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2561,7 +2561,7 @@ describe("removeFromGroup", () => {
   })
 
 
-  test("returns error 500 when error is thrown", async () => {
+  test("should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3210,7 +3210,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return 500 error when accessed by unknown route", async () => {
+  test("should return a 500 error when accessed by unknown route", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3325,7 +3325,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return 500 when error is thrown", async () => {
+  test("should return a 500 when error is thrown", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3765,7 +3765,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return 500 error if error thrown", async () => {
+  test("should return a 500 error if error thrown", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {

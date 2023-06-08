@@ -121,7 +121,7 @@ describe("createCategory", () => {
 
 
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -362,7 +362,7 @@ describe("updateCategory", () => {
         }
     );
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -601,7 +601,7 @@ describe("deleteCategory", () => {
 
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = {
             params: {
             },
@@ -696,7 +696,7 @@ describe("getCategories", () => {
         expect(res.json).toBeCalledWith({ error: 'Unauthorized' });
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -1005,7 +1005,7 @@ describe("createTransaction", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -1111,7 +1111,7 @@ describe("getAllTransactions", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = {
             params: {
             },
@@ -1313,7 +1313,7 @@ describe("getTransactionsByUser", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const req = {
             url: '/api/users/user1/transactions',
             body: {}
@@ -1479,7 +1479,7 @@ describe("getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('should return 500 error when error is thrown', async () => {
+    test('should return a 500 error when error is thrown', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -2640,7 +2640,7 @@ describe("deleteTransaction", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('should return 500 if an error occurs', async () => {
+    test('should return a 500 if an error occurs', async () => {
         const mockUsername = "user1";
         const mockTransaction_id = "id1";
         const req = {
@@ -2829,7 +2829,7 @@ describe("deleteTransactions", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     })
 
-    test('should return 500 error if error thrown', async () => {
+    test('should return a 500 error if error thrown', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",
