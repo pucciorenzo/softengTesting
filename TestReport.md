@@ -4,13 +4,14 @@
 
 # Contents
 
+- [Test Report](#test-report)
+- [Contents](#contents)
 - [Dependency graph](#dependency-graph)
-
 - [Integration approach](#integration-approach)
-
 - [Tests](#tests)
-
-- [Coverage](#Coverage)
+- [Coverage](#coverage)
+  - [Coverage of FR](#coverage-of-fr)
+  - [Coverage white box](#coverage-white-box)
 
 
 
@@ -18,7 +19,9 @@
 
 # Dependency graph 
 
-     <report the here the dependency graph of EzWallet>
+ <!-- <report the here the dependency graph of EzWallet> -->
+![Dependency Diagram](diagrams/DependencyGraph.svg){: .shadow}
+
      
 # Integration approach
 
@@ -35,8 +38,8 @@
 
 
 | Test case name | Object(s) tested | Test level | Technique used |
-|--|--|--|--|
-|||||
+| -------------- | ---------------- | ---------- | -------------- |
+|                |                  |            |                |
 
 
 
@@ -50,11 +53,11 @@
 
 <Report in the following table the coverage of  functional requirements (from official requirements) >
 
-| Functional Requirements covered |   Test(s) | 
-| ------------------------------- | ----------- | 
-| FRx                             |             |             
-| FRy                             |             | 
-| ... ||
+| Functional Requirements covered | Test(s) |
+| ------------------------------- | ------- |
+| FRx                             |         |
+| FRy                             |         |
+| ...                             |         |
 
 
 
