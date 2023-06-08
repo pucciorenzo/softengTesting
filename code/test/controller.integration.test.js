@@ -285,7 +285,7 @@ describe("updateCategory", () => {
             .patch("/api/categories/type1")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ type: "type0", color: "newColor3" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -315,7 +315,7 @@ describe("updateCategory", () => {
             .patch("/api/categories/type3")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ type: "type0", color: "newColor3" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -345,7 +345,7 @@ describe("updateCategory", () => {
             .patch("/api/categories/type3")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ type: "type0", color: "" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -375,7 +375,7 @@ describe("updateCategory", () => {
             .patch("/api/categories/type3")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -449,7 +449,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: ["type4", "type4", "type2", "type3",] });
-        console.log(JSON.stringify(response, null, 3));
+        //console.log(JSON.stringify(response, null, 3));
 
         expect(response.status).toEqual(200);
         expect(response.body.data).toEqual(
@@ -486,7 +486,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1",] });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -518,7 +518,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: ["type4", "type4", "type5", "type2", "type3", "type1",] });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -550,7 +550,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: [] });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -582,7 +582,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: ["type4", "type4", "", "type2", "type3", "type1"] });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -610,7 +610,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1"] });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -642,7 +642,7 @@ describe("deleteCategory", () => {
             .delete("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({});
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -699,7 +699,7 @@ describe("getCategories", () => {
         const response = await request(app)
             .get("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -796,7 +796,7 @@ describe("createTransaction", () => {
             .post("/api/users/user2/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", amount: "500.678", type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -841,7 +841,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", amount: "-a500.678", type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -886,7 +886,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", amount: "500.678", type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -931,7 +931,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user5", amount: "500.678", type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -976,7 +976,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user2", amount: "500.678", type: "type0" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1021,7 +1021,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", amount: "500.678", type: "type5" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1066,7 +1066,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", amount: "500.678", type: "" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1111,7 +1111,7 @@ describe("createTransaction", () => {
             .post("/api/users/user1/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
             .send({ username: "user1", type: "type1" });
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) });
@@ -1187,7 +1187,7 @@ describe("getAllTransactions", () => {
         const response = await request(app)
             .get("/api/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -1325,7 +1325,7 @@ describe("getTransactionsByUser", () => {
         const response = await request(app)
             .get("/api/users/user1/transactions/?from=2023-04-02&upTo=2023-04-05")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(200);
         expect(response.body.data).toEqual(
@@ -1373,7 +1373,7 @@ describe("getTransactionsByUser", () => {
         const response = await request(app)
             .get("/api/users/user2/transactions/?from=2023-04-02&upTo=2023-04-05")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(401);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -1416,7 +1416,7 @@ describe("getTransactionsByUser", () => {
         const response = await request(app)
             .get("/api/transactions/users/user5")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-        console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
         expect(response.body).toEqual({ error: expect.any(String) })
@@ -1689,7 +1689,7 @@ describe("getTransactionsByGroupByCategory", () => {
         const response = await request(app)
             .get("/api/groups/group2/transactions/category/type4")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        // console.log(JSON.stringify(response, null, 2));
+        ////console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(200);
         expect(response.body.data).toEqual(
