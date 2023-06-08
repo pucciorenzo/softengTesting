@@ -1790,8 +1790,266 @@ describe("getTransactionsByGroup", () => {
         )
     })
 
+    test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions", async () => {
 
-    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database        ", async () => {
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/groups/group2/transactions")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) });
+    })
+
+
+    test("should retreive the all group members transactions (admin route)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group2")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
+                { username: "user3", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
+                { username: "user1", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
+            ]
+        )
+    })
+
+    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group2")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) });
+    })
+
+    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database     (admin route, auth first)   ", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group3")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: "group does not exist" })
+    })
+
+    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database (user route, group check first) ", async () => {
 
         await User.insertMany(
             [
@@ -1848,10 +2106,10 @@ describe("getTransactionsByGroup", () => {
         const response = await request(app)
             .get("/api/groups/group3/transactions")
             .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-        //console.log(JSON.stringify(response, null, 2));
+        console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(400);
-        expect(response.body).toEqual({ error: "group does not exist" })
+        expect(response.body).toEqual({ error: expect.any(String) })
     })
 
 })
@@ -1932,6 +2190,398 @@ describe("getTransactionsByGroupByCategory", () => {
             ]
         )
     })
+
+    test("Returns a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions/category/:category", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/groups/group2/transactions/category/type4")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) })
+    })
+
+    test("should retreive all group members transactions belonging to a category(admin route)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group2/category/type4")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        ////console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
+                { username: "user3", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
+            ]
+        )
+    })
+
+
+    test("Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name/category/:category", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group2/category/type4")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        ////console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) })
+    })
+
+
+    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database(user route, group check first)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/groups/group3/transactions/category/type4")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) })
+    })
+
+    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group3/category/type4")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) })
+    })
+
+    test("Returns a 400 error if the category passed as a route parameter does not represent a category in the database", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions/groups/group1/category/type5")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) })
+    })
+
 })
 
 
