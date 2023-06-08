@@ -87,7 +87,7 @@ export const validateValueType = (attribute) => {
                 //not a number after parsing
                 const amountRegex = /^(?:(?:\+|-)?(?:\d+(?:[,.]\d*)?|(?:[,.]\d+)))?(?:[eE][+-]?\d+)?$/;
                 if (!amountRegex.test(value)) return validationFail("cannot parse as floating value");
-                if(isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
+                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
             }
                 break;
 
@@ -138,3 +138,9 @@ export const validateValueTypes = (attributes) => {
 
 export const resError = (res, code, msg) => res.status(code).json({ error: msg });
 export const resData = (res, data) => res.status(200).json({ data: data, refreshedTokenMessage: res.locals.refreshedTokenMessage });
+
+export const removeDuplicates = (array) => {
+    let uniqueKeys = {}
+    for (const value of array) uniqueKeys[value] = true;
+    return Object.keys(uniqueKeys);
+}
