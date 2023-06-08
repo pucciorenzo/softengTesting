@@ -8,7 +8,6 @@ import "jest-extended"
 import { User, Group } from '../models/User';
 import jwt from 'jsonwebtoken';
 
-
 dotenv.config();
 
 beforeAll(async () => {
@@ -70,7 +69,7 @@ describe("createCategory", () => {
             .post("/api/categories")
             .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
             .send({ type: "type3", color: "color3" });
-      //console.log(JSON.stringify(response, null, 2));
+        //console.log(JSON.stringify(response, null, 2));
 
         expect(response.status).toEqual(200);
         expect(response.body.data).toEqual(
@@ -79,635 +78,957 @@ describe("createCategory", () => {
                 color: "color3"
             }
         )
+    })
 
+    test('Returns a 400 error if the type of category passed in the request body represents an already existing category in the database', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type1", color: "color3" });
+        //console.log(response);
+
+        const mockErrorMessage = expect.any(String);
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: mockErrorMessage });
+    })
+
+    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "", color: "color3" });
+        //console.log(response);
+
+        const mockErrorMessage = expect.any(String);
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: mockErrorMessage });
+    })
+
+    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type3" });
+        //console.log(response);
+
+        const mockErrorMessage = expect.any(String);
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: mockErrorMessage });
+    })
+
+    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/categories")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type3" });
+        //console.log(response);
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) });
+    })
+
+});
+
+describe("updateCategory", () => {
+
+    //router.patch("/categories/:type", updateCategory)
+
+    test('should update a category with both new type and new color', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type1")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "newType1", color: "newColor3" });
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            {
+                message: expect.any(String),
+                count: 3
+            }
+        )
 
     });
 
-    test('should create a new category successfully', async () => {
+    test('should update a category with new color', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type1")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type1", color: "newColor3" });
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            {
+                message: expect.any(String),
+                count: 0 //?
+            }
+        )
 
     });
 
-    describe("updateCategory", () => {
+    test('Returns a 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
 
-        //router.patch("/categories/:type", updateCategory)
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
 
-        test('should update a category with both type and color', async () => {
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                ]
-            )
+        const response = await request(app)
+            .patch("/api/categories/type1")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "newType1", color: "newColor3" });
+        //console.log(JSON.stringify(response, null, 2));
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user1", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user1", type: "type0", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type1", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type1", amount: 500, date: Date.now() },
-                ]
-            )
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) });
 
-            const response = await request(app)
-                .patch("/api/categories/type1")
-                .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
-                .send({ type: "newType1", color: "newColor3" });
-          //console.log(JSON.stringify(response, null, 2));
+    });
 
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                {
-                    message: expect.any(String),
-                    count: 3
-                }
-            )
 
-        });
+    test('Returns a 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type1")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type0", color: "newColor3" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type3")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type0", color: "newColor3" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type3")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type0", color: "" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type0", amount: 300, date: Date.now() },
+                { username: "user1", type: "type1", amount: 400, date: Date.now() },
+                { username: "user1", type: "type1", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .patch("/api/categories/type3")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+})
+
+describe("deleteCategory", () => {
+
+    //router.delete("/categories", deleteCategory)
+
+    test('should delete all categories except oldest (N==T)', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .delete("/api/categories")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1",] });
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            {
+                message: expect.any(String),
+                count: 4
+            }
+        )
+
+    });
+
+})
+
+describe("getCategories", () => {
+
+    //router.get("/categories", getCategories)
+
+    test('should get all categories (user)', async () => {
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/categories")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color1" },
+                { type: "type3", color: "color1" },
+                { type: "type4", color: "color1" },
+            ]
+        )
+
+    });
+})
+
+describe("createTransaction", () => {
+
+    //router.post("/users/:username/transactions", createTransaction)
+
+    test('should create a transaction', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "500.678", type: "type0" });
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            { username: "user1", type: "type0", amount: 500.678, date: expect.any(String) },//?
+        )
+
+    });
+})
+
+describe("getAllTransactions", () => {
+
+    //router.get("/transactions", getAllTransactions)
+
+    test("should retreive all user's transactions", async () => {
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user4", type: "type3", amount: 400, date: Date.now() },
+                { username: "user5", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/transactions")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
+                { username: "user2", type: "type1", amount: 200, date: expect.any(String), color: "color1" },//?
+                { username: "user3", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
+                { username: "user4", type: "type3", amount: 400, date: expect.any(String), color: "color3" },//?
+                { username: "user5", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
+            ]
+        )
     })
 });
 
-    describe("deleteCategory", () => {
+describe("getTransactionsByUser", () => {
+    test("should retreive the user's transactions(user route)", async () => {
 
-        //router.delete("/categories", deleteCategory)
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
 
-        test('should delete all categories except oldest (N==T)', async () => {
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color1" },
-                    { type: "type3", color: "color1" },
-                    { type: "type4", color: "color1" },
-                ]
-            )
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user1", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user1", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 500, date: Date.now() },
-                ]
-            )
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user4", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
 
-            const response = await request(app)
-                .delete("/api/categories")
-                .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
-                .send({ types: ["type4", "type4", "type0", "type2", "type3", "type1",] });
-            //console.log(JSON.stringify(response, null, 2));
+        const response = await request(app)
+            .get("/api/users/user1/transactions/")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
 
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
+                { username: "user1", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
+                { username: "user1", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
+            ]
+        )
+    })
+
+
+})
+
+
+
+describe("getTransactionsByUserByCategory", () => {
+    test("should retreive the user's transactions belonging to a category(user route)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user4", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user1", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .get("/api/users/user1/transactions/category/type2")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
+                { username: "user1", type: "type2", amount: 200, date: expect.any(String), color: "color2" },//?
+            ]
+        )
+    })
+
+})
+
+
+
+
+describe("getTransactionsByGroup", () => {
+
+    //router.get("/groups/:name/transactions", getTransactionsByGroup) user
+    //router.get("/transactions/groups/:name", getTransactionsByGroup) admin
+
+
+    test("should retreive the all group members transactions (user route)", async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await Group.insertMany(
+            [
                 {
-                    message: expect.any(String),
-                    count: 4
-                }
-            )
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
 
-        });
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-    })
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
 
-    describe("getCategories", () => {
+        const response = await request(app)
+            .get("/api/groups/group2/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
 
-        //router.get("/categories", getCategories)
-
-        test('should get all categories (user)', async () => {
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color1" },
-                    { type: "type3", color: "color1" },
-                    { type: "type4", color: "color1" },
-                ]
-            )
-
-            const response = await request(app)
-                .get("/api/categories")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-            //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color1" },
-                    { type: "type3", color: "color1" },
-                    { type: "type4", color: "color1" },
-                ]
-            )
-
-        });
-    })
-
-    describe("createTransaction", () => {
-
-        //router.post("/users/:username/transactions", createTransaction)
-
-        test('should create a transaction', async () => {
-
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
-
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
-
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user1", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user1", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 500, date: Date.now() },
-                ]
-            )
-
-            const response = await request(app)
-                .post("/api/users/user1/transactions")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
-                .send({ username: "user1", amount: "500.678", type: "type0" });
-            //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                { username: "user1", type: "type0", amount: 500.678, date: expect.any(String) },//?
-            )
-
-        });
-    })
-
-    describe("getAllTransactions", () => {
-
-        //router.get("/transactions", getAllTransactions)
-
-        test("should retreive all user's transactions", async () => {
-
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
-
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user3", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user4", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user5", type: "type4", amount: 500, date: Date.now() },
-                ]
-            )
-
-            const response = await request(app)
-                .get("/api/transactions")
-                .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
-            //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
-                    { username: "user2", type: "type1", amount: 200, date: expect.any(String), color: "color1" },//?
-                    { username: "user3", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
-                    { username: "user4", type: "type3", amount: 400, date: expect.any(String), color: "color3" },//?
-                    { username: "user5", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
-                ]
-            )
-        })
-    });
-
-    describe("getTransactionsByUser", () => {
-        test("should retreive the user's transactions(user route)", async () => {
-
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
-
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
-
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user1", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user4", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 500, date: Date.now() },
-                ]
-            )
-
-            const response = await request(app)
-                .get("/api/users/user1/transactions/")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-          //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
-                    { username: "user1", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
-                    { username: "user1", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
-                ]
-            )
-        })
-
-
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
+                { username: "user3", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
+                { username: "user1", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
+            ]
+        )
     })
 
 
+    test("Returns a 400 error if the group name passed as a route parameter does not represent a group in the database        ", async () => {
 
-    describe("getTransactionsByUserByCategory", () => {
-        test("should retreive the user's transactions belonging to a category(user route)", async () => {
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
 
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
 
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user1", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user4", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 500, date: Date.now() },
-                    { username: "user1", type: "type2", amount: 200, date: Date.now() },
-                ]
-            )
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 200, date: Date.now() },
+                { username: "user3", type: "type2", amount: 300, date: Date.now() },
+                { username: "user2", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+            ]
+        )
 
-            const response = await request(app)
-                .get("/api/users/user1/transactions/category/type2")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-            //console.log(JSON.stringify(response, null, 2));
+        const response = await request(app)
+            .get("/api/groups/group3/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        //console.log(JSON.stringify(response, null, 2));
 
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { username: "user1", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
-                    { username: "user1", type: "type2", amount: 200, date: expect.any(String), color: "color2" },//?
-                ]
-            )
-        })
-
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: "group does not exist" })
     })
 
+})
 
 
 
-    describe("getTransactionsByGroup", () => {
 
-        //router.get("/groups/:name/transactions", getTransactionsByGroup) user
-        //router.get("/transactions/groups/:name", getTransactionsByGroup) admin
+describe("getTransactionsByGroupByCategory", () => {
 
+    //router.get("/groups/:name/transactions/category/:category", getTransactionsByGroupByCategory) user
+    //router.get("/transactions/groups/:name/category/:category", getTransactionsByGroupByCategory) admin
 
-        test("should retreive the all group members transactions (user route)", async () => {
+    test("should retreive all group members transactions belonging to a category(user route)", async () => {
 
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
 
-            await Group.insertMany(
-                [
-                    {
-                        name: "group1",
-                        members: [
-                            await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                    {
-                        name: "group2",
-                        members: [
-                            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                ]
-            );
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
 
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 200, date: Date.now() },
-                    { username: "user3", type: "type2", amount: 300, date: Date.now() },
-                    { username: "user2", type: "type3", amount: 400, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 500, date: Date.now() },
-                    { username: "user4", type: "type2", amount: 200, date: Date.now() },
-                ]
-            )
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
 
-            const response = await request(app)
-                .get("/api/groups/group2/transactions")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-            //console.log(JSON.stringify(response, null, 2));
+        const response = await request(app)
+            .get("/api/groups/group2/transactions/category/type4")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
+        // console.log(JSON.stringify(response, null, 2));
 
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: expect.any(String), color: "color0" },//?
-                    { username: "user3", type: "type2", amount: 300, date: expect.any(String), color: "color2" },//?
-                    { username: "user1", type: "type4", amount: 500, date: expect.any(String), color: "color4" },//?
-                ]
-            )
-        })
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toEqual(
+            [
+                { username: "user1", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
+                { username: "user3", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
+            ]
+        )
     })
+})
 
 
 
+describe("deleteTransaction", () => {
 
-    describe("getTransactionsByGroupByCategory", () => {
+    //router.delete("/users/:username/transactions", deleteTransaction)
 
-        //router.get("/groups/:name/transactions/category/:category", getTransactionsByGroupByCategory) user
-        //router.get("/transactions/groups/:name/category/:category", getTransactionsByGroupByCategory) admin
+    test("should delete a transaction", async () => {
 
-        test("should retreive all group members transactions belonging to a category(user route)", async () => {
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
 
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
 
-            await Group.insertMany(
-                [
-                    {
-                        name: "group1",
-                        members: [
-                            await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                    {
-                        name: "group2",
-                        members: [
-                            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                ]
-            );
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 100, date: Date.now() },
-                    { username: "user3", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user2", type: "type3", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 400, date: Date.now() },
-                    { username: "user4", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user3", type: "type4", amount: 400, date: Date.now() },
-                ]
-            )
+        const response = await request(app)
+            .delete("/api/users/user1/transactions/")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ _id: (await transactions.find({}))[4]._id });
+        //console.log(JSON.stringify(response, null, 2));
 
-            const response = await request(app)
-                .get("/api/groups/group2/transactions/category/type4")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
-            //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toEqual(
-                [
-                    { username: "user1", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
-                    { username: "user3", type: "type4", amount: 400, date: expect.any(String), color: "color4" },//?
-                ]
-            )
-        })
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toHaveProperty("message");
     })
+})
 
 
 
-    describe("deleteTransaction", () => {
+describe("deleteTransactions", () => {
 
-        //router.delete("/users/:username/transactions", deleteTransaction)
+    //router.delete("/transactions", deleteTransactions) admin
 
-        test("should delete a transaction", async () => {
 
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
+    test("should delete all transactions", async () => {
 
-            await Group.insertMany(
-                [
-                    {
-                        name: "group1",
-                        members: [
-                            await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                    {
-                        name: "group2",
-                        members: [
-                            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                ]
-            );
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
 
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
+        await Group.insertMany(
+            [
+                {
+                    name: "group1",
+                    members: [
+                        await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+                {
+                    name: "group2",
+                    members: [
+                        await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
+                        await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
+                    ]
+                },
+            ]
+        );
 
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 100, date: Date.now() },
-                    { username: "user3", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user2", type: "type3", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 400, date: Date.now() },
-                    { username: "user4", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user3", type: "type4", amount: 400, date: Date.now() },
-                ]
-            )
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
 
-            const response = await request(app)
-                .delete("/api/users/user1/transactions/")
-                .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
-                .send({ _id: (await transactions.find({}))[4]._id });
-            //console.log(JSON.stringify(response, null, 2));
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user2", type: "type1", amount: 100, date: Date.now() },
+                { username: "user3", type: "type2", amount: 200, date: Date.now() },
+                { username: "user2", type: "type3", amount: 300, date: Date.now() },
+                { username: "user1", type: "type4", amount: 400, date: Date.now() },
+                { username: "user4", type: "type2", amount: 200, date: Date.now() },
+                { username: "user3", type: "type4", amount: 400, date: Date.now() },
+            ]
+        )
 
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toHaveProperty("message");
-        })
+        const transactionIds = (await (transactions.find({}))).map(t => t._id);
+
+        const response = await request(app)
+            .delete("/api/transactions/")
+            .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
+            .send({ _ids: transactionIds });
+        //console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(200);
+        expect(response.body.data).toHaveProperty("message");
+
     })
-
-
-
-    describe("deleteTransactions", () => {
-
-        //router.delete("/transactions", deleteTransactions) admin
-
-
-        test("should delete all transactions", async () => {
-
-            await User.insertMany(
-                [
-                    { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
-                    { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
-                    { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
-                    { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
-                    { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
-                    { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
-                    { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
-                ]
-            );
-
-            await Group.insertMany(
-                [
-                    {
-                        name: "group1",
-                        members: [
-                            await User.findOne({ username: "user0" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user2" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                    {
-                        name: "group2",
-                        members: [
-                            await User.findOne({ username: "user1" }).then(u => { return { email: u.email, user: u.id } }),
-                            await User.findOne({ username: "user3" }).then(u => { return { email: u.email, user: u.id } }),
-                        ]
-                    },
-                ]
-            );
-
-            await categories.insertMany(
-                [
-                    { type: "type0", color: "color0" },
-                    { type: "type1", color: "color1" },
-                    { type: "type2", color: "color2" },
-                    { type: "type3", color: "color3" },
-                    { type: "type4", color: "color4" },
-                ]
-            )
-
-            await transactions.insertMany(
-                [
-                    { username: "user1", type: "type0", amount: 100, date: Date.now() },
-                    { username: "user2", type: "type1", amount: 100, date: Date.now() },
-                    { username: "user3", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user2", type: "type3", amount: 300, date: Date.now() },
-                    { username: "user1", type: "type4", amount: 400, date: Date.now() },
-                    { username: "user4", type: "type2", amount: 200, date: Date.now() },
-                    { username: "user3", type: "type4", amount: 400, date: Date.now() },
-                ]
-            )
-
-            const transactionIds = (await (transactions.find({}))).map(t => t._id);
-
-            const response = await request(app)
-                .delete("/api/transactions/")
-                .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
-                .send({ _ids: transactionIds });
-            //console.log(JSON.stringify(response, null, 2));
-
-            expect(response.status).toEqual(200);
-            expect(response.body.data).toHaveProperty("message");
-
-        })
-    })
+})
