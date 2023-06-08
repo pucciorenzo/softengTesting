@@ -203,19 +203,37 @@ Returns a 401 error if called by an authenticated user who is neither part of th
 export const getGroup = async (req, res) => {
   try {
 
-    //check group exists
-    let group = await Group.findOne({ name: req.params.name });
-    if (!group) return resError(res, 400, "group does not exist");
+    let group, memberEmails;
 
-    //get member emails
-    const memberEmails = group.members.map(m => m.email);
 
-    //authorize
+
+    //authenticate admin
     const auth = verifyAuth(req, res, { authType: "Admin" });
-    if (!auth.flag) {
+    if (auth.flag) {
+
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
+
+      //get member emails
+      memberEmails = group.members.map(m => m.email);
+
+    }
+    //authenticate user, check group first
+    else if (!auth.flag) {
+
+      //check group exists
+      group = await Group.findOne({ name: req.params.name });
+      if (!group) return resError(res, 400, "group does not exist");
+
+      //get member emails
+      memberEmails = group.members.map(m => m.email);
+
       const auth = verifyAuth(req, res, { authType: "Group", emails: memberEmails });
+
       if (!auth.flag) return resError(res, 401, auth.cause);
     }
+
 
     //prepare and send data
     return resData(res, { group: { name: group.name, members: memberEmails.map(mE => { return { email: mE } }) } });
