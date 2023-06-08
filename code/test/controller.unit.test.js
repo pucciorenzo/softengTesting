@@ -859,7 +859,7 @@ describe("createTransaction", () => {
         await createTransaction(req, res);
 
         expect(res.status).toBeCalledWith(400);
-        expect(res.json).toBeCalledWith({ error: 'user does not exist' });
+        expect(res.json).toBeCalledWith({ error: "user passed as a route parameter does not exist" });
     });
 
     test('should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
@@ -890,7 +890,7 @@ describe("createTransaction", () => {
         await createTransaction(req, res);
 
         expect(res.status).toBeCalledWith(400);
-        expect(res.json).toBeCalledWith({ error: 'user passed as a route parameter does not exist' });
+        expect(res.json).toBeCalledWith({ error: "user passed in request body does not exist" });
     });
 
     test('should return 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
