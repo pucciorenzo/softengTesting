@@ -254,8 +254,8 @@ export const createTransaction = async (req, res) => {
         amount = parseFloat(amount);
 
         //check users exist
-        if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
         if (!(await User.findOne({ username: req.params.username }))) return resError(res, 400, "user passed as a route parameter does not exist");
+        if (!(await User.findOne({ username: username }))) return resError(res, 400, "user does not exist");
 
         //check if calling user adds his own transaction
         if (username != req.params.username) return resError(res, 400, "cannot add other user's transaction");

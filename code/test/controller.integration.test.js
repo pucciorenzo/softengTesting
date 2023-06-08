@@ -757,6 +757,366 @@ describe("createTransaction", () => {
         )
 
     });
+
+    test('Returns a 401 error if called by an authenticated user who is not the same user as the one in the route parameter (authType = User)', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user2/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "500.678", type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(401);
+        expect(response.body).toEqual({ error: expect.any(String) })
+
+    });
+
+    test('Returns a 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "-a500.678", type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                //{ username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "500.678", type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the username passed in the request body does not represent a user in the database', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user5", amount: "500.678", type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the username passed in the request body is not equal to the one passed as a route parameter', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user2", amount: "500.678", type: "type0" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the type of category passed in the request body does not represent a category in the database', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "500.678", type: "type5" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", amount: "500.678", type: "" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
+
+    test('Returns a 400 error if the request body does not contain all the necessary attributes', async () => {
+
+        await User.insertMany(
+            [
+                { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
+                { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
+                { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
+                { username: "user3", email: "user3@ezwallet.com", password: "password3", role: "Regular" },
+                { username: "user4", email: "user4@ezwallet.com", password: "password4", role: "Regular" },
+                { username: "admin1", email: "admin1@ezwallet.com", password: "password1", role: "Admin", refreshToken: adminTokenValid },
+                { username: "admin2", email: "admin2@ezwallet.com", password: "password2", role: "Admin" },
+            ]
+        );
+
+        await categories.insertMany(
+            [
+                { type: "type0", color: "color0" },
+                { type: "type1", color: "color1" },
+                { type: "type2", color: "color2" },
+                { type: "type3", color: "color3" },
+                { type: "type4", color: "color4" },
+            ]
+        )
+
+        await transactions.insertMany(
+            [
+                { username: "user1", type: "type0", amount: 100, date: Date.now() },
+                { username: "user1", type: "type1", amount: 200, date: Date.now() },
+                { username: "user1", type: "type2", amount: 300, date: Date.now() },
+                { username: "user1", type: "type3", amount: 400, date: Date.now() },
+                { username: "user1", type: "type4", amount: 500, date: Date.now() },
+            ]
+        )
+
+        const response = await request(app)
+            .post("/api/users/user1/transactions")
+            .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
+            .send({ username: "user1", type: "type1" });
+        console.log(JSON.stringify(response, null, 2));
+
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({ error: expect.any(String) });
+
+    });
 })
 
 describe("getAllTransactions", () => {
