@@ -54,6 +54,32 @@ export const validateValueType = (attribute) => {
                 }
                 break;
 
+            case 'amount':
+            case 'number':
+            case 'float': {
+                //if string
+                //invalid string
+                if (typeof value == 'string') {
+                    let validation = validateValueType(createValueTypeObject(value, 'string'));
+                    if (!validation.flag) return validationFail(validation.cause);
+                }
+                //not a number after parsing
+                const amountRegex = /^(?:(?:\+|-)?(?:\d+(?:[,.]\d*)?|(?:[,.]\d+)))?(?:[eE][+-]?\d+)?$/;
+                if (!amountRegex.test(value)) return validationFail("cannot parse as floating value");
+                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
+            }
+                break;
+
+            case 'email':
+                {
+                    //invalid string
+                    let validation = validateValueType(createValueTypeObject(value, 'string'));
+                    if (!validation.flag) return validationFail("at least one: " + validation.cause);
+                    //incorrect format or invalid characters
+                    if (!validator.isEmail(value)) return validationFail("invalid email format");
+                }
+                break;
+
             case 'emailArray':
                 {
                     const array = value;
@@ -78,23 +104,6 @@ export const validateValueType = (attribute) => {
                         exists[value] = true;
                         */
                     }
-                }
-                break;
-
-            case 'amount':
-            case 'number':
-            case 'float': {
-                //not a number after parsing
-                const amountRegex = /^(?:(?:\+|-)?(?:\d+(?:[,.]\d*)?|(?:[,.]\d+)))?(?:[eE][+-]?\d+)?$/;
-                if (!amountRegex.test(value)) return validationFail("cannot parse as floating value");
-                if (isNaN(parseFloat(value))) return validationFail("cannot parse as floating value");
-            }
-                break;
-
-            case 'email':
-                {
-                    //incorrect format or invalid characters
-                    if (!validator.isEmail(value)) return validationFail("invalid email format");
                 }
                 break;
 
