@@ -70,14 +70,7 @@ describe("handleDateFilterParams", () => {
                 //date: "2023-01-01",
             }
         }
-
-        /* for all error thrown
-        const filter = () =>handleDateFilterParams(req);
-         expect(filter).toThrow(expect.any(String))
-        */
         const filter = handleDateFilterParams(req);
-        //console.log(JSON.stringify(filter, null, 2));
-
         expect(filter).toEqual({
             date: {
                 $gte: new Date(req.query.from + "T00:00:00.000Z"),
@@ -85,6 +78,134 @@ describe("handleDateFilterParams", () => {
             }
         })
     });
+
+    test('should return correct filter using from parameters', () => {
+        const req = {
+            query: {
+                from: "2023-01-01",
+                //upTo: "2033-05-31",
+                //date: "2023-01-01",
+            }
+        }
+        const filter = handleDateFilterParams(req);
+        expect(filter).toEqual({
+            date: {
+                $gte: new Date(req.query.from + "T00:00:00.000Z"),
+                //$lte: new Date(req.query.upTo + "T23:59:59.999Z")
+            }
+        })
+    });
+    test('should return correct filter using upTo parameters', () => {
+        const req = {
+            query: {
+                //from: "2023-01-01",
+                upTo: "2033-05-31",
+                //date: "2023-01-01",
+            }
+        }
+        const filter = handleDateFilterParams(req);
+        expect(filter).toEqual({
+            date: {
+                //$gte: new Date(req.query.from + "T00:00:00.000Z"),
+                $lte: new Date(req.query.upTo + "T23:59:59.999Z")
+            }
+        })
+    });
+    
+
+    test('should return correct filter using date parameters', () => {
+        const req = {
+            query: {
+                //from: "2023-01-01",
+                //upTo: "2033-05-31",
+                date: "2023-01-01",
+            }
+        }
+        const filter = handleDateFilterParams(req);
+        expect(filter).toEqual({
+            date: {
+                $gte: new Date(req.query.date + "T00:00:00.000Z"),
+                $lte: new Date(req.query.date + "T23:59:59.999Z")
+            }
+        })
+    });
+
+    test('should return nothing since no query defined', () => {
+        const req = {
+            query: {
+            }
+        }
+        const filter = handleDateFilterParams(req);
+        expect(filter).toEqual({})
+    });
+
+    test('should throw error if data is present with the two other parameters (from)', () => {
+        const req = {
+            query: {
+                from: "2023-01-01",
+                //upTo: "2033-05-31",
+                date: "2023-01-01"
+            }
+        }
+        const filter = () => handleDateFilterParams(req);
+        expect(filter).toThrow("Cannot include date parameter with from or upTo parameters.")
+    });
+
+    test('should throw error if data is present with the two other parameters (upTo)', () => {
+        const req = {
+            query: {
+                //from: "2023-01-01",
+                upTo: "2033-05-31",
+                date: "2023-01-01"
+            }
+        }
+
+        /* for all error thrown
+        const filter = () =>handleDateFilterParams(req);
+         expect(filter).toThrow(expect.any(String))
+        */
+        const filter = () => handleDateFilterParams(req);
+        //console.log(JSON.stringify(filter, null, 2));
+
+        expect(filter).toThrow("Cannot include date parameter with from or upTo parameters.")
+    });
+
+    test('should throw error invalid data parameter format', () => {
+        const req = {
+            query: {
+                //from: "2023-01-01",
+                //upTo: "2033-05-31",
+                date: "2023/01/01"
+            }
+        }
+        const filter = () => handleDateFilterParams(req);
+        expect(filter).toThrow("date : Invalid date format. YYYY-MM-DD format expected.")
+    });
+
+    test('should throw error invalid from parameter format', () => {
+        const req = {
+            query: {
+                from: "2023/01/01",
+                upTo: "2033-05-31",
+                //date: "2023/01/01"
+            }
+        }
+        const filter = () => handleDateFilterParams(req);
+        expect(filter).toThrow("from : Invalid date format. YYYY-MM-DD format expected.")
+    });
+
+    test('should throw error invalid upTo parameter format', () => {
+        const req = {
+            query: {
+                from: "2023-01-01",
+                upTo: "2033/05/31",
+                //date: "2023/01/01"
+            }
+        }
+        const filter = () => handleDateFilterParams(req);
+        expect(filter).toThrow("upTo : Invalid date format. YYYY-MM-DD format expected.")
+    });
+
 })
 
 
@@ -141,19 +262,75 @@ describe("handleAmountFilterParams", () => {
                 max: "500.678"
             }
         }
-
-        /* for all error thrown
-        const filter = () =>handleDateFilterParams(req);
-         expect(filter).toThrow(expect.any(String))
-        */
         const filter = handleAmountFilterParams(req);
-        //console.log(JSON.stringify(filter, null, 2));
-
         expect(filter).toEqual({
             amount: {
                 $gte: 100.234,
                 $lte: 500.678
             }
         })
+    });
+
+    test('should return correct filter using min queries', () => {
+        const req = {
+            query: {
+                min: "100.234",
+                //max: "500.678"
+            }
+        }
+        const filter = handleAmountFilterParams(req);
+        expect(filter).toEqual({
+            amount: {
+                $gte: 100.234,
+                //$lte: 500.678
+            }
+        })
+    });
+
+    test('should return correct filter using max queries', () => {
+        const req = {
+            query: {
+                //min: "100.234",
+                max: "500.678"
+            }
+        }
+        const filter = handleAmountFilterParams(req);
+        expect(filter).toEqual({
+            amount: {
+                //$gte: 100.234,
+                $lte: 500.678
+            }
+        })
+    });
+
+    test('should throw an error for invalid min (since not numerical)', () => {
+        const req = {
+            query: {
+                min: "abc",
+                max: "500.678"
+            }
+        }
+        const filter = () => handleAmountFilterParams(req);
+        expect(filter).toThrow("Invalid min. Expected a numerical value.")
+    });
+
+    test('should throw an error for invalid max (since not numerical)', () => {
+        const req = {
+            query: {
+                min: "100.234",
+                max: "abc"
+            }
+        }
+        const filter = () => handleAmountFilterParams(req);
+        expect(filter).toThrow("Invalid max. Expected a numerical value.")
+    });
+
+    test('should return nothing since min and max queries not defined', () => {
+        const req = {
+            query: {
+            }
+        }
+        const filter = handleAmountFilterParams(req);
+        expect(filter).toEqual({})
     });
 })
