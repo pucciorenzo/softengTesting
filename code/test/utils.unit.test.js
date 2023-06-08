@@ -293,7 +293,7 @@ describe("verifyAuth", () => {
     jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -337,7 +337,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -382,7 +382,7 @@ describe("verifyAuth", () => {
     jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -426,7 +426,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -503,7 +503,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -542,7 +542,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -660,7 +660,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET");
     //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -700,7 +700,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
     //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -739,7 +739,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
     //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });
@@ -778,7 +778,7 @@ describe("verifyAuth", () => {
     //jwt.sign.mockReturnValueOnce(mockValidToken);
 
     const result = verifyAuth(mockReq, mockRes, mockInfo);
-    console.log(JSON.stringify({ result, mockRes }, null, 2));
+   //console.log(JSON.stringify({ result, mockRes }, null, 2));
 
     //expect(jwt.verify).toHaveBeenCalledWith(mockInvalidToken, "EZWALLET");
     //expect(jwt.verify).toHaveBeenCalledWith(mockValidToken, "EZWALLET", { ignoreExpiration: true });

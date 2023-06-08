@@ -93,7 +93,7 @@ describe("getUsers", () => {
       .get("/api/users")
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`]);
 
-    //console.log(JSON.stringify(await User.find({}))); console.log(JSON.stringify(response, null, 2));
+    //console.log(JSON.stringify(await User.find({})));//console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.body.data).toHaveLength(usersArray.length);
 
@@ -118,7 +118,7 @@ describe("getUser", () => {
       .get("/api/users/user1")
       .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`]);
 
-    // console.log(JSON.stringify(await User.find({}))); console.log(JSON.stringify(response, null, 2));
+    ////console.log(JSON.stringify(await User.find({})));//console.log(JSON.stringify(response, null, 2));
     expect(response.status).toEqual(200);
     expect(response.body.data).toEqual(expect.objectContaining({
       username: "user1",

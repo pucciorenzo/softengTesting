@@ -7,9 +7,9 @@
   "scripts": {
     "start": "npx nodemon server.js",
     "test": "jest",
-    "test:coverage": "jest --coverage --colors",
-    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors auth.unit.test.js controller.unit.test.js users.unit.test.js utils.unit.test.js",
-    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration --colors auth.integration.test.js controller.integration.test.js users.integration.test.js utils.integration.test.js"
+    "test:coverage": "jest --coverage --colors --runInBand",
+    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors auth.unit.test.js controller.unit.test.js users.unit.test.js utils.unit.test.js --runInBand",
+    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration --colors auth.integration.test.js controller.integration.test.js users.integration.test.js utils.integration.test.js --runInBand"
   },
   "keywords": [],
   "author": "",

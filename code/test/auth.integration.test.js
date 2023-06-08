@@ -96,7 +96,7 @@ describe('register', () => {
     const response = await request(app)
       .post("/api/register").send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
   });
@@ -165,7 +165,7 @@ describe('register', () => {
     const response = await request(app)
       .post("/api/register").send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
   });
@@ -213,7 +213,7 @@ describe("registerAdmin", () => {
     const response = await request(app)
       .post("/api/admin")
       .send(body);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
@@ -236,7 +236,7 @@ describe("registerAdmin", () => {
     const response = await request(app)
       .post("/api/admin")
       .send(body);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
@@ -259,7 +259,7 @@ describe("registerAdmin", () => {
     const response = await request(app)
       .post("/api/admin")
       .send(body);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
@@ -282,7 +282,7 @@ describe("registerAdmin", () => {
     const response = await request(app)
       .post("/api/admin")
       .send(body);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
@@ -305,7 +305,7 @@ describe("registerAdmin", () => {
     const response = await request(app)
       .post("/api/admin")
       .send(body);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
@@ -365,7 +365,7 @@ describe('login', () => {
       post("/api/login")
       .send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
 
     expect(response.body).toHaveProperty("error");
@@ -389,7 +389,7 @@ describe('login', () => {
       post("/api/login")
       .send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
 
     expect(response.body).toHaveProperty("error");
@@ -414,7 +414,7 @@ describe('login', () => {
       post("/api/login")
       .send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
 
     expect(response.body).toHaveProperty("error");
@@ -438,7 +438,7 @@ describe('login', () => {
       post("/api/login")
       .send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
 
     expect(response.body).toHaveProperty("error");
@@ -461,7 +461,7 @@ describe('login', () => {
       post("/api/login")
       .send(body);
 
-    console.log(response);
+   //console.log(response);
     expect(response.status).toEqual(400);
 
     expect(response.body).toHaveProperty("error");
@@ -509,7 +509,7 @@ describe('logout', () => {
     const response = await request(app)
       .get("/api/logout")
       .set('Cookie', ["accessToken=validAccessToken;refreshToken=InvalidRefreshToken"]);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -528,7 +528,7 @@ describe('logout', () => {
     const response = await request(app)
       .get("/api/logout")
       .set('Cookie', ["accessToken=validAccessToken"]);
-    console.log(response);
+   //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");

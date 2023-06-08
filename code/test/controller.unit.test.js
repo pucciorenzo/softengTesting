@@ -2374,7 +2374,7 @@ describe("getTransactionsByGroupByCategory", () => {
         }
         const mockRes = {
             status: jest.fn().mockReturnThis(),
-            json: jest.fn(),//.mockImplementationOnce(a => console.log(a)),
+            json: jest.fn(),//.mockImplementationOnce(a =>//console.log(a)),
             locals: {
             }
         }
