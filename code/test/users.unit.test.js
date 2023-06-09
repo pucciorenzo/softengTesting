@@ -1072,7 +1072,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("should return a 401 error if called by a user who is not authenticated (authType = Simple)  ", async () => {
 
     //mock variables
     const mockName = "group1";
