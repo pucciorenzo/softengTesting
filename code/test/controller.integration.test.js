@@ -1129,7 +1129,7 @@ describe("getAllTransactions", () => {
 
     //router.get("/transactions", getAllTransactions)
 
-    test("should retreive all user's transactions", async () => {
+    test("should retrieve all user's transactions", async () => {
 
         await categories.insertMany(
             [
@@ -1203,7 +1203,7 @@ describe("getAllTransactions", () => {
 
 describe("getTransactionsByUser", () => {
 
-    test("should retreive the user's transactions(admin route)", async () => {
+    test("should retrieve the user's transactions(admin route)", async () => {
 
         await User.insertMany(
             [
@@ -1294,7 +1294,7 @@ describe("getTransactionsByUser", () => {
         expect(response.body).toEqual({ error: expect.any(String) });
     })
 
-    test("should retreive the user's transactions(user route) with from and upto", async () => {
+    test("should retrieve the user's transactions(user route) with from and upto", async () => {
 
         await User.insertMany(
             [
@@ -1434,7 +1434,7 @@ describe("getTransactionsByUser", () => {
 
 
 describe("getTransactionsByUserByCategory", () => {
-    test("should retreive the user's transactions belonging to a category(user route)", async () => {
+    test("should retrieve the user's transactions belonging to a category(user route)", async () => {
 
         await User.insertMany(
             [
@@ -1527,7 +1527,7 @@ describe("getTransactionsByUserByCategory", () => {
         expect(response.body).toEqual({ error: expect.any(String) });
     })
 
-    test("should retreive the user's transactions belonging to a category(admin route)", async () => {
+    test("should retrieve the user's transactions belonging to a category(admin route)", async () => {
 
         await User.insertMany(
             [
@@ -1721,7 +1721,7 @@ describe("getTransactionsByGroup", () => {
     //router.get("/transactions/groups/:name", getTransactionsByGroup) admin
 
 
-    test("should retreive the all group members transactions (user route)", async () => {
+    test("should retrieve the all group members transactions (user route)", async () => {
 
         await User.insertMany(
             [
@@ -1854,7 +1854,7 @@ describe("getTransactionsByGroup", () => {
     })
 
 
-    test("should retreive the all group members transactions (admin route)", async () => {
+    test("should retrieve the all group members transactions (admin route)", async () => {
 
         await User.insertMany(
             [
@@ -2122,7 +2122,7 @@ describe("getTransactionsByGroupByCategory", () => {
     //router.get("/groups/:name/transactions/category/:category", getTransactionsByGroupByCategory) user
     //router.get("/transactions/groups/:name/category/:category", getTransactionsByGroupByCategory) admin
 
-    test("should retreive all group members transactions belonging to a category(user route)", async () => {
+    test("should retrieve all group members transactions belonging to a category(user route)", async () => {
 
         await User.insertMany(
             [
@@ -2255,7 +2255,7 @@ describe("getTransactionsByGroupByCategory", () => {
         expect(response.body).toEqual({ error: expect.any(String) })
     })
 
-    test("should retreive all group members transactions belonging to a category(admin route)", async () => {
+    test("should retrieve all group members transactions belonging to a category(admin route)", async () => {
 
         await User.insertMany(
             [

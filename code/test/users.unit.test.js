@@ -27,7 +27,7 @@ afterEach(() => {
 
 describe("getUsers", () => {
 
-  test("should retreive all users", async () => {
+  test("should retrieve all users", async () => {
 
     //mock variables
     const mockReq = {
@@ -135,7 +135,7 @@ describe("getUsers", () => {
 
 describe("getUser", () => {
 
-  test("should retreive user (user auth)", async () => {
+  test("should retrieve user (user auth)", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -173,7 +173,7 @@ describe("getUser", () => {
 
   })
 
-  test("should retreive user (admin auth)", async () => {
+  test("should retrieve user (admin auth)", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -1123,7 +1123,7 @@ describe("createGroup", () => {
 
 describe("getGroups", () => {
 
-  test("should retreive all groups", async () => {
+  test("should retrieve all groups", async () => {
 
     //mock variables
     const mockGroups = [
@@ -1244,7 +1244,7 @@ describe("getGroups", () => {
 
 describe("getGroup", () => {
 
-  test("should retreive the group (user auth)", async () => {
+  test("should retrieve the group (user auth)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1295,7 +1295,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should retreive the group (admin auth)", async () => {
+  test("should retrieve the group (admin auth)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -3646,7 +3646,7 @@ describe("deleteUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
-  test("should return a 400 error if the request body does not contain all the necessary atributes  ", async () => {
+  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
 
     //mock variables
     const mockEmail = "";

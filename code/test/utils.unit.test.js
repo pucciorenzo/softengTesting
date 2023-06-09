@@ -15,22 +15,22 @@ describe("handleDateFilterParams", () => {
     expect(result).toEqual({});
   });
 
-  test('should throw an error if `date` parameter is provided together with `from` parameter', () => {
+  test('should throw an error if date parameter is provided together with from parameter', () => {
     const req = { query: { date: '2023-05-01', from: '2023-04-30' } };
     expect(() => handleDateFilterParams(req)).toThrow('Cannot include date parameter with from or upTo parameters.');
   });
 
-  test('should throw an error if `date` parameter is provided together with `upTo` parameter', () => {
+  test('should throw an error if date parameter is provided together with upTo parameter', () => {
     const req = { query: { date: '2023-05-01', upTo: '2023-05-31' } };
     expect(() => handleDateFilterParams(req)).toThrow('Cannot include date parameter with from or upTo parameters.');
   });
 
-  test('should throw an error if `date` parameter has an invalid format', () => {
+  test('should throw an error if date parameter has an invalid format', () => {
     const req = { query: { date: '2023/05/01' } };
     expect(() => handleDateFilterParams(req)).toThrow('Invalid date format. YYYY-MM-DD format expected.');
   });
 
-  test('should handle `date` parameter correctly', () => {
+  test('should handle date parameter correctly', () => {
     const req = { query: { date: '2023-05-01' } };
     const result = handleDateFilterParams(req);
     expect(result).toEqual({
@@ -41,18 +41,18 @@ describe("handleDateFilterParams", () => {
     });
   });
 
-  test('should handle `from` parameter correctly', () => {
+  test('should handle from parameter correctly', () => {
     const req = { query: { from: '2023-04-30' } };
     const result = handleDateFilterParams(req);
     expect(result).toEqual({ date: { $gte: new Date('2023-04-30T00:00:00.000Z') } });
   });
 
-  test('should throw an error if `from` parameter has an invalid format', () => {
+  test('should throw an error if from parameter has an invalid format', () => {
     const req = { query: { from: '2023/05/01' } };
     expect(() => handleDateFilterParams(req)).toThrow('Invalid date format. YYYY-MM-DD format expected.');
   });
 
-  test('should handle `upTo` parameter correctly', () => {
+  test('should handle upTo parameter correctly', () => {
     const req = { query: { upTo: '2023-05-31' } };
     const result = handleDateFilterParams(req);
     expect(result).toEqual({
@@ -62,12 +62,12 @@ describe("handleDateFilterParams", () => {
     });
   });
 
-  test('should throw an error if `upTo` parameter has an invalid format', () => {
+  test('should throw an error if upTo parameter has an invalid format', () => {
     const req = { query: { upTo: '2023/05/01' } };
     expect(() => handleDateFilterParams(req)).toThrow('Invalid date format. YYYY-MM-DD format expected.');
   });
 
-  test('should handle both `from` and `upTo` parameters correctly', () => {
+  test('should handle both from and upTo parameters correctly', () => {
     const req = { query: { from: '2023-04-30', upTo: '2023-05-31' } };
     const result = handleDateFilterParams(req);
     expect(result).toEqual({
@@ -183,7 +183,7 @@ describe("verifyAuth", () => {
     expect(result).toEqual(mockResult);
   });
 
-  test('authType User, should authorize and refresh token (username match', () => {
+  test('authType User, should authorize and refresh token (username match)', () => {
 
     const mockReq = {
       cookies: {
@@ -261,7 +261,7 @@ describe("verifyAuth", () => {
     expect(result).toEqual(mockResult);
   });
 
-  test('authType Group, should authorize and refresh token (user in group email', () => {
+  test('authType Group, should authorize and refresh token (user in group email)', () => {
     const mockReq = {
       cookies: {
         accessToken: mockValidToken,
@@ -350,7 +350,7 @@ describe("verifyAuth", () => {
 
   });
 
-  test('authType Admin, should authorize and refresh token (user role is admin', () => {
+  test('authType Admin, should authorize and refresh token (user role is admin)', () => {
     const mockReq = {
       cookies: {
         accessToken: mockValidToken,
@@ -394,7 +394,7 @@ describe("verifyAuth", () => {
     expect(result).toEqual(mockResult);
   });
 
-  test('authType Admin, should not authorize(user role is not admin', () => {
+  test('authType Admin, should not authorize(user role is not admin)', () => {
     const mockReq = {
       cookies: {
         accessToken: mockValidToken,
@@ -803,46 +803,46 @@ describe("handleAmountFilterParams", () => {
     expect(result).toEqual({});
   });
 
-  test("should return the correct filter object when only 'min' is provided", () => {
+  test("should return the correct filter object when only min parameter is provided", () => {
     const req = { query: { min: "5" } };
     const result = handleAmountFilterParams(req);
     expect(result).toEqual({ amount: { $gte: 5 } });
   });
 
-  test("should return the correct filter object when only 'max' is provided", () => {
+  test("should return the correct filter object when only max parameter is provided", () => {
     const req = { query: { max: "10" } };
     const result = handleAmountFilterParams(req);
     expect(result).toEqual({ amount: { $lte: 10 } });
   });
 
-  test("should return the correct filter object when both 'min' and 'max' are provided", () => {
+  test("should return the correct filter object when both min and max parameters are provided", () => {
     const req = { query: { min: "15", max: "25" } };
     const result = handleAmountFilterParams(req);
     expect(result).toEqual({ amount: { $gte: 15, $lte: 25 } });
   });
 
-  test("should throw an error when 'min' value is not a number", () => {
+  test("should throw an error when min value is not a number", () => {
     const req = { query: { min: "abc" } };
     expect(() => {
       handleAmountFilterParams(req);
     }).toThrow("Invalid min. Expected a numerical value.");
   });
 
-  test("should throw an error when 'max' value is not a number", () => {
+  test("should throw an error when max value is not a number", () => {
     const req = { query: { max: "abc" } };
     expect(() => {
       handleAmountFilterParams(req);
     }).toThrow("Invalid max. Expected a numerical value.");
   });
 
-  test("should throw an error when 'min' value is not a number when both 'min' and 'max' are provided", () => {
+  test("should throw an error when min value is not a number when both min and max parameters are provided", () => {
     const req = { query: { min: "abc", max: "25" } };
     expect(() => {
       handleAmountFilterParams(req);
     }).toThrow("Invalid min. Expected a numerical value.");
   });
 
-  test("should throw an error when 'max' value is not a number when both 'min' and 'max' are provided", () => {
+  test("should throw an error when max value is not a number when both min and max parameter are provided", () => {
     const req = { query: { min: "15", max: "abc" } };
     expect(() => {
       handleAmountFilterParams(req);

@@ -632,7 +632,7 @@ describe("getCategories", () => {
         jest.clearAllMocks();
     });
 
-    test('should retreive all categories', async () => {
+    test('should retrieve all categories', async () => {
         const mockReq = {
             params: {
             },
@@ -1057,7 +1057,7 @@ describe("getAllTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test('should retreive all transactions', async () => {
+    test('should retrieve all transactions', async () => {
         const mockReq = {
             params: {
             },

@@ -147,7 +147,7 @@ describe("getUser", () => {
     expect(response.body).toHaveProperty('error');
   });
 
-  test("should retur a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)", async () => {
+  test("should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
