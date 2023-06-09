@@ -139,7 +139,7 @@ export const validateValueTypes = (attributes) => {
         return validationPass();
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         return { flag: false, cause: error.message };
     }
 }
