@@ -517,7 +517,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database", async () => {
+  test("should return a 400 error if the user who calls the API does not exist  ", async () => {
     const usersArray = [
       //{ username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -1346,7 +1346,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route) ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1400,7 +1400,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database ", async () => {
+  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route) ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -2334,7 +2334,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "user5@ezwallet.com" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2379,7 +2379,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "user5@ezwalletcom" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2424,7 +2424,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2470,7 +2470,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({});
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2515,7 +2515,7 @@ describe("deleteUser", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ email: "admin2@ezwallet.com" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2595,7 +2595,7 @@ describe("deleteGroup", () => {
       .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
       .send({ name: "group1" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(401);
     expect(response.body).toHaveProperty("error");
@@ -2633,7 +2633,7 @@ describe("deleteGroup", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ name: "group2" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2671,7 +2671,7 @@ describe("deleteGroup", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({ name: "" });
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");
@@ -2709,7 +2709,7 @@ describe("deleteGroup", () => {
       .set('Cookie', [`accessToken=${adminTokenValid};refreshToken=${adminTokenValid}`])
       .send({});
 
-   //console.log(response);
+    //console.log(response);
 
     expect(response.status).toEqual(400);
     expect(response.body).toHaveProperty("error");

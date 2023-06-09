@@ -1385,7 +1385,7 @@ describe("getTransactionsByUser", () => {
         expect(response.body).toEqual({ error: expect.any(String) })
     })
 
-    test("Returns a 400 error if the username passed as a route parameter does not represent a user in the database    ", async () => {
+    test("should return a 400 error if the username passed as a route parameter does not represent a user in the database    ", async () => {
 
         await User.insertMany(
             [
