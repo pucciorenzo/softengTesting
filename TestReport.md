@@ -33,7 +33,7 @@
 -->
 
 Approach : Bottom Up + Mixed  
-Units were developed in mostly bottom up approach, with basic implementations first so that api tests could be performed for the implemented functions as early as possible and a basic working system was already available in the early stages. Any visible problems during API test were also fixed. Then, date and amount filters capability were added later and tested again with API test. After which, exhaustive unit tests and integration tests were created to achieve 100% statement coverage for each type of test while also fixing and perfecting the codes in the process as test failures were encountered. Finally, a simple API test was performed for whole system.
+Units were developed using mostly a bottom-up approach, with basic implementations first so that API tests could be performed for the implemented functions as early as possible, and a basic working system was already available in the early stages. Any visible problems during API test were also fixed. Then, date and amount filters capability were added later and tested again with API test. After which, exhaustive unit tests and integration tests were created to achieve 100% statement coverage for each type of test while also fixing and perfecting the codes in the process as test failures were encountered. Finally, a simple API test was performed for the whole system.
 
 | Step | Type             | Sequence                                      | functions                                            |
 | ---- | ---------------- | --------------------------------------------- | ---------------------------------------------------- |
