@@ -25,19 +25,41 @@
      
 # Integration approach
 
+<!--
     <Write here the integration sequence you adopted, in general terms (top down, bottom up, mixed) and as sequence
     (ex: step1: unit A, step 2: unit A+B, step 3: unit A+B+C, etc)> 
     <Some steps may  correspond to unit testing (ex step1 in ex above)>
     <One step will  correspond to API testing, or testing unit route.js>
+-->
 
-    | Step | Sequence |
-    | ---- | -------- |
-    |      |          |
-    |      |          |
-    |      |          |
-    |      |          |
-    |      |          |
-    
+Approach : Bottom Up + Mixed  
+Units were developed in mostly bottom up approach, with basic implementations first so that api tests could be performed for the implemented functions as early as possible and a basic working system was already available in the early stages. Any visible problems during API test were also fixed. Then, date and amount filters capability were added later and tested again with API test. After which, exhaustive unit tests and integration tests were created to achieve 100% statement coverage for each type of test while also fixing and perfecting the codes in the process as test failures were encountered. Finally, a simple API test was performed for whole system.
+
+| Step | Type             | Sequence                                      | functions                                            |
+| ---- | ---------------- | --------------------------------------------- | ---------------------------------------------------- |
+| 1    | Implementation   | users.js                                      | all                                                  |
+| 2    | API test         | users.js                                      | all                                                  |
+| 3    | Implementation   | utils.js                                      | verifyAuth                                           |
+| 4    | Implementation   | controller.js                                 | all user functions                                   |
+| 5    | API test         | utils.js + controller.js                      | all user functions                                   |
+| 6    | Implementation   | users.js                                      | all user functions                                   |
+| 7    | API test         | utils.js + controller.js + users.js           | all user functions                                   |
+| 8    | Implementation   | users.js                                      | all remaining group functions                        |
+| 9    | API test         | users.js                                      | all functions                                        |
+| 10   | Implementation   | controller.js                                 | all group functions                                  |
+| 11   | API test         | controller.js                                 | all functions                                        |
+| 12   | Implementation   | utils.js                                      | handleDateParams, handleAmountParams                 |
+| 13   | Implementation   | controller.js                                 | getTransactionsByUser(integrate date,amount filters) |
+| 14   | API test         | utils.js + controller.js                      | getTransactionsByUser                                |
+| 15   | Unit test        | auth.js                                       | all functions                                        |
+| 16   | Unit test        | controller.js                                 | all functions                                        |
+| 17   | Unit test        | users.js                                      | all functions                                        |
+| 18   | Unit test        | utils.js                                      | all functions                                        |
+| 19   | Integration test | auth.js                                       | all functions                                        |
+| 20   | Integration test | controller.js                                 | all functions                                        |
+| 21   | Integration test | users.js                                      | all functions                                        |
+| 22   | Integration test | utils.js                                      | all functions                                        |
+| 23   | API test         | auth.js + controller.js + users.js + utils.js | all functions                                        |
 
 
 # Tests
