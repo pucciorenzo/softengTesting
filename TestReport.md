@@ -1,6 +1,6 @@
 # Test Report
 
-<The goal of this document is to explain how the application was tested, detailing how the test cases were defined and what they cover>
+In this document we explain how the application was tested, detailing how the test cases were defined and what they cover
 
 # Contents
 
@@ -32,7 +32,7 @@
     <One step will  correspond to API testing, or testing unit route.js>
 -->
 
-Approach : Bottom Up + Mixed  
+Followed approach : Bottom Up + Mixed  
 Units were developed using mostly a bottom-up approach, with basic implementations first so that API tests could be performed for the implemented functions as early as possible, and a basic working system was already available in the early stages. Any visible problems during API test were also fixed. Then, date and amount filters capability were added later and tested again with API test. After which, exhaustive unit tests and integration tests were created to achieve 100% statement coverage for each type of test while also fixing and perfecting the codes in the process as test failures were encountered. Finally, a simple API test was performed for the whole system.
 
 | Step | Type             | Sequence                                      | functions                                            |
@@ -64,7 +64,7 @@ Units were developed using mostly a bottom-up approach, with basic implementatio
 
 # Tests
 
-   <in the table below list the test cases defined For each test report the object tested, the test level (API, integration, unit) and the technique used to define the test case  (BB/ eq partitioning, BB/ boundary, WB/ statement coverage, etc)>   <split the table if needed>
+In the table below we list all the test cases, divided as in test files, and stating the name, the object tested, the test level and the technique used to define the test case  
 
 
 | Test case name                                                                                                                                                                                                                                                                           | Object(s) tested                 | Test level  | Technique used         |
@@ -540,7 +540,7 @@ Units were developed using mostly a bottom-up approach, with basic implementatio
 
 ## Coverage of FR
 
-<Report in the following table the coverage of  functional requirements (from official requirements) >
+In the following table we are reporting the coverage (which tests and the percentage) of each functional requirements.
 
 | Functional Requirements covered                                | Test(s) | Coverage(%) |
 | -------------------------------------------------------------- | ------- | ----------- |
