@@ -93,6 +93,12 @@ describe("validateValueType ", () => {
         expect(result).toEqual({ flag: false, cause: expect.any(String) });
     })
 
+    test('should reject invalid date value correct format', () => {
+        const result = validateValueType({ value: "2023-13-28", type: 'date' });
+       //console.log(result)
+        expect(result).toEqual({ flag: false, cause: expect.any(String) });
+    })
+
 })
 
 describe("validateValueTypes ", () => {

@@ -2419,6 +2419,7 @@ describe("removeFromGroup", () => {
     //mock implementations
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
     Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
+    User.findOne.mockResolvedValueOnce(mockUsers[0]);
     User.findOne.mockResolvedValueOnce(mockUsers[1]);
     User.findOne.mockResolvedValueOnce(mockUsers[2]);
     User.findOne.mockResolvedValueOnce(mockUsers[3]);
@@ -2434,6 +2435,7 @@ describe("removeFromGroup", () => {
     //tests
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
@@ -2533,6 +2535,7 @@ describe("removeFromGroup", () => {
     //mock implementations
     Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[0]);
     User.findOne.mockResolvedValueOnce(mockUsers[1]);
     User.findOne.mockResolvedValueOnce(mockUsers[2]);
     User.findOne.mockResolvedValueOnce(mockUsers[3]);
@@ -2548,6 +2551,7 @@ describe("removeFromGroup", () => {
     //tests
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
@@ -2625,6 +2629,7 @@ describe("removeFromGroup", () => {
     //mock implementations
     Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
+    User.findOne.mockResolvedValueOnce(mockUsers[0]);
     User.findOne.mockResolvedValueOnce(mockUsers[1]);
     User.findOne.mockResolvedValueOnce(mockUsers[2]);
     User.findOne.mockResolvedValueOnce(mockUsers[3]);
@@ -2640,6 +2645,7 @@ describe("removeFromGroup", () => {
     //tests
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
@@ -2658,7 +2664,7 @@ describe("removeFromGroup", () => {
     //mock variables
     const mockName = "group1"
     const mockEmails = [
-      "user0@ezwallet.com",
+      //"user0@ezwallet.com",
       //"user1@ezwallet.com",
       //"user2@ezwallet.com",
       "user3@ezwallet.com", //exists not in group
@@ -2713,10 +2719,10 @@ describe("removeFromGroup", () => {
     //mock implementations
     Group.findOne.mockResolvedValueOnce(mockGroup);                  //group with name exists
     verifyAuth.mockReturnValueOnce({ flag: true, cause: "authorized" }); //authorized
-    User.findOne.mockResolvedValueOnce(mockUsers[1]);
-    User.findOne.mockResolvedValueOnce(mockUsers[2]);
     User.findOne.mockResolvedValueOnce(mockUsers[3]);
     User.findOne.mockResolvedValueOnce(mockUsers[4]);
+    User.findOne.mockResolvedValueOnce(false);
+    User.findOne.mockResolvedValueOnce(false);
 
     //call function
     await removeFromGroup(mockReq, mockRes);
@@ -2724,10 +2730,10 @@ describe("removeFromGroup", () => {
     //tests
     expect(Group.findOne).toHaveBeenCalledWith({ name: mockName });
     expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: mockMemberEmails });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[0] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[1] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[2] });
     expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[3] });
-    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmails[4] });
 
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus)
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);

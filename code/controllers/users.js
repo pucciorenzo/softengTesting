@@ -448,7 +448,8 @@ export const removeFromGroup = async (req, res) => {
     }
 
     //if all members set to be removed, exclude oldest
-    if(canBeRemovedMembersArray.length == memberEmails.length) canBeRemovedMembersArray.filter(e => e != memberEmails[0]); //exclude first member
+    if (canBeRemovedMembersArray.length == memberEmails.length)
+      canBeRemovedMembersArray = canBeRemovedMembersArray.filter(e => e != memberEmails[0]); //exclude first member
 
     //check if at least one member can be removed
     if (canBeRemovedMembersArray.length == 0) {
@@ -472,6 +473,7 @@ export const removeFromGroup = async (req, res) => {
       );
 
   } catch (error) {
+    //console.log(error)
     return resError(res, 500, error.message);
   }
 }

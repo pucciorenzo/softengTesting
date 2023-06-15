@@ -1958,7 +1958,7 @@ describe("removeFromGroup", () => {
       .set('Cookie', [`accessToken=${userTokenValid};refreshToken=${userTokenValid}`])
       .send({
         emails: [
-          "user0@ezwallet.com", //oldest member
+          //"user0@ezwallet.com", //oldest member
           //"user1@ezwallet.com", //caller can remove
           "user7@ezwallet.com", //can remove
           "user3@ezwallet.com", //not in group
