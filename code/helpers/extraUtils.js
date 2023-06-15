@@ -113,6 +113,7 @@ export const validateValueType = (attribute) => {
                     //not YYYY-MM-DD
                     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
                     if (!validateValueType(createValueTypeObject(value, 'string')).flag || !dateRegex.test(value)) return validationFail("invalid date format");
+                if(!validator.isDate(value)) return validationFail("invalid date value");
                 }
                 break;
 

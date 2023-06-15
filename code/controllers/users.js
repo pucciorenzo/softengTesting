@@ -427,7 +427,7 @@ export const removeFromGroup = async (req, res) => {
     let notInGroupMembersArray = [];
     let notFoundMembersArray = [];
     let canBeRemovedMembersArray = [];
-    emailArray = emailArray.filter(e => e != memberEmails[0]); //exclude first member
+    //emailArray = emailArray.filter(e => e != memberEmails[0]); //exclude first member
     for (const email of emailArray) {
 
       //user exists
@@ -446,6 +446,9 @@ export const removeFromGroup = async (req, res) => {
       canBeRemovedMembersArray.push(email);
 
     }
+
+    //if all members set to be removed, exclude oldest
+    if(canBeRemovedMembersArray.length == memberEmails.length) canBeRemovedMembersArray.filter(e => e != memberEmails[0]); //exclude first member
 
     //check if at least one member can be removed
     if (canBeRemovedMembersArray.length == 0) {
