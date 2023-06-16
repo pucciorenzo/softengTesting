@@ -75,7 +75,7 @@ const testerAccessTokenEmpty = jwt.sign({}, process.env.ACCESS_KEY, { expiresIn:
 
 
 
-describe("getUsers", () => {
+describe("I3.1 getUsers", () => {
   /**
    * Database is cleared before each test case, in order to allow insertion of data tailored for each specific test case.
    */
@@ -84,7 +84,7 @@ describe("getUsers", () => {
     await User.deleteMany({})
   })*/
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+  test("I3.1.1 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -103,7 +103,7 @@ describe("getUsers", () => {
     expect(response.body).toHaveProperty('error');
   });
 
-  test("should retrieve list of all users", async () => {
+  test("I3.1.2 should retrieve list of all users", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular" },
@@ -127,8 +127,8 @@ describe("getUsers", () => {
 
 
 
-describe("getUser", () => {
-  test("should return a 400 error if the username passed as the route parameter does not represent a user in the database", async () => {
+describe("I3.2 getUser", () => {
+  test("I3.2.1 should return a 400 error if the username passed as the route parameter does not represent a user in the database", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular" },
@@ -147,7 +147,7 @@ describe("getUser", () => {
     expect(response.body).toHaveProperty('error');
   });
 
-  test("should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)", async () => {
+  test("I3.2.2 should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -166,7 +166,7 @@ describe("getUser", () => {
     expect(response.body).toHaveProperty('error');
   });
 
-  test("should retrieve a regular user", async () => {
+  test("I3.2.3 should retrieve a regular user", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -190,7 +190,7 @@ describe("getUser", () => {
     }))
   })
 
-  test("should retrieve a regular user if called by an admin", async () => {
+  test("I3.2.4 should retrieve a regular user if called by an admin", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular" },
@@ -220,9 +220,9 @@ describe("getUser", () => {
 
 
 
-describe("createGroup", () => {
+describe("I3.3 createGroup", () => {
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("I3.3.1 should return a 400 error if the request body does not contain all the necessary attributes", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -249,7 +249,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty('error');
   })
 
-  test("should return a 400 error if the group name passed in the request body is an empty string", async () => {
+  test("I3.3.2 should return a 400 error if the group name passed in the request body is an empty string", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -277,7 +277,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty('error');
   })
 
-  test("should create a group", async () => {
+  test("I3.3.3 should create a group", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -326,7 +326,7 @@ describe("createGroup", () => {
     })
   })
 
-  test("should return a 401 error if called by a user who is not authenticated (authType = Simple)", async () => {
+  test("I3.3.4 should return a 401 error if called by a user who is not authenticated (authType = Simple)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -365,7 +365,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the member emails is an empty string", async () => {
+  test("I3.3.5 should return a 400 error if at least one of the member emails is an empty string", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -403,7 +403,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
+  test("I3.3.6 should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -441,7 +441,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if the user who calls the API is already in a group  ", async () => {
+  test("I3.3.7 should return a 400 error if the user who calls the API is already in a group  ", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -479,7 +479,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database", async () => {
+  test("I3.3.8 should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -517,7 +517,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if the user who calls the API does not exist  ", async () => {
+  test("I3.3.9 should return a 400 error if the user who calls the API does not exist  ", async () => {
     const usersArray = [
       //{ username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -555,7 +555,7 @@ describe("createGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
+  test("I3.3.10 should return a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
     const usersArray = [
       //{ username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -599,9 +599,9 @@ describe("createGroup", () => {
 
 
 
-describe("getGroups", () => {
+describe("I3.4 getGroups", () => {
 
-  test("should get all groups", async () => {
+  test("I3.4.1 should get all groups", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -651,7 +651,7 @@ describe("getGroups", () => {
     )
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+  test("I3.4.2 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -697,9 +697,9 @@ describe("getGroups", () => {
 
 
 
-describe("getGroup", () => {
+describe("I3.5 getGroup", () => {
 
-  test("should get user's group (admin auth)", async () => {
+  test("I3.5.1 should get user's group (admin auth)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -745,7 +745,7 @@ describe("getGroup", () => {
     )
   })
 
-  test("should get user's group (user auth)", async () => {
+  test("I3.5.2 should get user's group (user auth)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -791,7 +791,7 @@ describe("getGroup", () => {
     )
   })
 
-  test("should return a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)", async () => {
+  test("I3.5.3 should return a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -829,7 +829,7 @@ describe("getGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin auth)", async () => {
+  test("I3.5.4 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin auth)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -867,7 +867,7 @@ describe("getGroup", () => {
     expect(response.body).toHaveProperty("error");
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user auth)", async () => {
+  test("I3.5.5 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user auth)", async () => {
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
       { username: "user2", email: "user2@ezwallet.com", password: "password2", role: "Regular" },
@@ -911,9 +911,9 @@ describe("getGroup", () => {
 
 
 
-describe("addToGroup", () => {
+describe("I3.6 addToGroup", () => {
 
-  test("should add to group (user route)", async () => {
+  test("I3.6.1 should add to group (user route)", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -997,7 +997,7 @@ describe("addToGroup", () => {
   })
 
 
-  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
+  test("I3.6.2 should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1050,7 +1050,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should add to group (admin route)", async () => {
+  test("I3.6.3 should add to group (admin route)", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1133,7 +1133,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
+  test("I3.6.4 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1186,7 +1186,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
+  test("I3.6.5 should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1239,7 +1239,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the member emails is an empty string  ", async () => {
+  test("I3.6.6 should return a 400 error if at least one of the member emails is an empty string  ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1292,7 +1292,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if all the provided emails represent users that are already in a group or do not exist in the database  ", async () => {
+  test("I3.6.7 should return a 400 error if all the provided emails represent users that are already in a group or do not exist in the database  ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1346,7 +1346,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route) ", async () => {
+  test("I3.6.8 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route) ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1400,7 +1400,7 @@ describe("addToGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route) ", async () => {
+  test("I3.6.9 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route) ", async () => {
 
     const usersArray = [
       { username: "user1", email: "user1@ezwallet.com", password: "password1", role: "Regular", refreshToken: userTokenValid },
@@ -1459,9 +1459,9 @@ describe("addToGroup", () => {
 
 
 
-describe("removeFromGroup", () => {
+describe("I3.7 removeFromGroup", () => {
 
-  test("should remove from group keeping the oldest(user route)", async () => {
+  test("I3.7.1 should remove from group keeping the oldest(user route)", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1543,7 +1543,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove", async () => {
+  test("I3.7.2 should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1602,7 +1602,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull", async () => {
+  test("I3.7.3 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1662,7 +1662,7 @@ describe("removeFromGroup", () => {
   })
 
 
-  test("should remove from group keeping the oldest(admin route)", async () => {
+  test("I3.7.4 should remove from group keeping the oldest(admin route)", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1745,7 +1745,7 @@ describe("removeFromGroup", () => {
   })
 
 
-  test("should return a 400 error if the group contains only one member before deleting any user  (user auth)", async () => {
+  test("I3.7.5 should return a 400 error if the group contains only one member before deleting any user  (user auth)", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1804,7 +1804,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the emails is an empty string  ", async () => {
+  test("I3.7.6 should return a 400 error if at least one of the emails is an empty string  ", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1863,7 +1863,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the emails is not in a valid email format  ", async () => {
+  test("I3.7.7 should return a 400 error if at least one of the emails is not in a valid email format  ", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1920,7 +1920,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
+  test("I3.7.8 should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -1977,7 +1977,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database(user route)", async () => {
+  test("I3.7.9 should return a 400 error if the group name passed as a route parameter does not represent a group in the database(user route)", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -2034,7 +2034,7 @@ describe("removeFromGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)", async () => {
+  test("I3.7.10 should return a 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)", async () => {
 
     const usersArray = [
       { username: "user0", email: "user0@ezwallet.com", password: "password0", role: "Regular" },
@@ -2097,9 +2097,9 @@ describe("removeFromGroup", () => {
 
 
 
-describe("deleteUser", () => {
+describe("I3.8 deleteUser", () => {
 
-  test("should delete user and group", async () => {
+  test("I3.8.1 should delete user and group", async () => {
 
     await User.insertMany(
       [
@@ -2149,7 +2149,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should delete user and group member", async () => {
+  test("I3.8.2 should delete user and group member", async () => {
 
     await User.insertMany(
       [
@@ -2200,7 +2200,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should delete user and not group member", async () => {
+  test("I3.8.3 should delete user and not group member", async () => {
 
     await User.insertMany(
       [
@@ -2251,7 +2251,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+  test("I3.8.4 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
 
     await User.insertMany(
       [
@@ -2296,7 +2296,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body does not represent a user in the database", async () => {
+  test("I3.8.5 should return a 400 error if the email passed in the request body does not represent a user in the database", async () => {
 
     await User.insertMany(
       [
@@ -2341,7 +2341,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body is not in correct email format", async () => {
+  test("I3.8.6 should return a 400 error if the email passed in the request body is not in correct email format", async () => {
 
     await User.insertMany(
       [
@@ -2386,7 +2386,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body is an empty string  ", async () => {
+  test("I3.8.7 should return a 400 error if the email passed in the request body is an empty string  ", async () => {
 
     await User.insertMany(
       [
@@ -2432,7 +2432,7 @@ describe("deleteUser", () => {
   })
 
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("I3.8.8 should return a 400 error if the request body does not contain all the necessary attributes", async () => {
 
     await User.insertMany(
       [
@@ -2477,7 +2477,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body represents an admin  ", async () => {
+  test("I3.8.9 should return a 400 error if the email passed in the request body represents an admin  ", async () => {
 
     await User.insertMany(
       [
@@ -2524,9 +2524,9 @@ describe("deleteUser", () => {
 
 })
 
-describe("deleteGroup", () => {
+describe("I3.9 deleteGroup", () => {
 
-  test("should delete group", async () => {
+  test("I3.9.1 should delete group", async () => {
 
     await User.insertMany(
       [
@@ -2564,7 +2564,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
+  test("I3.9.2 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)", async () => {
 
     await User.insertMany(
       [
@@ -2602,7 +2602,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 400 error if the name passed in the request body does not represent a group in the database", async () => {
+  test("I3.9.3 should return a 400 error if the name passed in the request body does not represent a group in the database", async () => {
 
     await User.insertMany(
       [
@@ -2640,7 +2640,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 400 error if the name passed in the request body is an empty string", async () => {
+  test("I3.9.4 should return a 400 error if the name passed in the request body is an empty string", async () => {
 
     await User.insertMany(
       [
@@ -2678,7 +2678,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("I3.9.5 should return a 400 error if the request body does not contain all the necessary attributes", async () => {
 
     await User.insertMany(
       [

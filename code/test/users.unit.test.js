@@ -25,9 +25,9 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-describe("getUsers", () => {
+describe("U3.1 getUsers", () => {
 
-  test("should retrieve all users", async () => {
+  test("U3.1.1 hould retrieve all users", async () => {
 
     //mock variables
     const mockReq = {
@@ -70,7 +70,7 @@ describe("getUsers", () => {
 
   })
 
-  test("should return a 500 error when error is thrown", async () => {
+  test("U3.1.2 should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockReq = {
@@ -101,7 +101,7 @@ describe("getUsers", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("U3.1.3 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockReq = {
@@ -133,9 +133,9 @@ describe("getUsers", () => {
 })
 
 
-describe("getUser", () => {
+describe("U3.2 getUser", () => {
 
-  test("should retrieve user (user auth)", async () => {
+  test("U3.2.1 should retrieve user (user auth)", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -173,7 +173,7 @@ describe("getUser", () => {
 
   })
 
-  test("should retrieve user (admin auth)", async () => {
+  test("U3.2.2 should retrieve user (admin auth)", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -209,7 +209,7 @@ describe("getUser", () => {
 
   })
 
-  test("should return a 500 error when error is thrown", async () => {
+  test("U3.2.3 should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -246,7 +246,7 @@ describe("getUser", () => {
 
   })
 
-  test("should return a 400 error if the username passed as the route parameter does not represent a user in the database  ", async () => {
+  test("U3.2.4 should return a 400 error if the username passed as the route parameter does not represent a user in the database  ", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -283,7 +283,7 @@ describe("getUser", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)  ", async () => {
+  test("U3.2.5 should return a 401 error if called by an authenticated user who is neither the same user as the one in the route parameter (authType = User) nor an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockUser = { _id: "id1", username: "user1", email: "user1@ezwallet.com", role: "Regular" };
@@ -321,9 +321,9 @@ describe("getUser", () => {
 
 })
 
-describe("createGroup", () => {
+describe("U3.3 createGroup", () => {
 
-  test("should create the group", async () => {
+  test("U3.3.1 should create the group", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -439,7 +439,7 @@ describe("createGroup", () => {
   })
 
 
-  test("should create the group even if calling user email not present and repeating elements", async () => {
+  test("U3.3.2 should create the group even if calling user email not present and repeating elements", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -566,7 +566,7 @@ describe("createGroup", () => {
   })
 
 
-  test("should return a 500 error if error is thrown", async () => {
+  test("U3.3.3 should return a 500 error if error is thrown", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -645,7 +645,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database  ", async () => {
+  test("U3.3.4 should return a 400 error if all the provided emails (the ones in the array, the email of the user calling the function does not have to be considered in this case) represent users that are already in a group or do not exist in the database  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -720,7 +720,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the user who calls the API is already in a group  ", async () => {
+  test("U3.3.5 should return a 400 error if the user who calls the API is already in a group  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -783,7 +783,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the user who calls the API is not found using refresh token ", async () => {
+  test("U3.3.6 should return a 400 error if the user who calls the API is not found using refresh token ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -844,7 +844,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
+  test("U3.3.7 should return a 400 error if the group name passed in the request body represents an already existing group in the database", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -893,7 +893,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the group name passed in the request body is an empty string", async () => {
+  test("U3.3.8 should return a 400 error if the group name passed in the request body is an empty string", async () => {
 
     //mock variables
     const mockName = "";
@@ -940,7 +940,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the member emails is an empty string  ", async () => {
+  test("U3.3.9 should return a 400 error if at least one of the member emails is an empty string  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -987,7 +987,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
+  test("U3.3.10 should return a 400 error if at least one of the member emails is not in a valid email format  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1034,7 +1034,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes", async () => {
+  test("U3.3.11 should return a 400 error if the request body does not contain all the necessary attributes", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1072,7 +1072,7 @@ describe("createGroup", () => {
 
   })
 
-  test("should return a 401 error if called by a user who is not authenticated (authType = Simple)  ", async () => {
+  test("U3.3.12 should return a 401 error if called by a user who is not authenticated (authType = Simple)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1121,9 +1121,9 @@ describe("createGroup", () => {
 
 })
 
-describe("getGroups", () => {
+describe("U3.4 getGroups", () => {
 
-  test("should retrieve all groups", async () => {
+  test("U3.4.1 should retrieve all groups", async () => {
 
     //mock variables
     const mockGroups = [
@@ -1170,7 +1170,7 @@ describe("getGroups", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 500 error when error thrown", async () => {
+  test("U3.4.2 should return a 500 error when error thrown", async () => {
 
     const mockReq = {
       params: {
@@ -1206,7 +1206,7 @@ describe("getGroups", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("U3.4.3 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     const mockReq = {
       params: {
@@ -1242,9 +1242,9 @@ describe("getGroups", () => {
 
 });
 
-describe("getGroup", () => {
+describe("U3.5 getGroup", () => {
 
-  test("should retrieve the group (user auth)", async () => {
+  test("U3.5.1 should retrieve the group (user auth)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1295,7 +1295,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should retrieve the group (admin auth)", async () => {
+  test("U3.5.2 should retrieve the group (admin auth)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1341,7 +1341,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 500 error if error thrown (admin)", async () => {
+  test("U3.5.3 should return a 500 error if error thrown (admin)", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1382,7 +1382,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)  ", async () => {
+  test("U3.5.4 should return a 401 error if called by an authenticated user who is neither part of the group (authType = Group) nor an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1429,7 +1429,7 @@ describe("getGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin)  ", async () => {
+  test("U3.5.5 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1468,7 +1468,7 @@ describe("getGroup", () => {
     expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user)  ", async () => {
+  test("U3.5.6 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user)  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1510,9 +1510,9 @@ describe("getGroup", () => {
 
 })
 
-describe("addToGroup", () => {
+describe("U3.6 addToGroup", () => {
 
-  test("should add to the group (user route) filtering repeating emails", async () => {
+  test("U3.6.1 should add to the group (user route) filtering repeating emails", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -1644,7 +1644,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should add to the group (admin route) filtering repeating emails", async () => {
+  test("U3.6.2 should add to the group (admin route) filtering repeating emails", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -1772,7 +1772,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 500 error when error is thrown", async () => {
+  test("U3.6.3 should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -1864,7 +1864,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
+  test("U3.6.4 should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -1952,7 +1952,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if at least one of the member emails is not in a valid email format", async () => {
+  test("U3.6.5 should return a 400 error if at least one of the member emails is not in a valid email format", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2014,7 +2014,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if at least one of the member emails is an empty string", async () => {
+  test("U3.6.6 should return a 400 error if at least one of the member emails is an empty string", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2076,7 +2076,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
+  test("U3.6.7 should return a 400 error if the group name passed as a route parameter does not represent a group in the database  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2125,7 +2125,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
+  test("U3.6.8 should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/add", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2185,7 +2185,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
+  test("U3.6.9 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/insert", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2236,7 +2236,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if group not found in admin route", async () => {
+  test("U3.6.10 should return a 400 error if group not found in admin route", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2287,7 +2287,7 @@ describe("addToGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 500 error when function accessed using unknown route", async () => {
+  test("U3.6.11 should return a 500 error when function accessed using unknown route", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2336,9 +2336,9 @@ describe("addToGroup", () => {
 
 })
 
-describe("removeFromGroup", () => {
+describe("U3.7 removeFromGroup", () => {
 
-  test("should remove from the group (admin route)", async () => {
+  test("U3.7.1 should remove from the group (admin route)", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2449,7 +2449,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should remove from the group (user route)", async () => {
+  test("U3.7.2 should remove from the group (user route)", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2565,7 +2565,7 @@ describe("removeFromGroup", () => {
   })
 
 
-  test("should return a 500 error when error is thrown", async () => {
+  test("U3.7.3 should return a 500 error when error is thrown", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2659,7 +2659,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database  ", async () => {
+  test("U3.7.4 should return a 400 error if all the provided emails represent users that do not belong to the group or do not exist in the database  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2739,7 +2739,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if at least one of the emails is not in a valid email format  ", async () => {
+  test("U3.7.5 should return a 400 error if at least one of the emails is not in a valid email format  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2804,7 +2804,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if at least one of the emails is an empty string  ", async () => {
+  test("U3.7.6 should return a 400 error if at least one of the emails is an empty string  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -2869,7 +2869,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+  test("U3.7.7 should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2924,7 +2924,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the group contains only one member before deleting any user  ", async () => {
+  test("U3.7.8 should return a 400 error if the group contains only one member before deleting any user  ", async () => {
 
     //mock variables
     const mockName = "group1";
@@ -2975,7 +2975,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove  ", async () => {
+  test("U3.7.9 should return a 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is api/groups/:name/remove  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3040,7 +3040,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route)  ", async () => {
+  test("U3.7.10 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (user route)  ", async () => {
 
     //mock variables
     const mockName = "group2"
@@ -3098,7 +3098,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)  ", async () => {
+  test("U3.7.11 should return a 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3158,7 +3158,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull  ", async () => {
+  test("U3.7.12 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is api/groups/:name/pull  ", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3216,7 +3216,7 @@ describe("removeFromGroup", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   })
 
-  test("should return a 500 error when accessed by unknown route", async () => {
+  test("U3.7.13 should return a 500 error when accessed by unknown route", async () => {
 
     //mock variables
     const mockName = "group1"
@@ -3273,8 +3273,8 @@ describe("removeFromGroup", () => {
 
 })
 
-describe("deleteUser", () => {
-  test("should delete user and member in a group", async () => {
+describe("U3.8 deleteUser", () => {
+  test("U3.8.1 should delete user and member in a group", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3331,7 +3331,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 500 when error is thrown", async () => {
+  test("U3.8.2 should return a 500 when error is thrown", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3383,7 +3383,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should delete user and group", async () => {
+  test("U3.8.3 should delete user and group", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3437,7 +3437,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should delete user but not group member", async () => {
+  test("U3.8.4 should delete user but not group member", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3489,7 +3489,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body represents an admin  ", async () => {
+  test("U3.8.5 should return a 400 error if the email passed in the request body represents an admin  ", async () => {
 
     //mock variables
     const mockEmail = "admin0@ezwallet.com";
@@ -3531,7 +3531,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body does not represent a user in the database  ", async () => {
+  test("U3.8.6 should return a 400 error if the email passed in the request body does not represent a user in the database  ", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet.com";
@@ -3573,7 +3573,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body is not in correct email format  ", async () => {
+  test("U3.8.7 should return a 400 error if the email passed in the request body is not in correct email format  ", async () => {
 
     //mock variables
     const mockEmail = "user0.@ezwallet";
@@ -3613,7 +3613,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 400 error if the email passed in the request body is an empty string  ", async () => {
+  test("U3.8.8 should return a 400 error if the email passed in the request body is an empty string  ", async () => {
 
     //mock variables
     const mockEmail = "";
@@ -3652,7 +3652,7 @@ describe("deleteUser", () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
 
   })
-  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+  test("U3.8.9 should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
 
     //mock variables
     const mockEmail = "";
@@ -3691,7 +3691,7 @@ describe("deleteUser", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("U3.8.10 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
 
     //mock variables
     const mockEmail = "user0@ezwallet";
@@ -3734,8 +3734,8 @@ describe("deleteUser", () => {
 
 });
 
-describe("deleteGroup", () => {
-  test("should delete group successfully", async () => {
+describe("U3.9 deleteGroup", () => {
+  test("U3.9.1 should delete group successfully", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
@@ -3771,7 +3771,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 500 error if error thrown", async () => {
+  test("U3.9.2 should return a 500 error if error thrown", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
@@ -3804,7 +3804,7 @@ describe("deleteGroup", () => {
   })
 
 
-  test("should return a 400 error if the name passed in the request body does not represent a group in the database  ", async () => {
+  test("U3.9.3 should return a 400 error if the name passed in the request body does not represent a group in the database  ", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
@@ -3836,7 +3836,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 400 error if the name passed in the request body is an empty string  ", async () => {
+  test("U3.9.4 should return a 400 error if the name passed in the request body is an empty string  ", async () => {
     //mock variables
     const mockName = "";
     const mockReq = {
@@ -3866,7 +3866,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
+  test("U3.9.5 should return a 400 error if the request body does not contain all the necessary attributes  ", async () => {
     //mock variables
     const mockName = "";
     const mockReq = {
@@ -3895,7 +3895,7 @@ describe("deleteGroup", () => {
 
   })
 
-  test("should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
+  test("U3.9.6 should return a 401 error if called by an authenticated user who is not an admin (authType = Admin)  ", async () => {
     //mock variables
     const mockName = "group1";
     const mockReq = {
