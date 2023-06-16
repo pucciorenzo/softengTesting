@@ -1909,21 +1909,32 @@ describe("getTransactionsByGroup", () => {
         }
 
         Group.findOne.mockResolvedValueOnce(mockGroup);
-        mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
+        //mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
         verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[0].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[1].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[2].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[3].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[4].user);
+
         transactions.aggregate.mockResolvedValueOnce(mockTransactionAggregate);
 
         await getTransactionsByGroup(mockReq, mockRes);
 
         expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
-        expect(mockGroup.populate).toHaveBeenCalled();
+        //expect(mockGroup.populate).toHaveBeenCalled();
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[0].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[1].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[2].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[3].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[4].email });
         expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test("should show all transactions of members of user's group group (admin route)", async () => {
+    test("should show all transactions of members of group (admin route)", async () => {
         const mockGroupName = "group1";
         const mockPopulatedGroup = {
             _id: 1,
@@ -2004,15 +2015,24 @@ describe("getTransactionsByGroup", () => {
 
         verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
         Group.findOne.mockResolvedValueOnce(mockGroup);
-        mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
-        verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
+        //mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[0].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[1].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[2].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[3].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[4].user);
         transactions.aggregate.mockResolvedValueOnce(mockTransactionAggregate);
 
         await getTransactionsByGroup(mockReq, mockRes);
 
-        expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
-        expect(mockGroup.populate).toHaveBeenCalled();
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
+        expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
+        //expect(mockGroup.populate).toHaveBeenCalled();
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[0].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[1].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[2].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[3].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[4].email });
         expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
@@ -2237,7 +2257,7 @@ describe("getTransactionsByGroupByCategory", () => {
 
     });
 
-    test('should show all transactions of member of a group (user route)', async () => {
+    test('should show all transactions of members of the group (user route)', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockPopulatedGroup = {
@@ -2321,20 +2341,33 @@ describe("getTransactionsByGroupByCategory", () => {
 
         Group.findOne.mockResolvedValueOnce(mockGroup);
         verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
+        //mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
+        verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[0].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[1].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[2].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[3].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[4].user);
         categories.findOne.mockResolvedValueOnce(true);
         transactions.aggregate.mockResolvedValueOnce(mockTransactionAggregate);
 
         await getTransactionsByGroupByCategory(mockReq, mockRes);
 
         expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
-        expect(mockGroup.populate).toHaveBeenCalled();
+        //expect(mockGroup.populate).toHaveBeenCalled();
+        expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[0].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[1].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[2].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[3].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[4].email });
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Group", emails: ["user1@ezwallet.com", "user2@ezwallet.com", "user3@ezwallet.com", "user4@ezwallet.com", "user5@ezwallet.com"] });
         expect(categories.findOne).toHaveBeenCalledWith({ type: mockCategory });
-        //expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
-    test('should show all transactions of member of a group (admin route)', async () => {
+    test('should show all transactions of members of the group (admin route)', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockPopulatedGroup = {
@@ -2418,6 +2451,12 @@ describe("getTransactionsByGroupByCategory", () => {
 
         verifyAuth.mockReturnValueOnce({ flag: true, cause: 'Authorized' });
         Group.findOne.mockResolvedValueOnce(mockGroup);
+        //mockGroup.populate.mockResolvedValueOnce(mockPopulatedGroup);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[0].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[1].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[2].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[3].user);
+        User.findOne.mockResolvedValueOnce(mockPopulatedGroup.members[4].user);
         categories.findOne.mockResolvedValueOnce(true);
         transactions.aggregate.mockResolvedValueOnce(mockTransactionAggregate);
 
@@ -2425,9 +2464,14 @@ describe("getTransactionsByGroupByCategory", () => {
 
         expect(verifyAuth).toHaveBeenCalledWith(mockReq, mockRes, { authType: "Admin" });
         expect(Group.findOne).toHaveBeenCalledWith({ name: mockGroupName });
-        //expect(mockGroup.populate).toHaveBeenCalledWith('members.user');
-        //expect(categories.findOne).toHaveBeenCalledWith({ type: mockCategory });
-        //expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
+        //expect(mockGroup.populate).toHaveBeenCalled();
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[0].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[1].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[2].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[3].email });
+        expect(User.findOne).toHaveBeenCalledWith({ email: mockGroup.members[4].email });
+        expect(categories.findOne).toHaveBeenCalledWith({ type: mockCategory })
+        expect(transactions.aggregate).toHaveBeenCalledWith(mockTransactionAggregateFilter);
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
