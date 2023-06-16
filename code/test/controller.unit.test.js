@@ -18,9 +18,9 @@ afterEach(() => {
 
 });
 
-describe("U2.1 createCategory", () => {
+describe("U2.1: createCategory", () => {
 
-    test('U2.1.1 should return 400 error if request body is incomplete', async () => {
+    test('U2.1.1: should return 400 error if request body is incomplete', async () => {
         const req = { body: { type: 'testType' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -36,7 +36,7 @@ describe("U2.1 createCategory", () => {
     });
 
 
-    test('U2.1.2 should return 400 error if request body contains empty strings', async () => {
+    test('U2.1.2: should return 400 error if request body contains empty strings', async () => {
         const req = { body: { type: '', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -52,7 +52,7 @@ describe("U2.1 createCategory", () => {
     });
 
 
-    test('U2.1.3 should return 401 error if called by an authenticated user who is not an admin', async () => {
+    test('U2.1.3: should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -67,7 +67,7 @@ describe("U2.1 createCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test('U2.1.4 should return 400 if the type represents an already existing category in the database', async () => {
+    test('U2.1.4: should return 400 if the type represents an already existing category in the database', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -85,7 +85,7 @@ describe("U2.1 createCategory", () => {
         expect(res.json).toHaveBeenCalledWith({ error: 'category already exists' });
     });
 
-    test('U2.1.5 should create new category', async () => {
+    test('U2.1.5: should create new category', async () => {
         const mockReq = {
             body: {
                 type: "testType",
@@ -121,7 +121,7 @@ describe("U2.1 createCategory", () => {
 
 
 
-    test('U2.1.6 should return a 500 if an error occurs', async () => {
+    test('U2.1.6: should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -142,12 +142,12 @@ describe("U2.1 createCategory", () => {
 
 })
 
-describe("U2.2 updateCategory", () => {
+describe("U2.2: updateCategory", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.2.1 should return 400 error if request body is incomplete', async () => {
+    test('U2.2.1: should return 400 error if request body is incomplete', async () => {
         const req = {
             params: { type: 'currentTestType' },
             body: { type: 'newTestType' }
@@ -165,7 +165,7 @@ describe("U2.2 updateCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
     });
 
-    test('U2.2.2 should return 400 error if request body contains empty strings', async () => {
+    test('U2.2.2: should return 400 error if request body contains empty strings', async () => {
         const req = {
             params: { type: 'currentTestType' },
             body: { type: '', color: 'newTestColor' }
@@ -183,7 +183,7 @@ describe("U2.2 updateCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'empty string' });
     });
 
-    test('U2.2.3 should return 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
+    test('U2.2.3: should return 400 error if the type of category passed as a route parameter does not represent a category in the database', async () => {
         const req = {
             params: { type: 'nonExistingType' },
             body: { type: 'newTestType', color: 'newTestColor' }
@@ -203,7 +203,7 @@ describe("U2.2 updateCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'category does not exist' });
     });
 
-    test('U2.2.4 should return 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one', async () => {
+    test('U2.2.4: should return 400 error if the type of category passed in the request body as the new type represents an already existing category in the database and that category is not the same as the requested one', async () => {
         const req = {
             params: { type: 'existingType' },
             body: { type: 'alsoExistingType', color: 'newTestColor' }
@@ -237,7 +237,7 @@ describe("U2.2 updateCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'new category exists' });
     });
 
-    test('U2.2.5 should return 401 error if called by an authenticated user who is not an admin', async () => {
+    test('U2.2.5: should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = {
             params: { type: 'currentTestType' },
             body: { type: 'testType', color: 'newTestColor' }
@@ -255,7 +255,7 @@ describe("U2.2 updateCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test("U2.2.6 should update a category's both type and color",
+    test("U2.2.6: should update a category's both type and color",
         async () => {
 
             const mockReq = {
@@ -310,7 +310,7 @@ describe("U2.2 updateCategory", () => {
         }
     );
 
-    test("U2.2.7 should update a category's color only",
+    test("U2.2.7: should update a category's color only",
         async () => {
 
             const mockReq = {
@@ -360,7 +360,7 @@ describe("U2.2 updateCategory", () => {
         }
     );
 
-    test('U2.2.8 should return a 500 if an error occurs', async () => {
+    test('U2.2.8: should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -380,12 +380,12 @@ describe("U2.2 updateCategory", () => {
     });
 })
 
-describe("U2.3 deleteCategory", () => {
+describe("U2.3: deleteCategory", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.3.1 should return 400 error if request body is incomplete', async () => {
+    test('U2.3.1: should return 400 error if request body is incomplete', async () => {
         const req = {
             params: {},
             body: {}
@@ -403,7 +403,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
     });
 
-    test('U2.3.2 should return 400 error if called when there is only one category in the database', async () => {
+    test('U2.3.2: should return 400 error if called when there is only one category in the database', async () => {
         const req = {
             params: {},
             body: { types: ['A'] }
@@ -426,7 +426,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'only zero or one category exists' });
     });
 
-    test('U2.3.3 should return 400 error if at least one of the types in the array is an empty string', async () => {
+    test('U2.3.3: should return 400 error if at least one of the types in the array is an empty string', async () => {
         const req = {
             params: {},
             body: { types: ['C', 'B', '', 'D', 'E'] }
@@ -444,7 +444,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'at least one: empty string' });
     });
 
-    test('U2.3.4 should return 400 error if the array passed in the request body is empty', async () => {
+    test('U2.3.4: should return 400 error if the array passed in the request body is empty', async () => {
         const req = {
             params: {},
             body: { types: [] }
@@ -462,7 +462,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'empty array' });
     });
 
-    test('U2.3.5 should return 400 error if at least one of the types in the array does not represent a category in the database', async () => {
+    test('U2.3.5: should return 400 error if at least one of the types in the array does not represent a category in the database', async () => {
         const req = {
             params: {},
             body: { types: ['C', 'B', 'F'] }
@@ -488,7 +488,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'at least one type does not exist' });
     });
 
-    test('U2.3.6 should return 401 error if called by an authenticated user who is not an admin', async () => {
+    test('U2.3.6: should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = {
             params: {},
             body: { types: ['C', 'B', 'E'] }
@@ -506,7 +506,7 @@ describe("U2.3 deleteCategory", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test('U2.3.7 should delete all categories except oldest and set transactions to oldest', async () => {
+    test('U2.3.7: should delete all categories except oldest and set transactions to oldest', async () => {
         const mockReq = {
             params: {
             },
@@ -553,7 +553,7 @@ describe("U2.3 deleteCategory", () => {
 
     });
 
-    test('U2.3.8 should delete all categories and set transactions to oldest', async () => {
+    test('U2.3.8: should delete all categories and set transactions to oldest', async () => {
         const mockReq = {
             params: {
             },
@@ -599,7 +599,7 @@ describe("U2.3 deleteCategory", () => {
 
     });
 
-    test('U2.3.9 should return a 500 if an error occurs', async () => {
+    test('U2.3.9: should return a 500 if an error occurs', async () => {
         const req = {
             params: {
             },
@@ -625,12 +625,12 @@ describe("U2.3 deleteCategory", () => {
     });
 })
 
-describe("U2.4 getCategories", () => {
+describe("U2.4: getCategories", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.4.1 should retrieve all categories', async () => {
+    test('U2.4.1: should retrieve all categories', async () => {
         const mockReq = {
             params: {
             },
@@ -672,7 +672,7 @@ describe("U2.4 getCategories", () => {
 
     });
 
-    test('U2.4.2 should return 401 error if called by an authenticated user who is not an admin', async () => {
+    test('U2.4.2: should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = {
             params: {
             },
@@ -694,7 +694,7 @@ describe("U2.4 getCategories", () => {
         expect(res.json).toBeCalledWith({ error: 'Unauthorized' });
     });
 
-    test('U2.4.3 should return a 500 if an error occurs', async () => {
+    test('U2.4.3: should return a 500 if an error occurs', async () => {
         const req = { body: { type: 'testType', color: 'testColor' } };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -714,12 +714,12 @@ describe("U2.4 getCategories", () => {
     });
 })
 
-describe("U2.5 createTransaction", () => {
+describe("U2.5: createTransaction", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.5.1 should return 400 error if request body is incomplete', async () => {
+    test('U2.5.1: should return 400 error if request body is incomplete', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -742,7 +742,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
     });
 
-    test('U2.5.2 should return 400 error if request body contains empty strings', async () => {
+    test('U2.5.2: should return 400 error if request body contains empty strings', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -766,7 +766,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'empty string' });
     });
 
-    test('U2.5.3 should return 400 error if the type of category passed in the request body does not represent a category in the database', async () => {
+    test('U2.5.3: should return 400 error if the type of category passed in the request body does not represent a category in the database', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -797,7 +797,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'category does not exist' });
     });
 
-    test('U2.5.4 should return 400 error if the username passed in the request body is not equal to the one passed as a route parameter', async () => {
+    test('U2.5.4: should return 400 error if the username passed in the request body is not equal to the one passed as a route parameter', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -834,7 +834,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: "cannot add other user's transaction" });
     });
 
-    test('U2.5.5 should return 400 error if the username passed in the request body does not represent a user in the database', async () => {
+    test('U2.5.5: should return 400 error if the username passed in the request body does not represent a user in the database', async () => {
         const req = {
             params: {
                 username: 'user1',
@@ -860,7 +860,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: "user passed as a route parameter does not exist" });
     });
 
-    test('U2.5.6 should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
+    test('U2.5.6: should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
         const req = {
             params: {
                 username: 'nonUser',
@@ -891,7 +891,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: "user passed in request body does not exist" });
     });
 
-    test('U2.5.7 should return 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
+    test('U2.5.7: should return 400 error if the amount passed in the request body cannot be parsed as a floating value (negative numbers are accepted)', async () => {
         const req = {
             params: {
                 username: 'nonUser',
@@ -915,7 +915,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'cannot parse as floating value' });
     });
 
-    test('U2.5.8 should return 401 error if user is not authenticated', async () => {
+    test('U2.5.8: should return 401 error if user is not authenticated', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -949,7 +949,7 @@ describe("U2.5 createTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'Unauthorized' });
     });
 
-    test('U2.5.9 should create transaction', async () => {
+    test('U2.5.9: should create transaction', async () => {
         const mockReq = {
             params: {
                 username: 'user1',
@@ -1003,7 +1003,7 @@ describe("U2.5 createTransaction", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.5.10 should return a 500 if an error occurs', async () => {
+    test('U2.5.10: should return a 500 if an error occurs', async () => {
         const req = {
             params: {
                 username: "user1",
@@ -1030,12 +1030,12 @@ describe("U2.5 createTransaction", () => {
     });
 
 })
-describe("U2.6 getAllTransactions", () => {
+describe("U2.6: getAllTransactions", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.6.1 should return 401 error if called by an authenticated user who is not an admin', async () => {
+    test('U2.6.1: should return 401 error if called by an authenticated user who is not an admin', async () => {
         const req = {
             params: {
             },
@@ -1055,7 +1055,7 @@ describe("U2.6 getAllTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test('U2.6.2 should retrieve all transactions', async () => {
+    test('U2.6.2: should retrieve all transactions', async () => {
         const mockReq = {
             params: {
             },
@@ -1109,7 +1109,7 @@ describe("U2.6 getAllTransactions", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.6.3 should return a 500 if an error occurs', async () => {
+    test('U2.6.3: should return a 500 if an error occurs', async () => {
         const req = {
             params: {
             },
@@ -1136,12 +1136,12 @@ describe("U2.6 getAllTransactions", () => {
     });
 })
 
-describe("U2.7 getTransactionsByUser", () => {
+describe("U2.7: getTransactionsByUser", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test('U2.7.1 should return 400 error if the user does not exist', async () => {
+    test('U2.7.1: should return 400 error if the user does not exist', async () => {
         const mockReq = {
             url: '/api/transactions/users/nonExistentUser',
             params: {
@@ -1166,7 +1166,7 @@ describe("U2.7 getTransactionsByUser", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'user does not exist' });
     });
 
-    test('U2.7.2 should return 401 error if called by an authenticated user who is not the same user (user route)', async () => {
+    test('U2.7.2: should return 401 error if called by an authenticated user who is not the same user (user route)', async () => {
         const mockReq = {
             url: '/api/users/user1/transactions',
             params: {
@@ -1189,7 +1189,7 @@ describe("U2.7 getTransactionsByUser", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "cannot access other user's data" });
     });
 
-    test('U2.7.3 should return 401 error if called by an authenticated user who is not an admin (admin route)', async () => {
+    test('U2.7.3: should return 401 error if called by an authenticated user who is not an admin (admin route)', async () => {
         const mockReq = {
             url: '/api/transactions/users/user1',
             body: {}
@@ -1208,7 +1208,7 @@ describe("U2.7 getTransactionsByUser", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not admin' });
     });
 
-    test('U2.7.4 should throw a "unknown route" error if the path is wrong', async () => {
+    test('U2.7.4: should throw a "unknown route" error if the path is wrong', async () => {
         const mockReq = {
             url: "/api/unknown/route",
             query: {
@@ -1231,7 +1231,7 @@ describe("U2.7 getTransactionsByUser", () => {
 
     });
 
-    test('U2.7.5 should return all users transactions (user route with date)', async () => {
+    test('U2.7.5: should return all users transactions (user route with date)', async () => {
         const mockDate = "2023-04-01";
         const mockUsername = "user1"
         const mockReq = {
@@ -1311,7 +1311,7 @@ describe("U2.7 getTransactionsByUser", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.7.6 should return a 500 if an error occurs', async () => {
+    test('U2.7.6: should return a 500 if an error occurs', async () => {
         const req = {
             url: '/api/users/user1/transactions',
             body: {}
@@ -1335,8 +1335,8 @@ describe("U2.7 getTransactionsByUser", () => {
     });
 })
 
-describe("U2.8 getTransactionsByUserByCategory", () => {
-    test('U2.8.1 should show all user transactions of  given category (user route)', async () => {
+describe("U2.8: getTransactionsByUserByCategory", () => {
+    test('U2.8.1: should show all user transactions of  given category (user route)', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1407,7 +1407,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
     });
 
 
-    test('U2.8.2 should show all user transactions of  given category (admin route)', async () => {
+    test('U2.8.2: should show all user transactions of  given category (admin route)', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1477,7 +1477,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.8.3 should return a 500 error when error is thrown', async () => {
+    test('U2.8.3: should return a 500 error when error is thrown', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1540,7 +1540,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.8.4 should return 400 error if the username does not represent a user in the database', async () => {
+    test('U2.8.4: should return 400 error if the username does not represent a user in the database', async () => {
         const mockUsername = "nonexistentUser";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1564,7 +1564,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "user does not exist" });
     });
 
-    test('U2.8.5 should return 400 error if the category does not represent a category in the database', async () => {
+    test('U2.8.5: should return 400 error if the category does not represent a category in the database', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "nonexistentCategory";
         const mockReq = {
@@ -1589,7 +1589,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "category does not exist" });
     });
 
-    test('U2.8.6 should return 401 error if called by an authenticated user who is not the same user (user route)', async () => {
+    test('U2.8.6: should return 401 error if called by an authenticated user who is not the same user (user route)', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1615,7 +1615,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "cannot access other user's data" });
     });
 
-    test('U2.8.7 should return 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+    test('U2.8.7: should return 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1639,7 +1639,7 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "Not admin" });
     });
 
-    test('U2.8.8 should throw a "unknown route" error if the path is wrong', async () => {
+    test('U2.8.8: should throw a "unknown route" error if the path is wrong', async () => {
         const mockUsername = "user1";
         const mockCategoryType = "type1";
         const mockReq = {
@@ -1670,9 +1670,9 @@ describe("U2.8 getTransactionsByUserByCategory", () => {
 
 })
 
-describe("U2.9 getTransactionsByGroup", () => {
+describe("U2.9: getTransactionsByGroup", () => {
 
-    test('U2.9.1 should return 400 error if the group name passed as a route parameter does not represent a group in the database (user route)', async () => {
+    test('U2.9.1: should return 400 error if the group name passed as a route parameter does not represent a group in the database (user route)', async () => {
         const mockGroupName = "nonGroup";
         const mockReq = {
             url: "/api/groups/" + mockGroupName + "/transactions",
@@ -1701,7 +1701,7 @@ describe("U2.9 getTransactionsByGroup", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'group does not exist' });
     });
 
-    test('U2.9.2 should return 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)', async () => {
+    test('U2.9.2: should return 400 error if the group name passed as a route parameter does not represent a group in the database (admin route)', async () => {
         const mockGroupName = "nonGroup";
         const mockReq = {
             url: "/api/transactions/groups" + mockGroupName,
@@ -1732,7 +1732,7 @@ describe("U2.9 getTransactionsByGroup", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'group does not exist' });
     });
 
-    test('U2.9.3 should return 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions', async () => {
+    test('U2.9.3: should return 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions', async () => {
         const mockGroupName = "group1";
         const mockGroup = {
             _id: 1,
@@ -1773,7 +1773,7 @@ describe("U2.9 getTransactionsByGroup", () => {
 
     });
 
-    test('U2.9.4 should return 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name', async () => {
+    test('U2.9.4: should return 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name', async () => {
         const mockGroupName = "group1";
         const mockReq = {
             url: "/api/transactions/groups/" + mockGroupName,
@@ -1802,7 +1802,7 @@ describe("U2.9 getTransactionsByGroup", () => {
 
     });
 
-    test('U2.9.5 should throw a "unknown route" error if the path is wrong', async () => {
+    test('U2.9.5: should throw a "unknown route" error if the path is wrong', async () => {
         const mockGroupName = "group1";
         const mockReq = {
             url: "/api/unknown/route",
@@ -1827,7 +1827,7 @@ describe("U2.9 getTransactionsByGroup", () => {
     });
 
 
-    test("U2.9.6 should show all transactions of members of user's group group (user route)", async () => {
+    test("U2.9.6: should show all transactions of members of user's group group (user route)", async () => {
         const mockGroupName = "group1";
         const mockPopulatedGroup = {
             _id: 1,
@@ -1932,7 +1932,7 @@ describe("U2.9 getTransactionsByGroup", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test("U2.9.7 should show all transactions of members of group (admin route)", async () => {
+    test("U2.9.7: should show all transactions of members of group (admin route)", async () => {
         const mockGroupName = "group1";
         const mockPopulatedGroup = {
             _id: 1,
@@ -2037,9 +2037,9 @@ describe("U2.9 getTransactionsByGroup", () => {
     });
 })
 
-describe("U2.10 getTransactionsByGroupByCategory", () => {
+describe("U2.10: getTransactionsByGroupByCategory", () => {
 
-    test('U2.10.1 should return 400 error if the group name passed as a route parameter does not represent a group in the database(user route)', async () => {
+    test('U2.10.1: should return 400 error if the group name passed as a route parameter does not represent a group in the database(user route)', async () => {
         const mockGroupName = "nonGroup";
         const mockCategory = "type1"
         const mockReq = {
@@ -2068,7 +2068,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'group does not exist' });
     });
 
-    test('U2.10.2 should return 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)', async () => {
+    test('U2.10.2: should return 400 error if the group name passed as a route parameter does not represent a group in the database(admin route)', async () => {
         const mockGroupName = "nonGroup";
         const mockCategory = "type1"
         const mockReq = {
@@ -2098,7 +2098,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'group does not exist' });
     });
 
-    test('U2.10.3 should return 400 error if the category passed as a route parameter does not represent a category in the database', async () => {
+    test('U2.10.3: should return 400 error if the category passed as a route parameter does not represent a category in the database', async () => {
         const mockGroupName = "group1";
         const mockPopulatedGroup = {
             _id: 1,
@@ -2152,7 +2152,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: 'category does not exist' });
     });
 
-    test('U2.10.4 should return 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions', async () => {
+    test('U2.10.4: should return 401 error if called by an authenticated user who is not part of the group (authType = Group) if the route is /api/groups/:name/transactions', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockGroup = {
@@ -2194,7 +2194,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
         expect(mockRes.json).toHaveBeenCalledWith({ error: "user not in group" });
     });
 
-    test('U2.10.5 should return 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name', async () => {
+    test('U2.10.5: should return 401 error if called by an authenticated user who is not an admin (authType = Admin) if the route is /api/transactions/groups/:name', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockReq = {
@@ -2228,7 +2228,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
 
 
 
-    test('U2.10.6 should throw a "unknown route" error if the path is wrong', async () => {
+    test('U2.10.6: should throw a "unknown route" error if the path is wrong', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockReq = {
@@ -2255,7 +2255,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
 
     });
 
-    test('U2.10.7 should show all transactions of members of the group (user route)', async () => {
+    test('U2.10.7: should show all transactions of members of the group (user route)', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockPopulatedGroup = {
@@ -2365,7 +2365,7 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
         expect(mockRes.status).toHaveBeenCalledWith(mockResStatus);
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
-    test('U2.10.8 should show all transactions of members of the group (admin route)', async () => {
+    test('U2.10.8: should show all transactions of members of the group (admin route)', async () => {
         const mockGroupName = "group1";
         const mockCategory = "type1";
         const mockPopulatedGroup = {
@@ -2476,8 +2476,8 @@ describe("U2.10 getTransactionsByGroupByCategory", () => {
 
 })
 
-describe("U2.11 deleteTransaction", () => {
-    test('U2.11.1 should return 400 error if the request body does not contain all the necessary attributes', async () => {
+describe("U2.11: deleteTransaction", () => {
+    test('U2.11.1: should return 400 error if the request body does not contain all the necessary attributes', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2501,7 +2501,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
     });
 
-    test('U2.11.2 should return 400 error if the _id in the request body is an empty string', async () => {
+    test('U2.11.2: should return 400 error if the _id in the request body is an empty string', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2525,7 +2525,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'empty string' });
     });
 
-    test('U2.11.3 should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
+    test('U2.11.3: should return 400 error if the username passed as a route parameter does not represent a user in the database', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2551,7 +2551,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'user does not exist' });
     });
 
-    test('U2.11.4 should return 400 error if the _id in the request body does not represent a transaction in the database', async () => {
+    test('U2.11.4: should return 400 error if the _id in the request body does not represent a transaction in the database', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2578,7 +2578,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'transaction does not exist' });
     });
 
-    test('U2.11.5 should return 400 error if the _id in the request body represents a transaction made by a different user than the one in the route', async () => {
+    test('U2.11.5: should return 400 error if the _id in the request body represents a transaction made by a different user than the one in the route', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2608,7 +2608,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'transaction made by different user' });
     });
 
-    test('U2.11.6 should return 401 error if user is not authenticated', async () => {
+    test('U2.11.6: should return 401 error if user is not authenticated', async () => {
         const req = {
             params: {
                 username: 'user1'
@@ -2640,7 +2640,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(res.json).toBeCalledWith({ error: 'Unauthorized' });
     });
 
-    test('U2.11.7 should delete a transaction', async () => {
+    test('U2.11.7: should delete a transaction', async () => {
         const mockUsername = "user1";
         const mockTransaction_id = "id1";
         const mockReq = {
@@ -2682,7 +2682,7 @@ describe("U2.11 deleteTransaction", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     });
 
-    test('U2.11.8 should return a 500 if an error occurs', async () => {
+    test('U2.11.8: should return a 500 if an error occurs', async () => {
         const mockUsername = "user1";
         const mockTransaction_id = "id1";
         const req = {
@@ -2718,8 +2718,8 @@ describe("U2.11 deleteTransaction", () => {
     });
 })
 
-describe("U2.12 deleteTransactions", () => {
-    test('U2.12.1 should return 400 error if the request body does not contain all the necessary attributes', async () => {
+describe("U2.12: deleteTransactions", () => {
+    test('U2.12.1: should return 400 error if the request body does not contain all the necessary attributes', async () => {
         const req = {
             body: {
 
@@ -2738,7 +2738,7 @@ describe("U2.12 deleteTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'incomplete attributes' });
     });
 
-    test('U2.12.2 should return 400 error if at least one of the ids in the array is an empty string', async () => {
+    test('U2.12.2: should return 400 error if at least one of the ids in the array is an empty string', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",
@@ -2766,7 +2766,7 @@ describe("U2.12 deleteTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'at least one: empty string' });
     });
 
-    test('U2.12.3 should return 400 error if at least one of the ids in the array does not represent a transaction in the database', async () => {
+    test('U2.12.3: should return 400 error if at least one of the ids in the array does not represent a transaction in the database', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",
@@ -2795,7 +2795,7 @@ describe("U2.12 deleteTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'at least one transaction does not exist' });
     });
 
-    test('U2.12.4 should return 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
+    test('U2.12.4: should return 401 error if called by an authenticated user who is not an admin (authType = Admin)', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",
@@ -2823,7 +2823,7 @@ describe("U2.12 deleteTransactions", () => {
         expect(res.json).toBeCalledWith({ error: 'Not admin' });
     });
 
-    test('U2.12.5 should delete all transactions in an array', async () => {
+    test('U2.12.5: should delete all transactions in an array', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",
@@ -2871,7 +2871,7 @@ describe("U2.12 deleteTransactions", () => {
         expect(mockRes.json).toHaveBeenCalledWith(mockResData);
     })
 
-    test('U2.12.6 should return a 500 error if error thrown', async () => {
+    test('U2.12.6: should return a 500 error if error thrown', async () => {
         const mockTransaction_ids = [
             "id1",
             "id2",

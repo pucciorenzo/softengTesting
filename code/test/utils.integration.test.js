@@ -75,8 +75,8 @@ const adminTokenExpired = jwt.sign({
 const userTokenEmpty = jwt.sign({}, process.env.ACCESS_KEY, { expiresIn: "1y" })
 
 
-describe("I4.1 handleDateFilterParams", () => {
-    test('I4.1.1 should return correct filter using from and upto parameters', () => {
+describe("I4.1: handleDateFilterParams", () => {
+    test('I4.1.1: should return correct filter using from and upto parameters', () => {
         const req = {
             query: {
                 from: "2023-01-01",
@@ -93,7 +93,7 @@ describe("I4.1 handleDateFilterParams", () => {
         })
     });
 
-    test('I4.1.2 should return correct filter using from parameters', () => {
+    test('I4.1.2: should return correct filter using from parameters', () => {
         const req = {
             query: {
                 from: "2023-01-01",
@@ -109,7 +109,7 @@ describe("I4.1 handleDateFilterParams", () => {
             }
         })
     });
-    test('I4.1.3 should return correct filter using upTo parameters', () => {
+    test('I4.1.3: should return correct filter using upTo parameters', () => {
         const req = {
             query: {
                 //from: "2023-01-01",
@@ -127,7 +127,7 @@ describe("I4.1 handleDateFilterParams", () => {
     });
 
 
-    test('I4.1.4 should return correct filter using date parameters', () => {
+    test('I4.1.4: should return correct filter using date parameters', () => {
         const req = {
             query: {
                 //from: "2023-01-01",
@@ -144,7 +144,7 @@ describe("I4.1 handleDateFilterParams", () => {
         })
     });
 
-    test('I4.1.5 should return nothing since no query defined', () => {
+    test('I4.1.5: should return nothing since no query defined', () => {
         const req = {
             query: {
             }
@@ -153,7 +153,7 @@ describe("I4.1 handleDateFilterParams", () => {
         expect(filter).toEqual({})
     });
 
-    test('I4.1.6 should throw error if data is present with the two other parameters (from)', () => {
+    test('I4.1.6: should throw error if data is present with the two other parameters (from)', () => {
         const req = {
             query: {
                 from: "2023-01-01",
@@ -165,7 +165,7 @@ describe("I4.1 handleDateFilterParams", () => {
         expect(filter).toThrow("Cannot include date parameter with from or upTo parameters.")
     });
 
-    test('I4.1.7 should throw error if data is present with the two other parameters (upTo)', () => {
+    test('I4.1.7: should throw error if data is present with the two other parameters (upTo)', () => {
         const req = {
             query: {
                 //from: "2023-01-01",
@@ -184,7 +184,7 @@ describe("I4.1 handleDateFilterParams", () => {
         expect(filter).toThrow("Cannot include date parameter with from or upTo parameters.")
     });
 
-    test('I4.1.8 should throw error invalid data parameter format', () => {
+    test('I4.1.8: should throw error invalid data parameter format', () => {
         const req = {
             query: {
                 //from: "2023-01-01",
@@ -196,7 +196,7 @@ describe("I4.1 handleDateFilterParams", () => {
         expect(filter).toThrow("date : Invalid date format. YYYY-MM-DD format expected.")
     });
 
-    test('I4.1.9 should throw error invalid from parameter format', () => {
+    test('I4.1.9: should throw error invalid from parameter format', () => {
         const req = {
             query: {
                 from: "2023/01/01",
@@ -208,7 +208,7 @@ describe("I4.1 handleDateFilterParams", () => {
         expect(filter).toThrow("from : Invalid date format. YYYY-MM-DD format expected.")
     });
 
-    test('I4.1.10 should throw error invalid upTo parameter format', () => {
+    test('I4.1.10: should throw error invalid upTo parameter format', () => {
         const req = {
             query: {
                 from: "2023-01-01",
@@ -224,9 +224,9 @@ describe("I4.1 handleDateFilterParams", () => {
 
 
 
-describe("I4.2 verifyAuth", () => {
+describe("I4.2: verifyAuth", () => {
 
-    test("I4.2.1 should authorize user and refresh token authType==Simple ", () => {
+    test("I4.2.1: should authorize user and refresh token authType==Simple ", () => {
 
         const req = {
             cookies: {
@@ -266,7 +266,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.2 should not authorize user and refresh token authType==Simple ", () => {
+    test("I4.2.2: should not authorize user and refresh token authType==Simple ", () => {
 
         const req = {
             cookies: {
@@ -296,7 +296,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.3 should authorize user and refresh token authType==Admin ", () => {
+    test("I4.2.3: should authorize user and refresh token authType==Admin ", () => {
 
         const req = {
             cookies: {
@@ -336,7 +336,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.4 should not authorize user authType==Admin ", () => {
+    test("I4.2.4: should not authorize user authType==Admin ", () => {
 
         const req = {
             cookies: {
@@ -364,7 +364,7 @@ describe("I4.2 verifyAuth", () => {
         expect(message).toBe(false)
     })
 
-    test("I4.2.5 should authorize user and refresh token authType==User ", () => {
+    test("I4.2.5: should authorize user and refresh token authType==User ", () => {
 
         const req = {
             cookies: {
@@ -404,7 +404,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.6 should not authorize user and refresh token authType==User ", () => {
+    test("I4.2.6: should not authorize user and refresh token authType==User ", () => {
 
         const req = {
             cookies: {
@@ -432,7 +432,7 @@ describe("I4.2 verifyAuth", () => {
         expect(message).toBe(false)
     })
 
-    test("I4.2.7 should authorize user and refresh token where authType==Group ", () => {
+    test("I4.2.7: should authorize user and refresh token where authType==Group ", () => {
 
         const req = {
             cookies: {
@@ -473,7 +473,7 @@ describe("I4.2 verifyAuth", () => {
         expect(message).toBe(true)
     })
 
-    test("I4.2.8 should not authorize user and refresh token where authType==Group ", () => {
+    test("I4.2.8: should not authorize user and refresh token where authType==Group ", () => {
 
         const req = {
             cookies: {
@@ -502,7 +502,7 @@ describe("I4.2 verifyAuth", () => {
         expect(message).toBe(false)
     })
 
-    test("I4.2.9 should not authorize user and refresh token where authType==Unknown ", () => {
+    test("I4.2.9: should not authorize user and refresh token where authType==Unknown ", () => {
 
         const req = {
             cookies: {
@@ -531,7 +531,7 @@ describe("I4.2 verifyAuth", () => {
         expect(message).toBe(false)
     })
 
-    test("I4.2.10 should not authorize if access token missing information ", () => {
+    test("I4.2.10: should not authorize if access token missing information ", () => {
 
         const req = {
             cookies: {
@@ -561,7 +561,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.11 should not authorize if refresh token missing information ", () => {
+    test("I4.2.11: should not authorize if refresh token missing information ", () => {
 
         const req = {
             cookies: {
@@ -591,7 +591,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.12 should not authorize if access token cannot be verified ", () => {
+    test("I4.2.12: should not authorize if access token cannot be verified ", () => {
 
         const req = {
             cookies: {
@@ -621,7 +621,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.13 should not authorize if refresh token cannot be verified ", () => {
+    test("I4.2.13: should not authorize if refresh token cannot be verified ", () => {
 
         const req = {
             cookies: {
@@ -651,7 +651,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.14 should not authorize if refresh token expired ", () => {
+    test("I4.2.14: should not authorize if refresh token expired ", () => {
 
         const req = {
             cookies: {
@@ -681,7 +681,7 @@ describe("I4.2 verifyAuth", () => {
 
     })
 
-    test("I4.2.15 should not authorize if missing tokens ", () => {
+    test("I4.2.15: should not authorize if missing tokens ", () => {
 
         const req = {
             cookies: {
@@ -713,8 +713,8 @@ describe("I4.2 verifyAuth", () => {
 
 
 
-describe("I4.3 handleAmountFilterParams", () => {
-    test('I4.3.1 should return correct filter using min and max queries', () => {
+describe("I4.3: handleAmountFilterParams", () => {
+    test('I4.3.1: should return correct filter using min and max queries', () => {
         const req = {
             query: {
                 min: "100.234",
@@ -730,7 +730,7 @@ describe("I4.3 handleAmountFilterParams", () => {
         })
     });
 
-    test('I4.3.2 should return correct filter using min queries', () => {
+    test('I4.3.2: should return correct filter using min queries', () => {
         const req = {
             query: {
                 min: "100.234",
@@ -746,7 +746,7 @@ describe("I4.3 handleAmountFilterParams", () => {
         })
     });
 
-    test('I4.3.3 should return correct filter using max queries', () => {
+    test('I4.3.3: should return correct filter using max queries', () => {
         const req = {
             query: {
                 //min: "100.234",
@@ -762,7 +762,7 @@ describe("I4.3 handleAmountFilterParams", () => {
         })
     });
 
-    test('I4.3.4 should throw an error for invalid min (since not numerical)', () => {
+    test('I4.3.4: should throw an error for invalid min (since not numerical)', () => {
         const req = {
             query: {
                 min: "abc",
@@ -773,7 +773,7 @@ describe("I4.3 handleAmountFilterParams", () => {
         expect(filter).toThrow("Invalid min. Expected a numerical value.")
     });
 
-    test('I4.3.5 should throw an error for invalid max (since not numerical)', () => {
+    test('I4.3.5: should throw an error for invalid max (since not numerical)', () => {
         const req = {
             query: {
                 min: "100.234",
@@ -784,7 +784,7 @@ describe("I4.3 handleAmountFilterParams", () => {
         expect(filter).toThrow("Invalid max. Expected a numerical value.")
     });
 
-    test('I4.3.6 should return nothing since min and max queries not defined', () => {
+    test('I4.3.6: should return nothing since min and max queries not defined', () => {
         const req = {
             query: {
             }

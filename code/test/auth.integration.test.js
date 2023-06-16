@@ -40,8 +40,8 @@ afterEach(async () => {
 })
 
 
-describe('I1.1 register', () => {
-  test('I1.1.1 should register user successfully', async () => {
+describe('I1.1: register', () => {
+  test('I1.1.1: should register user successfully', async () => {
     const body = {
       username: "user1",
       email: "user1@ezwallet.com",
@@ -55,7 +55,7 @@ describe('I1.1 register', () => {
     expect(response.body).toHaveProperty("data.message");
   });
 
-  test('I1.1.2 should return a 400 error if the email in the request body identifies an already existing user ', async () => {
+  test('I1.1.2: should return a 400 error if the email in the request body identifies an already existing user ', async () => {
 
     await User.insertMany(
       [
@@ -78,7 +78,7 @@ describe('I1.1 register', () => {
   });
 
 
-  test('I1.1.3 should return a 400 error if the username in the request body identifies an already existing user ', async () => {
+  test('I1.1.3: should return a 400 error if the username in the request body identifies an already existing user ', async () => {
 
     await User.insertMany(
       [
@@ -102,7 +102,7 @@ describe('I1.1 register', () => {
   });
 
 
-  test('I1.1.4 should return a 400 error if the email in the request body is not in a valid email format  ', async () => {
+  test('I1.1.4: should return a 400 error if the email in the request body is not in a valid email format  ', async () => {
 
     await User.insertMany(
       [
@@ -125,7 +125,7 @@ describe('I1.1 register', () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test('I1.1.5 should return a 400 error if at least one of the parameters in the request body is an empty string ', async () => {
+  test('I1.1.5: should return a 400 error if at least one of the parameters in the request body is an empty string ', async () => {
 
     await User.insertMany(
       [
@@ -148,7 +148,7 @@ describe('I1.1 register', () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test('I1.1.6 should return a 400 error if the request body does not contain all the necessary attributes ', async () => {
+  test('I1.1.6: should return a 400 error if the request body does not contain all the necessary attributes ', async () => {
 
     await User.insertMany(
       [
@@ -172,9 +172,9 @@ describe('I1.1 register', () => {
 
 });
 
-describe("I1.2 registerAdmin", () => {
+describe("I1.2: registerAdmin", () => {
 
-  test('I1.2.1 should register admin successfully', async () => {
+  test('I1.2.1: should register admin successfully', async () => {
 
     await User.insertMany(
       [
@@ -196,7 +196,7 @@ describe("I1.2 registerAdmin", () => {
     expect(response.body).toHaveProperty("data.message");
   });
 
-  test('I1.2.2 should return a 400 error if the email in the request body identifies an already existing user  ', async () => {
+  test('I1.2.2: should return a 400 error if the email in the request body identifies an already existing user  ', async () => {
 
     await User.insertMany(
       [
@@ -219,7 +219,7 @@ describe("I1.2 registerAdmin", () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test('I1.2.3 should return a 400 error if the username in the request body identifies an already existing user  ', async () => {
+  test('I1.2.3: should return a 400 error if the username in the request body identifies an already existing user  ', async () => {
 
     await User.insertMany(
       [
@@ -242,7 +242,7 @@ describe("I1.2 registerAdmin", () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test('I1.2.4 should return a 400 error if the email in the request body is not in a valid email format ', async () => {
+  test('I1.2.4: should return a 400 error if the email in the request body is not in a valid email format ', async () => {
 
     await User.insertMany(
       [
@@ -265,7 +265,7 @@ describe("I1.2 registerAdmin", () => {
     expect(response.body).toHaveProperty("error");
   });
 
-  test('I1.2.5 should return a 400 error if at least one of the parameters in the request body is an empty string ', async () => {
+  test('I1.2.5: should return a 400 error if at least one of the parameters in the request body is an empty string ', async () => {
 
     await User.insertMany(
       [
@@ -289,7 +289,7 @@ describe("I1.2 registerAdmin", () => {
   });
 
 
-  test('I1.2.6 should return a 400 error if the request body does not contain all the necessary attributes', async () => {
+  test('I1.2.6: should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
     await User.insertMany(
       [
@@ -314,9 +314,9 @@ describe("I1.2 registerAdmin", () => {
 
 })
 
-describe('I1.3 login', () => {
+describe('I1.3: login', () => {
 
-  test('I1.3.1 Should login successfully', async () => {
+  test('I1.3.1: should login successfully', async () => {
 
     await User.create({
       username: "user1",
@@ -347,7 +347,7 @@ describe('I1.3 login', () => {
 
   });
 
-  test('I1.3.2 should return a 400 error if the supplied password does not match with the one in the database', async () => {
+  test('I1.3.2: should return a 400 error if the supplied password does not match with the one in the database', async () => {
 
     await User.create({
       username: "user1",
@@ -372,7 +372,7 @@ describe('I1.3 login', () => {
 
   });
 
-  test('I1.3.3 should return a 400 error if the email in the request body does not identify a user in the database', async () => {
+  test('I1.3.3: should return a 400 error if the email in the request body does not identify a user in the database', async () => {
 
     await User.create({
       username: "user1",
@@ -397,7 +397,7 @@ describe('I1.3 login', () => {
   });
 
 
-  test('I1.3.4 should return a 400 error if the email in the request body is not in a valid email format', async () => {
+  test('I1.3.4: should return a 400 error if the email in the request body is not in a valid email format', async () => {
 
     await User.create({
       username: "user1",
@@ -421,7 +421,7 @@ describe('I1.3 login', () => {
 
   });
 
-  test('I1.3.5 should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+  test('I1.3.5: should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
     await User.create({
       username: "user1",
@@ -445,7 +445,7 @@ describe('I1.3 login', () => {
 
   });
 
-  test('I1.3.6 should return a 400 error if the request body does not contain all the necessary attributes', async () => {
+  test('I1.3.6: should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
     await User.create({
       username: "user1",
@@ -471,8 +471,8 @@ describe('I1.3 login', () => {
 });
 
 
-describe('I1.4 logout', () => {
-  test('I1.4.1 Should logout successfully', async () => {
+describe('I1.4: logout', () => {
+  test('I1.4.1: should logout successfully', async () => {
 
     await User.create({
       username: "user1",
@@ -497,7 +497,7 @@ describe('I1.4 logout', () => {
 
   });
 
-  test("I1.4.2 should return a 400 error if the refresh token in the request's cookies does not represent a user in the database", async () => {
+  test("I1.4.2: should return a 400 error if the refresh token in the request's cookies does not represent a user in the database", async () => {
 
     await User.create({
       username: "user1",
@@ -516,7 +516,7 @@ describe('I1.4 logout', () => {
 
   });
 
-  test("I1.4.3 should return a 400 error if the request does not have a refresh token in the cookies", async () => {
+  test("I1.4.3: should return a 400 error if the request does not have a refresh token in the cookies", async () => {
 
     await User.create({
       username: "user1",

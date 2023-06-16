@@ -15,12 +15,12 @@ afterEach(() => {
 })
 
 
-describe("U1.1 register", () => {
+describe("U1.1: register", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('U1.1.1 should register user', async () => {
+  test('U1.1.1: should register user', async () => {
 
     //mock variables
     const mockReq = {
@@ -68,7 +68,7 @@ describe("U1.1 register", () => {
 
   })
 
-  test('U1.1.2 should return a 400 error if the username in the request body identifies an already existing user', async () => {
+  test('U1.1.2: should return a 400 error if the username in the request body identifies an already existing user', async () => {
 
     //mock variables
     const mockReq = {
@@ -102,7 +102,7 @@ describe("U1.1 register", () => {
 
   })
 
-  test('U1.1.3 should return a 400 error if the email in the request body identifies an already existing user', async () => {
+  test('U1.1.3: should return a 400 error if the email in the request body identifies an already existing user', async () => {
 
     //mock variables
     const mockReq = {
@@ -135,7 +135,7 @@ describe("U1.1 register", () => {
 
   })
 
-  test('U1.1.4 should return a 400 error if the email in the request body is not in a valid email format', async () => {
+  test('U1.1.4: should return a 400 error if the email in the request body is not in a valid email format', async () => {
 
     //mock variables
     const mockReq = {
@@ -162,7 +162,7 @@ describe("U1.1 register", () => {
   })
 
 
-  test('U1.1.5 should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+  test('U1.1.5: should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
     //mock variables
     const mockReq = {
@@ -188,7 +188,7 @@ describe("U1.1 register", () => {
 
   })
 
-  test('U1.1.6 should return a 400 error if the request body does not contain all the necessary attributes', async () => {
+  test('U1.1.6: should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
     //mock variables
     const mockReq = {
@@ -213,7 +213,7 @@ describe("U1.1 register", () => {
 
   })
 
-  test('U1.1.7 should return a 500 error if error is occurs', async () => {
+  test('U1.1.7: should return a 500 error if error is occurs', async () => {
 
     //mock variables
     const mockReq = {
@@ -249,13 +249,13 @@ describe("U1.1 register", () => {
 });
 -
 
-  describe("U1.2 registerAdmin", () => {
+  describe("U1.2: registerAdmin", () => {
 
     afterEach(() => {
       jest.resetAllMocks();
     });
 
-    test('U1.2.1 should register admin', async () => {
+    test('U1.2.1: should register admin', async () => {
 
       //mock variables
       const mockReq = {
@@ -304,7 +304,7 @@ describe("U1.1 register", () => {
 
     })
 
-    test('U1.2.2 should return a 400 error if the username in the request body identifies an already existing user', async () => {
+    test('U1.2.2: should return a 400 error if the username in the request body identifies an already existing user', async () => {
 
       //mock variables
       const mockReq = {
@@ -338,7 +338,7 @@ describe("U1.1 register", () => {
 
     })
 
-    test('U1.2.3 should return a 400 error if the email in the request body identifies an already existing user', async () => {
+    test('U1.2.3: should return a 400 error if the email in the request body identifies an already existing user', async () => {
 
       //mock variables
       const mockReq = {
@@ -373,7 +373,7 @@ describe("U1.1 register", () => {
 
 
 
-    test('U1.2.4 should return a 400 error if the email in the request body is not in a valid email format', async () => {
+    test('U1.2.4: should return a 400 error if the email in the request body is not in a valid email format', async () => {
 
       //mock variables
       const mockReq = {
@@ -399,7 +399,7 @@ describe("U1.1 register", () => {
 
     })
 
-    test('U1.2.5 should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
+    test('U1.2.5: should return a 400 error if at least one of the parameters in the request body is an empty string', async () => {
 
       //mock variables
       const mockReq = {
@@ -425,7 +425,7 @@ describe("U1.1 register", () => {
 
     })
 
-    test('U1.2.6 should return a 400 error if the request body does not contain all the necessary attributes', async () => {
+    test('U1.2.6: should return a 400 error if the request body does not contain all the necessary attributes', async () => {
 
       //mock variables
       const mockReq = {
@@ -450,7 +450,7 @@ describe("U1.1 register", () => {
 
     })
 
-    test('U1.2.7 should return a 500 error if error occurs', async () => {
+    test('U1.2.7: should return a 500 error if error occurs', async () => {
 
       //mock variables
       const mockReq = {
@@ -488,9 +488,9 @@ describe("U1.1 register", () => {
 
 
 
-describe('U1.3 login', () => {
+describe('U1.3: login', () => {
 
-  test('U1.3.1 should log in successfully', async () => {
+  test('U1.3.1: should log in successfully', async () => {
 
     //mock variables
     const mockReq = {
@@ -559,7 +559,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.2 should return a 500 error if any error thrown', async () => {
+  test('U1.3.2: should return a 500 error if any error thrown', async () => {
 
     //mock variables
     const mockReq = {
@@ -621,7 +621,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.3 should return a 400 error if the supplied password does not match with the one in the database  ', async () => {
+  test('U1.3.3: should return a 400 error if the supplied password does not match with the one in the database  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -664,7 +664,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.4 should return a 400 error if the email in the request body does not identify a user in the database  ', async () => {
+  test('U1.3.4: should return a 400 error if the email in the request body does not identify a user in the database  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -696,7 +696,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.5 should return a 400 error if the email in the request body is not in a valid email format  ', async () => {
+  test('U1.3.5: should return a 400 error if the email in the request body is not in a valid email format  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -723,7 +723,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.6 should return a 400 error if at least one of the parameters in the request body is an empty string  ', async () => {
+  test('U1.3.6: should return a 400 error if at least one of the parameters in the request body is an empty string  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -750,7 +750,7 @@ describe('U1.3 login', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.3.7 should return a 400 error if the request body does not contain all the necessary attributes  ', async () => {
+  test('U1.3.7: should return a 400 error if the request body does not contain all the necessary attributes  ', async () => {
 
     //mock variables
     const mockReq = {
@@ -780,14 +780,14 @@ describe('U1.3 login', () => {
 });
 
 
-describe('U1.4 logout', () => {
+describe('U1.4: logout', () => {
 
   beforeEach(() => {
     // Reset the mocked functions and values before each test
     jest.clearAllMocks();
   });
 
-  test('U1.4.1 should log out successfully', async () => {
+  test('U1.4.1: should log out successfully', async () => {
 
     //mock variables
     const mockAccessToken = "access token";
@@ -838,7 +838,7 @@ describe('U1.4 logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test('U1.4.2 should return a 500 error if error is thrown', async () => {
+  test('U1.4.2: should return a 500 error if error is thrown', async () => {
 
     //mock variables
     const mockAccessToken = "access token";
@@ -885,7 +885,7 @@ describe('U1.4 logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test("U1.4.3 should return a 400 error if the refresh token in the request's cookies does not represent a user in the database ", async () => {
+  test("U1.4.3: should return a 400 error if the refresh token in the request's cookies does not represent a user in the database ", async () => {
 
     //mock variables
     const mockAccessToken = "access token";
@@ -922,7 +922,7 @@ describe('U1.4 logout', () => {
     expect(mockRes.json).toHaveBeenCalledWith(mockResJson);
   });
 
-  test("U1.4.4 should return a 400 error if the request does not have a refresh token in the cookies  ", async () => {
+  test("U1.4.4: should return a 400 error if the request does not have a refresh token in the cookies  ", async () => {
 
     //mock variables
     const mockAccessToken = "access token";
