@@ -521,7 +521,10 @@ export const getTransactionsByGroup = async (req, res) => {
         else throw new Error('unknown route');
 
         //fill the members with user data
-        group = await group.populate('members.user');
+        //group = await group.populate('members.user');
+        for (const member of group.members) {
+            member.user = await User.findOne({ email: member.email });
+        }
 
         //retreive and send data
         await transactions.aggregate(
@@ -598,8 +601,11 @@ export const getTransactionsByGroupByCategory = async (req, res) => {
         //unknown route
         else throw new Error('unknown route');
 
-        //fill the members with user data
-        group = await group.populate('members.user');
+       //fill the members with user data
+       //group = await group.populate('members.user');
+       for (const member of group.members) {
+           member.user = await User.findOne({ email: member.email });
+       }
 
         //check category exists
         if (! await categories.findOne({ type: req.params.category })) return resError(res, 400, "category does not exist");
